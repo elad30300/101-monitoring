@@ -1,0 +1,2 @@
+rootProject.name='101-monitoring'
+include ':app'
