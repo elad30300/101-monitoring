@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">101-monitoring</string>
+    <string name="register_fragment_title">רישום</string>
+    <string name="id">ת.ז</string>
+    <string name="haiti_id">מזהה האיטי</string>
+    <string name="doctor">מטפל</string>
+    <string name="department">מחלקה</string>
+    <string name="room">חדר</string>
+    <string name="bed">מיטה</string>
+    <string name="civilian">אזרח</string>
+    <string name="breathed">מונשם</string>
+    <string name="register_button_text">הוסף</string>
+    <string name="login_button_text">התחבר כמטופל קיים</string>
+    <string name="mandatory_field_text">חובה *</string>
 </resources>

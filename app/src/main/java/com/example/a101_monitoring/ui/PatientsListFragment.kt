@@ -3,20 +3,18 @@ package com.example.a101_monitoring.ui
 import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.navigation.Navigation
 import com.example.a101_monitoring.MyApplication
 import com.example.a101_monitoring.R
 import com.example.a101_monitoring.data.model.Patient
 import com.example.a101_monitoring.di.component.PatientsListFragmentComponent
+import com.example.a101_monitoring.ui.adapters.MyPatientRecyclerViewAdapter
 
-
-import com.example.a101_monitoring.ui.dummy.DummyContent
-import com.example.a101_monitoring.ui.dummy.DummyContent.DummyItem
 import com.example.a101_monitoring.viewmodel.PatientsListViewModel
+import kotlinx.android.synthetic.main.fragment_patient_list.*
 import javax.inject.Inject
 
 /**
@@ -48,19 +46,22 @@ class PatientsListFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_patient_list, container, false)
 
-        // Set the adapter
-        if (view is RecyclerView) {
-            with(view) {
-//                layoutManager = when {
-//                    columnCount <= 1 -> LinearLayoutManager(context)
-//                    else -> GridLayoutManager(context, columnCount)
-//                }
-//                addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.HORIZONTAL))
-//                addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
-                adapter = MyPatientRecyclerViewAdapter(patientsListViewModel.getPatients(), listener)
-            }
-        }
+
         return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // Set the adapter
+        list.apply {
+            adapter = MyPatientRecyclerViewAdapter(
+                patientsListViewModel.getPatients(),
+                listener
+            )
+        }
+
+        add_patient_button.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.registerPatientFragment, null))
     }
 
     override fun onAttach(context: Context) {
@@ -86,6 +87,7 @@ class PatientsListFragment : Fragment() {
 //            }
         patientsListFragmentComponent.inject(this)
     }
+
 
     /**
      * This interface must be implemented by activities that contain this

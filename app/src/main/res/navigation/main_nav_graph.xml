@@ -9,5 +9,15 @@
         android:id="@+id/patientFragment"
         android:name="com.example.a101_monitoring.ui.PatientsListFragment"
         android:label="fragment_patient_list"
-        tools:layout="@layout/fragment_patient_list" />
+        tools:layout="@layout/fragment_patient_list" >
+        <action
+            android:id="@+id/action_patientFragment_to_registerPatientFragment"
+            app:destination="@id/registerPatientFragment"
+            app:enterAnim="@anim/fragment_fade_enter" />
+    </fragment>
+    <fragment
+        android:id="@+id/registerPatientFragment"
+        android:name="com.example.a101_monitoring.ui.RegisterPatientFragment"
+        android:label="register_patient_fragment"
+        tools:layout="@layout/register_patient_fragment" />
 </navigation>

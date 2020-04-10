@@ -1,4 +1,4 @@
-package com.example.a101_monitoring.ui
+package com.example.a101_monitoring.ui.adapters
 
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
@@ -10,7 +10,6 @@ import com.example.a101_monitoring.data.model.Patient
 
 
 import com.example.a101_monitoring.ui.PatientsListFragment.OnListFragmentInteractionListener
-import com.example.a101_monitoring.ui.dummy.DummyContent.DummyItem
 
 import kotlinx.android.synthetic.main.fragment_patient.view.*
 
