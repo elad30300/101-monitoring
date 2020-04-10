@@ -31,9 +31,11 @@
         >
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/patient_id"
+            android:id="@+id/registered_patient_id"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"
+            />
 
     </com.google.android.material.textfield.TextInputLayout>
 

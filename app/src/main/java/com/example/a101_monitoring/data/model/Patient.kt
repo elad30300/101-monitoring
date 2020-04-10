@@ -3,7 +3,7 @@ package com.example.a101_monitoring.data.model
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity
+@Entity(tableName = "patients")
 data class Patient(
     @PrimaryKey val numericalId: String,
     val id: Int,

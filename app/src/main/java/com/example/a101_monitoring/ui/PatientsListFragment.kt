@@ -6,13 +6,14 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Observer
 import androidx.navigation.Navigation
+import androidx.navigation.findNavController
 import com.example.a101_monitoring.MyApplication
 import com.example.a101_monitoring.R
 import com.example.a101_monitoring.data.model.Patient
 import com.example.a101_monitoring.di.component.PatientsListFragmentComponent
 import com.example.a101_monitoring.ui.adapters.MyPatientRecyclerViewAdapter
-
 import com.example.a101_monitoring.viewmodel.PatientsListViewModel
 import kotlinx.android.synthetic.main.fragment_patient_list.*
 import javax.inject.Inject
@@ -32,6 +33,14 @@ class PatientsListFragment : Fragment() {
 
     private var listener: OnListFragmentInteractionListener? = null
 
+    val patientsObserver = Observer<List<Patient>> {
+        onPatientsChange(it)
+    }
+
+    private fun onPatientsChange(patients: List<Patient>?) {
+        list.adapter = MyPatientRecyclerViewAdapter(patients ?: listOf<Patient>(), listener)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -46,22 +55,18 @@ class PatientsListFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_patient_list, container, false)
 
-
         return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Set the adapter
-        list.apply {
-            adapter = MyPatientRecyclerViewAdapter(
-                patientsListViewModel.getPatients(),
-                listener
-            )
-        }
+        patientsListViewModel.patients.observe(viewLifecycleOwner, patientsObserver)
 
-        add_patient_button.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.registerPatientFragment, null))
+        add_patient_button.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.registerPatientFragment))
+//        add_patient_button.setOnClickListener() {
+//            onAddPatientClicked(it)
+//        }
     }
 
     override fun onAttach(context: Context) {
@@ -82,12 +87,14 @@ class PatientsListFragment : Fragment() {
         patientsListFragmentComponent = (context.applicationContext as MyApplication).applicationComponent
             .patientsListComponent()
             .create()
-//            .also {
-//                it.inject(this)
-//            }
-        patientsListFragmentComponent.inject(this)
+            .also {
+                it.inject(this)
+            }
     }
 
+    fun onAddPatientClicked(view: View) {
+        view.findNavController().navigate(R.id.action_patientFragment_to_registerPatientFragment)
+    }
 
     /**
      * This interface must be implemented by activities that contain this
