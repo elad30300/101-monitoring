@@ -1,5 +1,6 @@
 package com.example.a101_monitoring.di.component
 
+import com.example.a101_monitoring.MainActivity
 import com.example.a101_monitoring.di.module.ApplicationModule
 import com.example.a101_monitoring.di.module.ApplicationSubcomponentModule
 import dagger.Component
@@ -16,4 +17,6 @@ interface ApplicationComponent {
 
     fun registerPatientComponent(): RegisterPatientComponent.Factory
 
+
+//    fun inject(mainActivity: MainActivity)
 }
