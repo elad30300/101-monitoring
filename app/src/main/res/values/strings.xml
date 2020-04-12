@@ -12,5 +12,9 @@
     <string name="register_button_text">הוסף</string>
     <string name="login_button_text">התחבר כמטופל קיים</string>
     <string name="mandatory_field_text">חובה *</string>
+    <string name="temprature">חום</string>
+    <string name="diastolic">דיאסטולי</string>
+    <string name="systolic">סיסטולי</string>
+    <string name="send_manual_measurments_button_text">שלח</string>
 <!--    <string name="register_patient_fail_message">רישום מטופל נכשל</string>-->
 </resources>
