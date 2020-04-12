@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.a101_monitoring.data.dao.PatientDao
 import com.example.a101_monitoring.data.model.Patient
+import com.example.a101_monitoring.data.model.Sensor
 import java.lang.Exception
 import java.util.concurrent.Executors
 import javax.inject.Inject
@@ -33,6 +34,8 @@ class PatientRepository @Inject constructor(private val patientDao: PatientDao) 
 //    }
 
     fun getPatients() = patientDao.getAll()
+
+    fun isPatientConnectedToSensor(patientId: Int) = patientDao.isPatientConnectedToSensor(patientId)
 
     fun registerPatient(patient: Patient) {
         executor.execute {

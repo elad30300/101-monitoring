@@ -15,4 +15,8 @@ class PatientsListViewModel @Inject constructor(val patientRepository: PatientRe
 
     fun getAllPatients() = patientRepository.getPatients()
 
+//    val patients: LiveData<List<Patient>> = getAllPatients()
+//
+//    fun getAllPatients() = patientRepository.getPatients()
+
 }

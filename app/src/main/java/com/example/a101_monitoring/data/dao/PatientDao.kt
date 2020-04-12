@@ -10,6 +10,9 @@ interface PatientDao {
     @Query("SELECT * FROM patients")
     fun getAll(): LiveData<List<Patient>>
 
+    @Query("SELECT is_connected FROM patients WHERE id = :patientId")
+    fun isPatientConnectedToSensor(patientId: Int): LiveData<Boolean?>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertPatients(vararg patients: Patient)
 

@@ -38,7 +38,7 @@ class PatientsListFragment : Fragment() {
     }
 
     private fun onPatientsChange(patients: List<Patient>?) {
-        list.adapter = MyPatientRecyclerViewAdapter(patients ?: listOf<Patient>(), listener)
+        list.adapter = MyPatientRecyclerViewAdapter(patients ?: listOf<Patient>(), listener, this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

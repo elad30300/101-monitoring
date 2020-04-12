@@ -1,7 +1,10 @@
 package com.example.a101_monitoring.data.model
 
+import androidx.annotation.Nullable
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import androidx.room.Relation
 
 @Entity(tableName = "patients")
 data class Patient(
@@ -14,5 +17,6 @@ data class Patient(
     val registeredDoctor: String,
     val isCitizen: Boolean,
     val isOxygen: Int,
-    val isActive: Boolean
+    val isActive: Boolean,
+    @Embedded var sensor: Sensor? = null
 )

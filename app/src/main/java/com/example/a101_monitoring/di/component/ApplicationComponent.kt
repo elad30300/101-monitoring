@@ -21,6 +21,7 @@ interface ApplicationComponent {
 
     fun patientManualMeasurmentsComponent(): PatientManualMeasurmentsComponent.Factory
 
+    fun patientItemComponent(): PatientItemComponent.Factory
 
 //    fun inject(mainActivity: MainActivity)
 }
