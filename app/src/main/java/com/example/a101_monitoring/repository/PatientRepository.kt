@@ -1,5 +1,6 @@
 package com.example.a101_monitoring.repository
 
+import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -37,14 +38,34 @@ class PatientRepository @Inject constructor(private val patientDao: PatientDao) 
 
     fun isPatientConnectedToSensor(patientId: Int) = patientDao.isPatientConnectedToSensor(patientId)
 
+    fun getSensorAddress(patientId: Int) = patientDao.getSensorAddress(patientId)
+
     fun registerPatient(patient: Patient) {
         executor.execute {
             try {
                 patientDao.insertPatients(patient)
+                Log.d(TAG, "insert patient with id ${patient.id} in dao successfully")
             } catch (ex: Exception) {
+                Log.e(TAG, "insert patient with id ${patient.id} in dao failed, stacktrace: ${ex.printStackTrace()}")
                 registerPatientState.postValue(false)
             }
         }
+    }
+
+    fun setSensor(patientId: Int, sensorAddress: String) {
+        executor.execute {
+            try {
+                patientDao.updateSensorToPatient(patientId, sensorAddress)
+                Log.d(TAG, "Set sensor with address $sensorAddress to patient with id $patientId in dao successfully")
+            } catch (ex: Exception) {
+                Log.e(TAG, "Set sensor with address $sensorAddress to patient with id $patientId in dao failed, stacktrace: ${ex.printStackTrace()}")
+//                registerPatientState.postValue(false)
+            }
+        }
+    }
+
+    companion object {
+        const val TAG = "PatientRepository"
     }
 
 }

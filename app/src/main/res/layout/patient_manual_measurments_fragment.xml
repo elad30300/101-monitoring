@@ -23,7 +23,7 @@
         android:layout_width="240dp"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
-        android:hint="@string/temprature"
+        android:hint="@string/temperature"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/patient_manual_measurments_title"
@@ -96,7 +96,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:text="@string/send_manual_measurments_button_text"
+        android:text="@string/send_manual_measurements_button_text"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

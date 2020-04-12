@@ -23,5 +23,7 @@ interface ApplicationComponent {
 
     fun patientItemComponent(): PatientItemComponent.Factory
 
+    fun sensorChooseComponent(): SensorChooseComponent.Factory
+
 //    fun inject(mainActivity: MainActivity)
 }

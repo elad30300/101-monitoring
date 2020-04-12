@@ -159,7 +159,7 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/set_sensor_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

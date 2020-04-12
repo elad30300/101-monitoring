@@ -1,7 +1,6 @@
 package com.example.a101_monitoring.ui
 
 import android.content.Context
-import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -12,6 +11,7 @@ import com.example.a101_monitoring.MyApplication
 
 import com.example.a101_monitoring.R
 import com.example.a101_monitoring.di.component.PatientManualMeasurmentsComponent
+import com.example.a101_monitoring.viewmodel.PatientManualMeasurmentsViewModel
 import kotlinx.android.synthetic.main.patient_manual_measurments_fragment.*
 import javax.inject.Inject
 

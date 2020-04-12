@@ -10,6 +10,12 @@ interface PatientDao {
     @Query("SELECT * FROM patients")
     fun getAll(): LiveData<List<Patient>>
 
+    @Query("SELECT address FROM patients WHERE id = :patientId")
+    fun getSensorAddress(patientId: Int): LiveData<String?>
+
+    @Query("UPDATE patients SET address = :sensorAddress WHERE id = :patientId")
+    fun updateSensorToPatient(patientId: Int, sensorAddress: String)
+
     @Query("SELECT is_connected FROM patients WHERE id = :patientId")
     fun isPatientConnectedToSensor(patientId: Int): LiveData<Boolean?>
 

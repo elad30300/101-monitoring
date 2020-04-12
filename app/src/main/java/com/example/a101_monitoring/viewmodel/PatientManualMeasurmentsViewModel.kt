@@ -1,4 +1,4 @@
-package com.example.a101_monitoring.ui
+package com.example.a101_monitoring.viewmodel
 
 import androidx.lifecycle.ViewModel
 import com.example.a101_monitoring.di.scope.PatientManualMeasurmentsScope

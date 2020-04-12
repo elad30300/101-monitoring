@@ -12,10 +12,16 @@
     <string name="register_button_text">הוסף</string>
     <string name="login_button_text">התחבר כמטופל קיים</string>
     <string name="mandatory_field_text">חובה *</string>
-    <string name="temprature">חום</string>
+    <string name="temperature">חום</string>
     <string name="diastolic">דיאסטולי</string>
     <string name="systolic">סיסטולי</string>
-    <string name="send_manual_measurments_button_text">שלח</string>
+    <string name="send_manual_measurements_button_text">שלח</string>
     <string name="set_sensor_button_text">בחירת חיישן</string>
+    <string name="sensor_address_hint_text">מזהה</string>
+    <string name="sensor_address_placeholder">FF:FF:FF:FF:FF:FF</string>
+    <string name="save">שמור</string>
+    <string name="sensor_address_save_button_text">@string/save</string>
+    <string name="sensor_address_choose_title">בחירת חיישן</string>
+    <string name="sensor_address_choose_description">ניתן להקליד את כתובת החיישן או לסרוק את תג החיישן</string>
 <!--    <string name="register_patient_fail_message">רישום מטופל נכשל</string>-->
 </resources>

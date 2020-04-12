@@ -4,21 +4,26 @@ import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.findNavController
 import com.example.a101_monitoring.R
 import com.example.a101_monitoring.data.model.Patient
 
 
 import com.example.a101_monitoring.ui.PatientsListFragment.OnListFragmentInteractionListener
+import com.example.a101_monitoring.ui.PatientsListFragmentDirections
 import com.example.a101_monitoring.viewmodel.PatientItemViewModel
 import com.example.a101_monitoring.viewmodel.factory.PatientItemViewModelFactory
+import com.google.android.material.button.MaterialButton
 
 import kotlinx.android.synthetic.main.fragment_patient.view.*
+import kotlinx.android.synthetic.main.sensor_choose_fragment.view.*
 
 
 class MyPatientRecyclerViewAdapter(
@@ -58,10 +63,9 @@ class MyPatientRecyclerViewAdapter(
             mHeartRate.text = "--"
             mRespiratoryRate.text = "--"
 
-            patientItemViewModel.isPatientConnectedToSensor.observe(mFragment.viewLifecycleOwner, Observer {
-                val resourceId = (if (it == null) indicatorBackgroundMap[false] else indicatorBackgroundMap[it!!])
-                mSensorIndicator.background = mView.context.resources.getDrawable(resourceId!!)
-            })
+            setObserverConnectionToSensor()
+
+            setChooseSensorButtonActionListener(item.id)
 
             with(mView) {
                 tag = item
@@ -78,6 +82,7 @@ class MyPatientRecyclerViewAdapter(
         val mSaturation: TextView = mView.saturation
         val mHeartRate: TextView = mView.heart_rate
         val mRespiratoryRate: TextView = mView.respiratory_rate
+        val mChooseSensorButton: Button = mView.set_sensor_button
 
         lateinit var patientItemViewModel: PatientItemViewModel
 
@@ -91,6 +96,20 @@ class MyPatientRecyclerViewAdapter(
                 mFragment,
                 PatientItemViewModelFactory(mView.context, patientId))
                 .get(PatientItemViewModel::class.java)
+        }
+
+        fun setChooseSensorButtonActionListener(patientId: Int) {
+            mChooseSensorButton.setOnClickListener {
+                val action = PatientsListFragmentDirections.actionPatientFragmentToSensorChooseFragment(patientId)
+                it.findNavController().navigate(action)
+            }
+        }
+
+        fun setObserverConnectionToSensor() {
+            patientItemViewModel.isPatientConnectedToSensor.observe(mFragment.viewLifecycleOwner, Observer {
+                val resourceId = (if (it == null) indicatorBackgroundMap[false] else indicatorBackgroundMap[it!!])
+                mSensorIndicator.background = mView.context.resources.getDrawable(resourceId!!)
+            })
         }
 
 //        override fun toString(): String {
