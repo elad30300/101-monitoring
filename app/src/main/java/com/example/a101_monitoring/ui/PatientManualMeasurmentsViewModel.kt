@@ -6,5 +6,5 @@ import javax.inject.Inject
 
 @PatientManualMeasurmentsScope
 class PatientManualMeasurmentsViewModel @Inject constructor() : ViewModel() {
-    // TODO: Implement the ViewModel
+    var patientId: Int? = null
 }
