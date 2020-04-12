@@ -16,5 +16,6 @@
     <string name="diastolic">דיאסטולי</string>
     <string name="systolic">סיסטולי</string>
     <string name="send_manual_measurments_button_text">שלח</string>
+    <string name="set_sensor_button_text">בחירת חיישן</string>
 <!--    <string name="register_patient_fail_message">רישום מטופל נכשל</string>-->
 </resources>
