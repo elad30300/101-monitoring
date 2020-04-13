@@ -98,14 +98,14 @@ class BluetoothController @Inject constructor(
             )
     }
 
-    fun disconnectAll() {
+    private fun disconnectAll() {
         Log.i(TAG, "disconnecting all devices")
         connectedDevicesList.forEach {
             disconnect(it)
         }
     }
 
-    fun disconnect(address: String) {
+    private fun disconnect(address: String) {
         val deviceHandler = findDeviceInConnectedDevices(address)
         deviceHandler?.apply {
             disconnect(this)
