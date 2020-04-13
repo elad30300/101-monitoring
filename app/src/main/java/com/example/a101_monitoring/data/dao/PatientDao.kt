@@ -11,6 +11,9 @@ interface PatientDao {
     @Query("SELECT * FROM patients")
     fun getAll(): LiveData<List<Patient>>
 
+    @Query("SELECT id FROM patients WHERE address = :address")
+    fun getPatientIdBySensorAddress(address: String): Int
+
     @Query("SELECT address FROM patients WHERE id = :patientId")
     fun getSensorAddress(patientId: Int): LiveData<String?>
 

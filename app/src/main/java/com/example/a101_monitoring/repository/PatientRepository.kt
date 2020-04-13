@@ -36,6 +36,8 @@ class PatientRepository @Inject constructor(private val patientDao: PatientDao) 
 
     fun getPatients() = patientDao.getAll()
 
+    fun getPatientIdBySensorAddress(address: String) = patientDao.getPatientIdBySensorAddress(address)
+
     fun isPatientConnectedToSensor(patientId: Int) = patientDao.isPatientConnectedToSensor(patientId)
 
     fun getSensorAddress(patientId: Int) = patientDao.getSensorAddress(patientId)

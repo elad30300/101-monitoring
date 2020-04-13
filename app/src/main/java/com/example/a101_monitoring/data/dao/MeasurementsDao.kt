@@ -1,8 +1,7 @@
 package com.example.a101_monitoring.data.dao
 
 import androidx.lifecycle.LiveData
-import androidx.room.Dao
-import androidx.room.Query
+import androidx.room.*
 import com.example.a101_monitoring.data.model.HeartRate
 import com.example.a101_monitoring.data.model.RespiratoryRate
 import com.example.a101_monitoring.data.model.Saturation
@@ -37,7 +36,7 @@ interface MeasurementsDao {
             GROUP BY time
         )
         """)
-    fun getLastHeartRateForPatient(patientId: Int): LiveData<HeartRate>
+    fun getLastHeartRateForPatient(patientId: Int): LiveData<HeartRate?>
 
     @Query("""
         SELECT *
@@ -48,7 +47,7 @@ interface MeasurementsDao {
             GROUP BY time
         )
         """)
-    fun getLastSaturationForPatient(patientId: Int): LiveData<Saturation>
+    fun getLastSaturationForPatient(patientId: Int): LiveData<Saturation?>
 
     @Query("""
         SELECT *
@@ -59,6 +58,33 @@ interface MeasurementsDao {
             GROUP BY time
         )
         """)
-    fun getLastRespiratoryRateForPatient(patientId: Int): LiveData<RespiratoryRate>
+    fun getLastRespiratoryRateForPatient(patientId: Int): LiveData<RespiratoryRate?>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertHeartRates(vararg heartRate: HeartRate)
+
+    @Update
+    fun updateHeartRates(vararg heartRate: HeartRate)
+
+    @Delete
+    fun deleteHeartRates(vararg heartRate: HeartRate)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertSaturations(vararg saturation: Saturation)
+
+    @Update
+    fun updateSaturations(vararg saturation: Saturation)
+
+    @Delete
+    fun deleteSaturations(vararg saturation: Saturation)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertRespiratoryRates(vararg respiratoryRate: RespiratoryRate)
+
+    @Update
+    fun updateRespiratoryRates(vararg respiratoryRate: RespiratoryRate)
+
+    @Delete
+    fun deleteRespiratoryRates(vararg hrespiratoryRate: RespiratoryRate)
 
 }

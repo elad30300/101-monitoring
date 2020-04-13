@@ -1,6 +1,8 @@
 package com.example.a101_monitoring.bluetooth
 
+import android.app.Application
 import android.bluetooth.BluetoothAdapter
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
@@ -21,6 +23,7 @@ import javax.inject.Singleton
 
 @Singleton
 class BluetoothController @Inject constructor(
+    private val context: Application,
     private val rxBleClient: RxBleClient,
     private val patientRepository: PatientRepository
 ) : Closeable {
@@ -208,7 +211,7 @@ class BluetoothController @Inject constructor(
     private fun getBleDeviceHandlerByScanResult(scanResult: ScanResult): BleDeviceHandler? {
         val handler: BleDeviceHandler? = scanResult.bleDevice.name?.let {
             if (it.contains("Nonin")) {
-                return NoninHandler(scanResult.bleDevice).also {
+                return NoninHandler(context, scanResult.bleDevice).also {
                     connectedDevicesList.add(it)
                 }
             }

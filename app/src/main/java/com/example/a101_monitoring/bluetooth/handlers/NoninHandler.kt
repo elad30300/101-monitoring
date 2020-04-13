@@ -1,20 +1,40 @@
 package com.example.a101_monitoring.bluetooth.handlers
 
+import android.content.Context
 import android.util.Log
+import com.example.a101_monitoring.MyApplication
+import com.example.a101_monitoring.data.model.HeartRate
+import com.example.a101_monitoring.data.model.RespiratoryRate
+import com.example.a101_monitoring.data.model.Saturation
+import com.example.a101_monitoring.repository.MeasurementsRepository
+import com.example.a101_monitoring.repository.PatientRepository
 import com.example.a101_monitoring.utils.DefaultCallbacksHelper
+import com.example.a101_monitoring.utils.TimeHelper
 import com.polidea.rxandroidble2.RxBleConnection
 import com.polidea.rxandroidble2.RxBleDevice
+import java.lang.Exception
 import java.util.*
+import javax.inject.Inject
 
 typealias CharacteristicNotificationCallback = (ByteArray) -> Unit
 typealias ErrorCallback = (Throwable) -> Unit
 
 class NoninHandler(
+    private val context: Context,
     device: RxBleDevice
 ) : BleDeviceHandler(device) {
 
-    companion object {
-        const val TAG = "NoninHandler"
+    private var lastRespiratoryRate = NoninGattAttributes.OximeteryService.Characteritics.RESPIRATORY_RATE_MISSING_VALUE
+
+    @Inject lateinit var patientRepository: PatientRepository
+    @Inject lateinit var measurementsRepository: MeasurementsRepository
+
+    init {
+        initializeDependencies()
+    }
+
+    private fun initializeDependencies() {
+        (context.applicationContext as MyApplication).applicationComponent.inject(this)
     }
 
     override fun onConnected() {
@@ -72,13 +92,29 @@ class NoninHandler(
 
     private fun handleOximteryCharacteristicNotification(bytes: ByteArray) {
         val saturation = bytes[7].toInt() and 0xff
-        val pulseRate =  ((bytes[8].toInt() and 0xff ) shl 8) or ((bytes[9].toInt()) and 0xff)
-        Log.i(TAG, "nonin oximetry message, saturation: ${if (isSaturationValueMissing(saturation)) "missing" else saturation}, hr: ${if (isHeartRateValueMissing(pulseRate)) "missing" else pulseRate}")
+        val heartRate =  ((bytes[8].toInt() and 0xff ) shl 8) or ((bytes[9].toInt()) and 0xff)
+        Log.i(TAG, "nonin oximetry message, saturation: ${if (isSaturationValueMissing(saturation)) "missing" else saturation}, hr: ${if (isHeartRateValueMissing(heartRate)) "missing" else heartRate}")
+        onOximeteryMeasurements(heartRate, saturation)
     }
 
     private fun handleRespirationCharacteristicNotification(bytes: ByteArray) {
         val respiratoryRate = bytes[4].toInt() and 0xff
+        lastRespiratoryRate = respiratoryRate
         Log.i(TAG, "nonin respiratory rate message, respiratory: ${if (isRespiratoryRateValueMissing(respiratoryRate)) "missing" else respiratoryRate}")
+    }
+
+    private fun onOximeteryMeasurements(heartRateValue: Int, saturationValue: Int) {
+        try {
+            val time = TimeHelper.instance.getTimeInMiliSeconds()
+            val patientId = patientRepository.getPatientIdBySensorAddress(getDevice().macAddress)
+            measurementsRepository.insertMeasurements(
+                if (isHeartRateValueMissing(heartRateValue)) null else HeartRate(heartRateValue, time, patientId),
+                if (isSaturationValueMissing(saturationValue)) null else Saturation(saturationValue, time, patientId),
+                if (isRespiratoryRateValueMissing(lastRespiratoryRate)) null else RespiratoryRate(lastRespiratoryRate, time, patientId)
+            )
+        } catch (exception: Exception) {
+            DefaultCallbacksHelper.onErrorDefault(TAG, "Couldn't handle measurements after parsing", exception)
+        }
     }
 
     private fun isHeartRateValueMissing(value: Int) = isMeasurmentMissing(value, NoninGattAttributes.OximeteryService.Characteritics.HEART_RATE_MISSING_VALUE)
@@ -99,6 +135,10 @@ class NoninHandler(
                 const val RESPIRATORY_RATE_MISSING_VALUE = 127
             }
         }
+    }
+
+    companion object {
+        const val TAG = "NoninHandler"
     }
 
 }

@@ -5,31 +5,35 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 open class Measurement(
-    open val value: Int,
-    open val time: Long,
-    @ColumnInfo(name = "patient_id") open val patientId: String
+    @ColumnInfo(name = "value") val value: Int,
+    @ColumnInfo(name = "time") val time: Long,
+    @ColumnInfo(name = "patient_id") val patientId: Int
 ) {
-    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "measurment_id") val measurmentId: Int = 0
+    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "measurement_id") var measurementId: Int = 0
+
+    override fun toString(): String {
+        return "[${this.javaClass::class.java.name} - value: $value,  time: $time, patientId: $patientId]"
+    }
 }
 
 @Entity(tableName = "heart_rates")
-data class HeartRate(
-    override val value: Int,
-    override val time: Long,
-    @ColumnInfo(name = "patient_id") override val patientId: String
+class HeartRate(
+    value: Int,
+    time: Long,
+    patientId: Int
 ) : Measurement(value, time, patientId)
 
 
 @Entity(tableName = "saturations")
-data class Saturation(
-    override val value: Int,
-    override val time: Long,
-    @ColumnInfo(name = "patient_id") override val patientId: String
+class Saturation(
+    value: Int,
+    time: Long,
+    patientId: Int
 ) : Measurement(value, time, patientId)
 
 @Entity(tableName = "respirations")
-data class RespiratoryRate(
-    override val value: Int,
-    override val time: Long,
-    @ColumnInfo(name = "patient_id") override val patientId: String
+class RespiratoryRate(
+    value: Int,
+    time: Long,
+    patientId: Int
 ) : Measurement(value, time, patientId)

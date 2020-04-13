@@ -58,12 +58,11 @@ class MyPatientRecyclerViewAdapter(
             initializePatientItemViewModel(item.id)
 
             mIdView.text = item.id.toString()
-            // TODO fix measurments values to the actual we get for the patient, fetch from viewmodel
-            mSaturation.text = "--"
-            mHeartRate.text = "--"
-            mRespiratoryRate.text = "--"
 
             setObserverConnectionToSensor()
+            setObserverToHeartRate()
+            setObserverToSaturation()
+            setObserverToRespiratoryRate()
 
             setChooseSensorButtonActionListener(item.id)
 
@@ -109,6 +108,24 @@ class MyPatientRecyclerViewAdapter(
             patientItemViewModel.isPatientConnectedToSensor.observe(mFragment.viewLifecycleOwner, Observer {
                 val resourceId = (if (it == null) indicatorBackgroundMap[false] else indicatorBackgroundMap[it!!])
                 mSensorIndicator.background = mView.context.resources.getDrawable(resourceId!!)
+            })
+        }
+
+        fun setObserverToHeartRate() {
+            patientItemViewModel.heartRate.observe(mFragment.viewLifecycleOwner, Observer {
+                mHeartRate.text = if (it == null) "--" else it.value.toString()
+            })
+        }
+
+        fun setObserverToSaturation() {
+            patientItemViewModel.saturation.observe(mFragment.viewLifecycleOwner, Observer {
+                mSaturation.text = if (it == null) "--" else it.value.toString()
+            })
+        }
+
+        fun setObserverToRespiratoryRate() {
+            patientItemViewModel.respiratoryRate.observe(mFragment.viewLifecycleOwner, Observer {
+                mRespiratoryRate.text = if (it == null) "--" else it.value.toString()
             })
         }
 
