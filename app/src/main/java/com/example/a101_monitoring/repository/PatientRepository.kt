@@ -40,13 +40,16 @@ class PatientRepository @Inject constructor(private val patientDao: PatientDao) 
 
     fun getSensorAddress(patientId: Int) = patientDao.getSensorAddress(patientId)
 
+    fun getSensors() = patientDao.getAllSensors()
+
     fun registerPatient(patient: Patient) {
         executor.execute {
             try {
                 patientDao.insertPatients(patient)
                 Log.d(TAG, "insert patient with id ${patient.id} in dao successfully")
             } catch (ex: Exception) {
-                Log.e(TAG, "insert patient with id ${patient.id} in dao failed, stacktrace: ${ex.printStackTrace()}")
+                Log.e(TAG, "insert patient with id ${patient.id} in dao failed, stacktrace:")
+                ex.printStackTrace()
                 registerPatientState.postValue(false)
             }
         }
@@ -58,7 +61,21 @@ class PatientRepository @Inject constructor(private val patientDao: PatientDao) 
                 patientDao.updateSensorToPatient(patientId, sensorAddress)
                 Log.d(TAG, "Set sensor with address $sensorAddress to patient with id $patientId in dao successfully")
             } catch (ex: Exception) {
-                Log.e(TAG, "Set sensor with address $sensorAddress to patient with id $patientId in dao failed, stacktrace: ${ex.printStackTrace()}")
+                Log.e(TAG, "Set sensor with address $sensorAddress to patient with id $patientId in dao failed, stacktrace:")
+                ex.printStackTrace()
+//                registerPatientState.postValue(false)
+            }
+        }
+    }
+
+    fun setSensorIsConnected(sensorAddress: String, isConnected: Boolean) {
+        executor.execute {
+            try {
+                patientDao.setSensorIsConnected(sensorAddress, isConnected)
+                Log.d(TAG, "Set sensor is connected to ${isConnected} with address $sensorAddress in dao successfully")
+            } catch (ex: Exception) {
+                Log.e(TAG, "Set sensor is connected to ${isConnected} with address $sensorAddress in dao failed, stacktrace:")
+                ex.printStackTrace()
 //                registerPatientState.postValue(false)
             }
         }

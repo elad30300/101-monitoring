@@ -1,6 +1,7 @@
 package com.example.a101_monitoring.di.module
 
 import android.app.Application
+import androidx.room.PrimaryKey
 import androidx.room.Room
 import com.example.a101_monitoring.data.database.ApplicationDatabase
 import dagger.Module
@@ -9,6 +10,10 @@ import javax.inject.Singleton
 
 @Module
 class ApplicationModule(val context: Application) {
+
+    @Singleton
+    @PrimaryKey
+    fun provideApplicationContext() = context
 
     @Singleton
     @Provides

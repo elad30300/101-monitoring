@@ -3,33 +3,67 @@ package com.example.a101_monitoring
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.content.Intent
+import android.content.IntentFilter
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
 import androidx.lifecycle.Observer
-import androidx.navigation.findNavController
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.fragment.findNavController
+import com.example.a101_monitoring.bluetooth.BluetoothController
 import com.example.a101_monitoring.data.model.Patient
+import com.example.a101_monitoring.receiver.SensorAddressUpdatedBroadcastReceiver
 import com.example.a101_monitoring.ui.PatientsListFragment
 import com.example.a101_monitoring.ui.PatientsListFragmentDirections
-import com.example.a101_monitoring.viewmodel.StatesViewModel
+import com.example.a101_monitoring.utils.BroadcastConstants
+import com.example.a101_monitoring.viewmodel.SensorViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInteractionListener {
 
 //    @Inject lateinit var statesViewModel: StatesViewModel
+    @Inject lateinit var sensorViewModel: SensorViewModel
+    @Inject lateinit var bluetoothController: BluetoothController
+
+//    private lateinit var sensorAddressUpdatedBroadcastReceiver: SensorAddressUpdatedBroadcastReceiver
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-//        (applicationContext as MyApplication).applicationComponent.inject(this)
+        (applicationContext as MyApplication).applicationComponent.mainActivityComponent().create().also {
+            it.inject(this)
+        }
 
         initializePermissions()
 
         checkIfBluetoothOn()
+
+        initializeBleScanComponents()
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        deinitializeBleScanComponents()
+    }
+
+    private fun initializeBleScanComponents() {
+        bluetoothController.start()
+    }
+
+    private fun deinitializeBleScanComponents() {
+        bluetoothController.close()
+    }
+
+//    private fun registerSensorAddressUpdatedBroadcastReceiver() {
+//        IntentFilter(BroadcastConstants.BroadcastActions.SENSOR_ADDRESS_UPDATED).apply {
+//            addAction(BroadcastConstants.BroadcastActions.SENSOR_ADDRESS_UPDATED)
+//            LocalBroadcastManager.getInstance(this@MainActivity)
+//                .registerReceiver(sensorAddressUpdatedBroadcastReceiver, this)
+//        }
+//    }
 
     override fun onListFragmentInteraction(item: Patient?) {
         item?.apply {

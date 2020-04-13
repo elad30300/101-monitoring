@@ -8,7 +8,8 @@ import dagger.Module
     PatientManualMeasurmentsComponent::class,
     RegisterPatientComponent::class,
     PatientItemComponent::class,
-    SensorChooseComponent::class
+    SensorChooseComponent::class,
+    MainActivityComponent::class
 ])
 class ApplicationSubcomponentModule {
 
