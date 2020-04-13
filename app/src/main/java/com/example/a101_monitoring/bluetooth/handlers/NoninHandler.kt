@@ -4,15 +4,14 @@ import android.util.Log
 import com.example.a101_monitoring.utils.DefaultCallbacksHelper
 import com.polidea.rxandroidble2.RxBleConnection
 import com.polidea.rxandroidble2.RxBleDevice
-import io.reactivex.Observable
 import java.util.*
 
 typealias CharacteristicNotificationCallback = (ByteArray) -> Unit
 typealias ErrorCallback = (Throwable) -> Unit
 
-class NoninHandler(device: RxBleDevice) : BleDeviceHandler(device) {
-
-//    private var measurmentsCharacteristicObservable: Observable<ByteArray> = null
+class NoninHandler(
+    device: RxBleDevice
+) : BleDeviceHandler(device) {
 
     companion object {
         const val TAG = "NoninHandler"
