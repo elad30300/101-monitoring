@@ -1,7 +1,6 @@
 package com.example.a101_monitoring.di.module
 
 import android.app.Application
-import androidx.room.PrimaryKey
 import androidx.room.Room
 import com.example.a101_monitoring.data.database.ApplicationDatabase
 import dagger.Module
@@ -12,7 +11,7 @@ import javax.inject.Singleton
 class ApplicationModule(val context: Application) {
 
     @Singleton
-    @PrimaryKey
+    @Provides
     fun provideApplicationContext() = context
 
     @Singleton
@@ -27,5 +26,9 @@ class ApplicationModule(val context: Application) {
     @Singleton
     @Provides
     fun providePatientDao(database: ApplicationDatabase) = database.patientDao()
+
+    @Singleton
+    @Provides
+    fun provideMeasurementsDao(database: ApplicationDatabase) = database.measurementsDao()
 
 }
