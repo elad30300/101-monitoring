@@ -24,7 +24,7 @@ class PatientItemViewModel(
 
     val heartRate: LiveData<HeartRate?>
     val saturation: LiveData<Saturation?>
-    val respiratoryRate: LiveData<RespiratoryRate?>
+    val respiratoryRate: LiveData<List<RespiratoryRate>>
 
     init {
         (context.applicationContext as MyApplication).applicationComponent.patientItemComponent().create().also {

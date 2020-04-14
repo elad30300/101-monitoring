@@ -1,5 +1,6 @@
 package com.example.a101_monitoring.ui.adapters
 
+import android.util.Log
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -125,7 +126,7 @@ class MyPatientRecyclerViewAdapter(
 
         fun setObserverToRespiratoryRate() {
             patientItemViewModel.respiratoryRate.observe(mFragment.viewLifecycleOwner, Observer {
-                mRespiratoryRate.text = if (it == null) "--" else it.value.toString()
+                mRespiratoryRate.text = it.firstOrNull()?.value?.toString() ?: "--"
             })
         }
 

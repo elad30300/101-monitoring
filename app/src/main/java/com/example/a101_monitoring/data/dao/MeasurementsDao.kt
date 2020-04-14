@@ -30,10 +30,9 @@ interface MeasurementsDao {
     @Query("""
         SELECT *
         FROM heart_rates
-        WHERE patient_id = :patientId AND time IN (
+        WHERE patient_id = :patientId AND time = (
             SELECT MAX(time)
             FROM heart_rates
-            GROUP BY time
         )
         """)
     fun getLastHeartRateForPatient(patientId: Int): LiveData<HeartRate?>
@@ -41,10 +40,9 @@ interface MeasurementsDao {
     @Query("""
         SELECT *
         FROM saturations
-        WHERE patient_id = :patientId AND time IN (
+        WHERE patient_id = :patientId AND time = (
             SELECT MAX(time)
             FROM saturations
-            GROUP BY time
         )
         """)
     fun getLastSaturationForPatient(patientId: Int): LiveData<Saturation?>
@@ -52,13 +50,12 @@ interface MeasurementsDao {
     @Query("""
         SELECT *
         FROM respirations
-        WHERE patient_id = :patientId AND time IN (
+        WHERE patient_id = :patientId AND time = (
             SELECT MAX(time)
             FROM respirations
-            GROUP BY time
         )
         """)
-    fun getLastRespiratoryRateForPatient(patientId: Int): LiveData<RespiratoryRate?>
+    fun getLastRespiratoryRateForPatient(patientId: Int): LiveData<List<RespiratoryRate>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertHeartRates(vararg heartRate: HeartRate)
