@@ -6,7 +6,6 @@ import com.example.a101_monitoring.bluetooth.handlers.NoninHandler
 import com.example.a101_monitoring.di.module.ApplicationModule
 import com.example.a101_monitoring.di.module.ApplicationSubcomponentModule
 import com.example.a101_monitoring.di.module.BluetoothModule
-import com.example.a101_monitoring.receiver.SensorAddressUpdatedBroadcastReceiver
 import dagger.Component
 import javax.inject.Singleton
 
@@ -32,8 +31,6 @@ interface ApplicationComponent {
 
 
     fun inject(noninHandler: NoninHandler)
-
-    fun inject(sensorAddressUpdatedBroadcastReceiver: SensorAddressUpdatedBroadcastReceiver)
 
 //    fun inject(mainActivity: MainActivity)
 }
