@@ -86,4 +86,9 @@ dependencies {
     // For Kotlin use kapt instead of annotationProcessor
     implementation "androidx.room:room-ktx:$room_version"
     //
+
+    // Android debug database
+    def android_debug_database_version = "1.0.6"
+    debugImplementation "com.amitshekhar.android:debug-db:$android_debug_database_version"
+    //
 }
