@@ -10,10 +10,13 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ListAdapter
 import android.widget.SpinnerAdapter
+import androidx.core.widget.doAfterTextChanged
+import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Observer
 import com.example.a101_monitoring.MyApplication
 import com.example.a101_monitoring.R
 import com.example.a101_monitoring.data.model.Department
+import com.example.a101_monitoring.data.model.DepartmentWithRooms
 import com.example.a101_monitoring.di.component.RegisterPatientComponent
 import com.example.a101_monitoring.viewmodel.RegisterPatientViewModel
 import kotlinx.android.synthetic.main.register_patient_fragment.*
@@ -54,59 +57,59 @@ class RegisterPatientFragment : Fragment() {
 
     private fun initializeDepartments() {
         registerPatientViewModel.departments.observe(viewLifecycleOwner, Observer {
-            val departmentNames = it.map { it.department.name } as MutableList<String>
-            department_spinner.adapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, departmentNames).apply {
-                setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            }
+            onDepartmentsUpdate(it)
         })
-        department_spinner.onItemSelectedListener = onDepartmentSelectedItem
+        department_spinner.doAfterTextChanged {
+            val departmentText = it.toString()
+            registerPatientViewModel.departments.value?.also {
+                val selectedDepartment = it.filter { it.department.name == departmentText }.firstOrNull()
+                selectedDepartment?.also {
+                    onSetDepartment(it)
+                }
+            }
+        }
+    }
+
+    private fun onDepartmentsUpdate(departments: List<DepartmentWithRooms>) {
+        val departmentNames = departments.map { it.department.name } as MutableList<String>
+        department_spinner.setAdapter(ArrayAdapter(context, R.layout.material_dropdown_menu_popup_item, departmentNames).apply {
+            setDropDownViewResource(R.layout.material_dropdown_menu_popup_item)
+        })
+        department_spinner.setText(department_spinner.adapter.getItem(0).toString(), false)
+    }
+
+    private fun onSetDepartment(department: DepartmentWithRooms) {
+        department.rooms.map { it.name }?.apply {
+            room_spinner.setAdapter(ArrayAdapter(context, R.layout.material_dropdown_menu_popup_item, this).apply {
+                setDropDownViewResource(R.layout.material_dropdown_menu_popup_item)
+            })
+            room_spinner.setText(room_spinner.adapter.getItem(0).toString(), false)
+        }
     }
 
     private fun initializeBeds() {
         registerPatientViewModel.getAvailableBeds().observe(viewLifecycleOwner, Observer {
-            bed_spinner.adapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, it).apply {
-                setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            }
+            onRoomsUpdate(it)
         })
-        room_spinner.onItemSelectedListener = onRoomSelectedItem
-    }
-
-    private val onDepartmentSelectedItem = object : AdapterView.OnItemSelectedListener {
-
-        override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+        room_spinner.doAfterTextChanged {
+            val roomText = it.toString()
             registerPatientViewModel.departments.value?.also {
-                val selectedDepartment = it[position]
-                val roomNames = selectedDepartment.rooms.map { it.name }
-                room_spinner.adapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, roomNames).apply {
-                    setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                val department = it.filter { it.department.name == department_spinner.text.toString() }.firstOrNull()
+                department?.also {
+                    val room = department.rooms.filter { it.name == roomText }.firstOrNull()
+                    room?.apply {
+                        registerPatientViewModel.updateAvailableBeds(this)
+                    }
                 }
             }
         }
-
-        override fun onNothingSelected(parent: AdapterView<*>?) {
-            room_spinner.adapter = ArrayAdapter<String>(context, android.R.layout.simple_spinner_item)
-        }
-
     }
 
-    private val onRoomSelectedItem = object : AdapterView.OnItemSelectedListener {
-
-        override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-            registerPatientViewModel.departments.value?.also {
-                val room = it[department_spinner.selectedItemPosition].rooms[position]
-                registerPatientViewModel.updateAvailableBeds(room)
-//                registerPatientViewModel.getAvailableBeds(room).observe(viewLifecycleOwner, Observer {
-//                    bed_spinner.adapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, it).apply {
-//                        setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-//                    }
-//                })
-            }
-        }
-
-        override fun onNothingSelected(parent: AdapterView<*>?) {
-            bed_spinner.adapter = ArrayAdapter<String>(context, android.R.layout.simple_spinner_item)
-        }
-
+    private fun onRoomsUpdate(roomsNames: List<String>) {
+        bed_spinner.setAdapter(ArrayAdapter(context, R.layout.material_dropdown_menu_popup_item, roomsNames).apply {
+            setDropDownViewResource(R.layout.material_dropdown_menu_popup_item)
+        })
+        bed_spinner.setText(bed_spinner.adapter.getItem(0).toString(), false)
     }
 
     override fun onAttach(context: Context) {

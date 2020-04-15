@@ -79,6 +79,7 @@
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/department_container"
+        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
         android:layout_width="240dp"
         android:layout_height="wrap_content"
         android:hint="@string/department"
@@ -90,18 +91,26 @@
         android:layout_marginStart="16dp"
         >
 
-        <androidx.appcompat.widget.AppCompatSpinner
+        <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+            android:inputType="none"
+            android:editable="false"
             android:id="@+id/department_spinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
+
+<!--        <androidx.appcompat.widget.AppCompatSpinner-->
+<!--            android:id="@+id/department_spinner"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content" />-->
 
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/room_container"
+        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
         android:layout_width="240dp"
         android:layout_height="wrap_content"
-        android:hint="@string/department"
+        android:hint="@string/room"
         app:helperText="@string/mandatory_field_text"
         app:helperTextTextColor="@android:color/holo_red_dark"
         app:layout_constraintTop_toTopOf="@id/patient_haiti_container"
@@ -109,18 +118,22 @@
         app:layout_constraintEnd_toEndOf="@id/department_container"
         >
 
-        <androidx.appcompat.widget.AppCompatSpinner
+        <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+            android:inputType="none"
+            android:editable="false"
             android:id="@+id/room_spinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
+
 
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/bed_container"
+        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
         android:layout_width="240dp"
         android:layout_height="wrap_content"
-        android:hint="@string/department"
+        android:hint="@string/bed"
         app:helperText="@string/mandatory_field_text"
         app:helperTextTextColor="@android:color/holo_red_dark"
         app:layout_constraintTop_toTopOf="@id/patient_doctor_container"
@@ -128,7 +141,9 @@
         app:layout_constraintEnd_toEndOf="@id/department_container"
         >
 
-        <androidx.appcompat.widget.AppCompatSpinner
+        <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+            android:inputType="none"
+            android:editable="false"
             android:id="@+id/bed_spinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
