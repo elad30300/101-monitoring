@@ -48,6 +48,8 @@ class RegisterPatientFragment : Fragment() {
         }
 
         initializeDepartments()
+
+        initializeBeds()
     }
 
     private fun initializeDepartments() {
@@ -60,14 +62,13 @@ class RegisterPatientFragment : Fragment() {
         department_spinner.onItemSelectedListener = onDepartmentSelectedItem
     }
 
+    private fun initializeBeds() {
+        room_spinner.onItemSelectedListener = onRoomSelectedItem
+    }
+
     private val onDepartmentSelectedItem = object : AdapterView.OnItemSelectedListener {
 
-        override fun onItemSelected(
-            parent: AdapterView<*>?,
-            view: View?,
-            position: Int,
-            id: Long
-        ) {
+        override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
             registerPatientViewModel.departments.value?.also {
                 val selectedDepartment = it[position]
                 val roomNames = selectedDepartment.rooms.map { it.name }
@@ -79,6 +80,25 @@ class RegisterPatientFragment : Fragment() {
 
         override fun onNothingSelected(parent: AdapterView<*>?) {
             room_spinner.adapter = ArrayAdapter<String>(context, android.R.layout.simple_spinner_item)
+        }
+
+    }
+
+    private val onRoomSelectedItem = object : AdapterView.OnItemSelectedListener {
+
+        override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+            registerPatientViewModel.departments.value?.also {
+                val room = it[department_spinner.selectedItemPosition].rooms[position]
+                registerPatientViewModel.getAvailableBeds(room).observe(viewLifecycleOwner, Observer {
+                    bed_spinner.adapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, it).apply {
+                        setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    }
+                })
+            }
+        }
+
+        override fun onNothingSelected(parent: AdapterView<*>?) {
+            bed_spinner.adapter = ArrayAdapter<String>(context, android.R.layout.simple_spinner_item)
         }
 
     }

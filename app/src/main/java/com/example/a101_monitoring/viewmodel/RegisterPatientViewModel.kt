@@ -3,6 +3,7 @@ package com.example.a101_monitoring.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.a101_monitoring.data.model.Patient
+import com.example.a101_monitoring.data.model.Room
 import com.example.a101_monitoring.data.model.Sensor
 import com.example.a101_monitoring.repository.PatientRepository
 import javax.inject.Inject
@@ -12,6 +13,8 @@ class RegisterPatientViewModel @Inject constructor(
 ) : ViewModel() {
 
     val departments = patientRepository.getDepartments()
+
+    fun getAvailableBeds(room: Room) = patientRepository.getAvailableBeds(room)
 
     fun registerPatient(
         id: Int,

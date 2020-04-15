@@ -31,6 +31,8 @@ class PatientRepository @Inject constructor(
     private val fetchPatientsState = MutableLiveData<Boolean>()
     private val registerPatientState = MutableLiveData<Boolean>()
 
+    private val availableBeds = MutableLiveData<List<String>>()
+
     fun getFetchPatientsState(): LiveData<Boolean> = fetchPatientsState
     fun getRegisterPatientState(): LiveData<Boolean> = registerPatientState
 
@@ -47,6 +49,27 @@ class PatientRepository @Inject constructor(
     fun getDepartments(): LiveData<List<DepartmentWithRooms>> {
         getDepartmentsFromRemote()
         return departmentDao.getAll()
+    }
+
+    fun getAvailableBeds(room: Room): LiveData<List<String>> {
+        getAvailableBedsFromRemote(room)
+        return availableBeds
+    }
+
+    private fun getAvailableBedsFromRemote(room: Room) {
+        executor.execute {
+            atalefRemoteAdapter.getAvailableBeds(room, {
+                onGotAvailableBeds(it)
+            }, {
+                DefaultCallbacksHelper.onErrorDefault(TAG, "failed to fetch available beds for room ${room.name}, department ${room.departmentId} from remote", it)
+            }, {
+                DefaultCallbacksHelper.onErrorDefault(TAG, "error in fetch available beds for room ${room.name}, department ${room.departmentId} from remote", it)
+            })
+        }
+    }
+
+    private fun onGotAvailableBeds(beds: List<String>) {
+        availableBeds.postValue(beds)
     }
 
     private fun getDepartmentsFromRemote() {

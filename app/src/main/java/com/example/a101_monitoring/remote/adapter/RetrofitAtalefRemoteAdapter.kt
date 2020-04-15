@@ -1,6 +1,7 @@
 package com.example.a101_monitoring.remote.adapter
 
 import android.util.Log
+import com.example.a101_monitoring.data.model.Room
 import com.example.a101_monitoring.remote.model.DepartmentBody
 import com.example.a101_monitoring.remote.model.PatientBody
 import com.example.a101_monitoring.remote.service.AtalefService
@@ -16,12 +17,19 @@ class RetrofitAtalefRemoteAdapter(
 )  : AtalefRemoteAdapter {
 
 
-    override fun register(patient: PatientBody, onResponse: OnResponseCallback<PatientBody>, onFailed: onFailedCallback, onError: onErrorCallback) {
+    override fun register(patient: PatientBody, onResponse: OnResponseCallback<PatientBody>, onFailed: onFailedCallback,
+                          onError: onErrorCallback) {
         request(atalefService.register(patient), onResponse, onFailed, onError)
     }
 
-    override fun getDepartments(onResponse: OnResponseCallback<List<DepartmentBody>>, onFailed: onFailedCallback, onError: onErrorCallback) {
+    override fun getDepartments(onResponse: OnResponseCallback<List<DepartmentBody>>, onFailed: onFailedCallback,
+                                onError: onErrorCallback) {
         request(atalefService.getDepartments(), onResponse, onFailed, onError)
+    }
+
+    override fun getAvailableBeds(room: Room, onResponse: OnResponseCallback<List<String>>,
+                                  onFailed: onFailedCallback, onError: onErrorCallback) {
+        request(atalefService.getAvailableBeds(room.name, room.departmentId), onResponse, onFailed, onError)
     }
 
     private fun <T: Any>request(
