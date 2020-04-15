@@ -51,9 +51,10 @@ class PatientRepository @Inject constructor(
         return departmentDao.getAll()
     }
 
-    fun getAvailableBeds(room: Room): LiveData<List<String>> {
+    fun getAvailableBeds(): LiveData<List<String>> = availableBeds
+
+    fun updateAvailableBeds(room: Room) {
         getAvailableBedsFromRemote(room)
-        return availableBeds
     }
 
     private fun getAvailableBedsFromRemote(room: Room) {

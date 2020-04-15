@@ -63,6 +63,11 @@ class RegisterPatientFragment : Fragment() {
     }
 
     private fun initializeBeds() {
+        registerPatientViewModel.getAvailableBeds().observe(viewLifecycleOwner, Observer {
+            bed_spinner.adapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, it).apply {
+                setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            }
+        })
         room_spinner.onItemSelectedListener = onRoomSelectedItem
     }
 
@@ -89,11 +94,12 @@ class RegisterPatientFragment : Fragment() {
         override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
             registerPatientViewModel.departments.value?.also {
                 val room = it[department_spinner.selectedItemPosition].rooms[position]
-                registerPatientViewModel.getAvailableBeds(room).observe(viewLifecycleOwner, Observer {
-                    bed_spinner.adapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, it).apply {
-                        setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                    }
-                })
+                registerPatientViewModel.updateAvailableBeds(room)
+//                registerPatientViewModel.getAvailableBeds(room).observe(viewLifecycleOwner, Observer {
+//                    bed_spinner.adapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, it).apply {
+//                        setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+//                    }
+//                })
             }
         }
 

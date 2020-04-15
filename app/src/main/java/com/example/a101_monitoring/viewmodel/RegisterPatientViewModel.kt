@@ -14,7 +14,11 @@ class RegisterPatientViewModel @Inject constructor(
 
     val departments = patientRepository.getDepartments()
 
-    fun getAvailableBeds(room: Room) = patientRepository.getAvailableBeds(room)
+    fun getAvailableBeds() = patientRepository.getAvailableBeds()
+
+    fun updateAvailableBeds(room: Room) {
+        patientRepository.updateAvailableBeds(room)
+    }
 
     fun registerPatient(
         id: Int,
