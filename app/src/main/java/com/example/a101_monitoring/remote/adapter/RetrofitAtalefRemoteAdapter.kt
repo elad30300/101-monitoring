@@ -32,12 +32,7 @@ class RetrofitAtalefRemoteAdapter(
         request(atalefService.getAvailableBeds(room.name, room.departmentId), onResponse, onFailed, onError)
     }
 
-    private fun <T: Any>request(
-        call: Call<T>,
-        onResponse: (responseBody: T) -> Unit,
-        onFailed: (throwable: Throwable) -> Unit,
-        onError: (throwable: Throwable) -> Unit
-    ) {
+    private fun <T: Any>request(call: Call<T>, onResponse: OnResponseCallback<T>, onFailed: onFailedCallback, onError: onErrorCallback) {
         call.enqueue(object : Callback<T> {
             override fun onResponse(call: Call<T>, response: Response<T>) {
                 if (response.isSuccessful && response.body() != null) {
