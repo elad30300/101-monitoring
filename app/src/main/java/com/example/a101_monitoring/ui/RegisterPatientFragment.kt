@@ -6,8 +6,14 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.ListAdapter
+import android.widget.SpinnerAdapter
+import androidx.lifecycle.Observer
 import com.example.a101_monitoring.MyApplication
 import com.example.a101_monitoring.R
+import com.example.a101_monitoring.data.model.Department
 import com.example.a101_monitoring.di.component.RegisterPatientComponent
 import com.example.a101_monitoring.viewmodel.RegisterPatientViewModel
 import kotlinx.android.synthetic.main.register_patient_fragment.*
@@ -40,6 +46,41 @@ class RegisterPatientFragment : Fragment() {
         register_button.setOnClickListener {
             onRegisterClicked(it)
         }
+
+        initializeDepartments()
+    }
+
+    private fun initializeDepartments() {
+        registerPatientViewModel.departments.observe(viewLifecycleOwner, Observer {
+            val departmentNames = it.map { it.department.name } as MutableList<String>
+            department_spinner.adapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, departmentNames).apply {
+                setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            }
+        })
+        department_spinner.onItemSelectedListener = onDepartmentSelectedItem
+    }
+
+    private val onDepartmentSelectedItem = object : AdapterView.OnItemSelectedListener {
+
+        override fun onItemSelected(
+            parent: AdapterView<*>?,
+            view: View?,
+            position: Int,
+            id: Long
+        ) {
+            registerPatientViewModel.departments.value?.also {
+                val selectedDepartment = it[position]
+                val roomNames = selectedDepartment.rooms.map { it.name }
+                room_spinner.adapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, roomNames).apply {
+                    setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                }
+            }
+        }
+
+        override fun onNothingSelected(parent: AdapterView<*>?) {
+            room_spinner.adapter = ArrayAdapter<String>(context, android.R.layout.simple_spinner_item)
+        }
+
     }
 
     override fun onAttach(context: Context) {

@@ -4,6 +4,7 @@ import android.app.Application
 import com.example.a101_monitoring.di.component.DaggerApplicationComponent
 import com.example.a101_monitoring.di.module.ApplicationModule
 import com.example.a101_monitoring.di.module.BluetoothModule
+import com.example.a101_monitoring.di.module.RemoteServiceModule
 import javax.inject.Inject
 
 class MyApplication : Application() {

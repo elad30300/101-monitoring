@@ -21,6 +21,7 @@ class ApplicationModule(val context: Application) {
                                         ApplicationDatabase::class.java,
                                         "application-database"
                                     )
+//                                        .addMigrations(ApplicationDatabase.migration1to2)
                                         .build()
 
     @Singleton
@@ -30,5 +31,13 @@ class ApplicationModule(val context: Application) {
     @Singleton
     @Provides
     fun provideMeasurementsDao(database: ApplicationDatabase) = database.measurementsDao()
+
+    @Singleton
+    @Provides
+    fun provideDepartmentDao(database: ApplicationDatabase) = database.departmentDao()
+
+    @Singleton
+    @Provides
+    fun provideRoomDao(database: ApplicationDatabase) = database.roomDao()
 
 }

@@ -11,6 +11,8 @@ class RegisterPatientViewModel @Inject constructor(
     private val patientRepository: PatientRepository
 ) : ViewModel() {
 
+    val departments = patientRepository.getDepartments()
+
     fun registerPatient(
         id: Int,
         deptId: Int,
