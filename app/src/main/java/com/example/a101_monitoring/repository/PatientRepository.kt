@@ -8,8 +8,11 @@ import com.example.a101_monitoring.data.dao.PatientDao
 import com.example.a101_monitoring.data.dao.RoomDao
 import com.example.a101_monitoring.data.model.*
 import com.example.a101_monitoring.remote.adapter.AtalefRemoteAdapter
-import com.example.a101_monitoring.remote.adapter.RetrofitAtalefRemoteAdapter
+import com.example.a101_monitoring.remote.adapter.OnErrorCallback
+import com.example.a101_monitoring.remote.adapter.OnResponseCallback
+import com.example.a101_monitoring.remote.adapter.OnFailedCallback
 import com.example.a101_monitoring.remote.model.DepartmentBody
+import com.example.a101_monitoring.remote.model.PatientBody
 import com.example.a101_monitoring.utils.DataRemoteHelper
 import com.example.a101_monitoring.utils.DefaultCallbacksHelper
 import java.lang.Exception
@@ -138,7 +141,34 @@ class PatientRepository @Inject constructor(
         }
     }
 
-    fun registerPatient(patient: Patient) {
+    fun registerPatient(identityNumber: String, deptId: Int, room: String, bed: String, haitiId: String, registeredDoctor: String,
+                        isCitizen: Boolean, isOxygen: Int, isActive: Boolean, sensorAddress: String = "") {
+        val patientBody = PatientBody(0, identityNumber, deptId, room, bed, haitiId, registeredDoctor, isCitizen, isOxygen, isActive)
+        registerPatientToRemote(patientBody,
+            {
+                onPatientRegisteredSuccessfullyToRemote(it, sensorAddress)
+            }, {
+                DefaultCallbacksHelper.onErrorDefault(TAG, "Failure: register patient ${identityNumber} to remote failed", it)
+            }, {
+                DefaultCallbacksHelper.onErrorDefault(TAG, "Error: register patient ${identityNumber} to remote failed", it)
+            }
+        )
+    }
+
+    private fun registerPatientToRemote(patientBody: PatientBody, onResponseCallback: OnResponseCallback<PatientBody>, onFailed: OnFailedCallback, onError: OnErrorCallback) {
+        executor.execute {
+            atalefRemoteAdapter.register(patientBody, onResponseCallback, onFailed, onError)
+        }
+    }
+
+    private fun onPatientRegisteredSuccessfullyToRemote(patientBody: PatientBody, sensorAddress: String = "") {
+        val patient = DataRemoteHelper.fromPatientBodyToPatient(patientBody).apply {
+            sensor = if (sensorAddress == "") Sensor(sensorAddress) else null
+        }
+        insertPatient(patient)
+    }
+
+    private fun insertPatient(patient: Patient) {
         executor.execute {
             try {
                 patientDao.insertPatients(patient)

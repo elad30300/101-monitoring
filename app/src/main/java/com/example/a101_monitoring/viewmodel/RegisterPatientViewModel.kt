@@ -32,9 +32,6 @@ class RegisterPatientViewModel @Inject constructor(
         isActive: Boolean,
         sensorAddress: String = ""
     ) {
-        val sensor: Sensor? = if (sensorAddress == "") Sensor(sensorAddress) else null
-        patientRepository.registerPatient(
-            Patient(id, 0, deptId, room, bed, haitiId, registeredDoctor, isCitizen, isOxygen, isActive, sensor)
-        )
+        patientRepository.registerPatient(id, deptId, room, bed, haitiId, registeredDoctor, isCitizen, isOxygen, isActive, sensorAddress)
     }
 }

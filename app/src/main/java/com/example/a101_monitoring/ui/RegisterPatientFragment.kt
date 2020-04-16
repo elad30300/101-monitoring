@@ -127,17 +127,31 @@ class RegisterPatientFragment : Fragment() {
     }
 
     fun onRegisterClicked(view: View) {
-        registerPatientViewModel.registerPatient(
-            registered_patient_id.text.toString(),
-            1,
-            "1",
-            "1",
-            patient_haiti.toString(),
-            doctor.toString(),
-            is_civilian_switch.isSelected,
-            0,
-            true
-        )
+        val department = getSelectedDepartment()
+        if (isInputValid()) {
+            registerPatientViewModel.registerPatient(
+                registered_patient_id.text.toString(),
+                getSelectedDepartment()!!.id,
+                room_spinner.text.toString(),
+                bed_spinner.text.toString(),
+                patient_haiti.text.toString(),
+                doctor.text.toString(),
+                is_civilian_switch.isSelected,
+                0,
+                true
+            )
+        }
+    }
+
+    private fun isInputValid(): Boolean {
+        return getSelectedDepartment() != null
+    }
+
+    fun getSelectedDepartment(): Department? {
+        val departmentText = department_spinner.text.toString()
+        return registerPatientViewModel.departments.value?.let {
+             it.filter { it.department.name == departmentText }.firstOrNull()?.department
+        }
     }
 
 }

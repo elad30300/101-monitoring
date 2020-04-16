@@ -1,6 +1,5 @@
 package com.example.a101_monitoring.remote.adapter
 
-import android.util.Log
 import com.example.a101_monitoring.data.model.Room
 import com.example.a101_monitoring.remote.model.DepartmentBody
 import com.example.a101_monitoring.remote.model.PatientBody
@@ -17,22 +16,22 @@ class RetrofitAtalefRemoteAdapter(
 )  : AtalefRemoteAdapter {
 
 
-    override fun register(patient: PatientBody, onResponse: OnResponseCallback<PatientBody>, onFailed: onFailedCallback,
-                          onError: onErrorCallback) {
+    override fun register(patient: PatientBody, onResponse: OnResponseCallback<PatientBody>, onFailed: OnFailedCallback,
+                          onError: OnErrorCallback) {
         request(atalefService.register(patient), onResponse, onFailed, onError)
     }
 
-    override fun getDepartments(onResponse: OnResponseCallback<List<DepartmentBody>>, onFailed: onFailedCallback,
-                                onError: onErrorCallback) {
+    override fun getDepartments(onResponse: OnResponseCallback<List<DepartmentBody>>, onFailed: OnFailedCallback,
+                                onError: OnErrorCallback) {
         request(atalefService.getDepartments(), onResponse, onFailed, onError)
     }
 
     override fun getAvailableBeds(room: Room, onResponse: OnResponseCallback<List<String>>,
-                                  onFailed: onFailedCallback, onError: onErrorCallback) {
+                                  onFailed: OnFailedCallback, onError: OnErrorCallback) {
         request(atalefService.getAvailableBeds(room.name, room.departmentId), onResponse, onFailed, onError)
     }
 
-    private fun <T: Any>request(call: Call<T>, onResponse: OnResponseCallback<T>, onFailed: onFailedCallback, onError: onErrorCallback) {
+    private fun <T: Any>request(call: Call<T>, onResponse: OnResponseCallback<T>, onFailed: OnFailedCallback, onError: OnErrorCallback) {
         call.enqueue(object : Callback<T> {
             override fun onResponse(call: Call<T>, response: Response<T>) {
                 if (response.isSuccessful && response.body() != null) {
