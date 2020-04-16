@@ -26,9 +26,9 @@ class RetrofitAtalefRemoteAdapter(
         request(atalefService.getDepartments(), onResponse, onFailed, onError)
     }
 
-    override fun getAvailableBeds(room: Room, onResponse: OnResponseCallback<List<String>>,
+    override fun getAvailableBeds(room: String, departmentId: Int, onResponse: OnResponseCallback<List<String>>,
                                   onFailed: OnFailedCallback, onError: OnErrorCallback) {
-        request(atalefService.getAvailableBeds(room.name, room.departmentId), onResponse, onFailed, onError)
+        request(atalefService.getAvailableBeds(room, departmentId), onResponse, onFailed, onError)
     }
 
     override fun getReleaseReasons(onResponse: OnResponseCallback<List<ReleaseReasonBody>>, onFailed: OnFailedCallback,

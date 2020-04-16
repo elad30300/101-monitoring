@@ -65,7 +65,7 @@ class PatientRepository @Inject constructor(
 
     private fun getAvailableBedsFromRemote(room: Room) {
         executor.execute {
-            atalefRemoteAdapter.getAvailableBeds(room, {
+            atalefRemoteAdapter.getAvailableBeds(room.name, room.departmentId, {
                 onGotAvailableBeds(it)
             }, {
                 DefaultCallbacksHelper.onErrorDefault(TAG, "failed to fetch available beds for room ${room.name}, department ${room.departmentId} from remote", it)

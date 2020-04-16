@@ -13,7 +13,7 @@ interface AtalefRemoteAdapter {
 
     fun getDepartments(onResponse: OnResponseCallback<List<DepartmentBody>>, onFailed: OnFailedCallback, onError: OnErrorCallback)
 
-    fun getAvailableBeds(room: Room, onResponse: OnResponseCallback<List<String>>, onFailed: OnFailedCallback, onError: OnErrorCallback)
+    fun getAvailableBeds(room: String, departmentId: Int, onResponse: OnResponseCallback<List<String>>, onFailed: OnFailedCallback, onError: OnErrorCallback)
 
     fun getReleaseReasons(onResponse: OnResponseCallback<List<ReleaseReasonBody>>, onFailed: OnFailedCallback, onError: OnErrorCallback)
 
