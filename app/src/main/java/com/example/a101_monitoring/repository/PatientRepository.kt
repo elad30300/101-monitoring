@@ -40,9 +40,9 @@ class PatientRepository @Inject constructor(
 
     fun getPatientIdBySensorAddress(address: String) = patientDao.getPatientIdBySensorAddress(address)
 
-    fun isPatientConnectedToSensor(patientId: Int) = patientDao.isPatientConnectedToSensor(patientId)
+    fun isPatientConnectedToSensor(patientId: PatientIdentityFieldType) = patientDao.isPatientConnectedToSensor(patientId)
 
-    fun getSensorAddress(patientId: Int) = patientDao.getSensorAddress(patientId)
+    fun getSensorAddress(patientId: PatientIdentityFieldType) = patientDao.getSensorAddress(patientId)
 
     fun getSensors() = patientDao.getAllSensors()
 
@@ -151,7 +151,7 @@ class PatientRepository @Inject constructor(
         }
     }
 
-    fun setSensor(patientId: Int, sensorAddress: String) {
+    fun setSensor(patientId: PatientIdentityFieldType, sensorAddress: String) {
         executor.execute {
             try {
                 patientDao.updateSensorToPatient(patientId, sensorAddress)

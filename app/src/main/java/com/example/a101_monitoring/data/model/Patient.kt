@@ -6,9 +6,11 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.Relation
 
+typealias PatientIdentityFieldType = String
+
 @Entity(tableName = "patients")
 data class Patient(
-    @PrimaryKey val numericalId: String,
+    @PrimaryKey val identityId: String,
     val id: Int,
     val deptId: Int,
     val room: String,
@@ -19,4 +21,10 @@ data class Patient(
     val isOxygen: Int,
     val isActive: Boolean,
     @Embedded var sensor: Sensor? = null
-)
+) {
+    fun getIdentityField() = identityId
+
+    companion object {
+        const val IDENTITY_FIELD_IN_DB = "identityId"
+    }
+}

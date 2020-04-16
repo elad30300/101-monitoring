@@ -15,6 +15,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
 import com.example.a101_monitoring.R
 import com.example.a101_monitoring.data.model.Patient
+import com.example.a101_monitoring.data.model.PatientIdentityFieldType
 
 
 import com.example.a101_monitoring.ui.PatientsListFragment.OnListFragmentInteractionListener
@@ -56,16 +57,16 @@ class MyPatientRecyclerViewAdapter(
         val item = mValues[position]
 
         holder.apply {
-            initializePatientItemViewModel(item.id)
+            initializePatientItemViewModel(item.getIdentityField())
 
-            mIdView.text = item.id.toString()
+            mIdView.text = item.identityId
 
             setObserverConnectionToSensor()
             setObserverToHeartRate()
             setObserverToSaturation()
             setObserverToRespiratoryRate()
 
-            setChooseSensorButtonActionListener(item.id)
+            setChooseSensorButtonActionListener(item.getIdentityField())
 
             with(mView) {
                 tag = item
@@ -91,14 +92,14 @@ class MyPatientRecyclerViewAdapter(
             false to R.drawable.rounded_red_rectangle
         )
 
-        fun initializePatientItemViewModel(patientId: Int) {
+        fun initializePatientItemViewModel(patientId: PatientIdentityFieldType) {
             patientItemViewModel = ViewModelProviders.of(
                 mFragment,
                 PatientItemViewModelFactory(mView.context, patientId))
                 .get(PatientItemViewModel::class.java)
         }
 
-        fun setChooseSensorButtonActionListener(patientId: Int) {
+        fun setChooseSensorButtonActionListener(patientId: PatientIdentityFieldType) {
             mChooseSensorButton.setOnClickListener {
                 val action = PatientsListFragmentDirections.actionPatientFragmentToSensorChooseFragment(patientId)
                 it.findNavController().navigate(action)

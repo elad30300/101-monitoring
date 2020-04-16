@@ -3,6 +3,7 @@ package com.example.a101_monitoring.data.dao
 import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.example.a101_monitoring.data.model.HeartRate
+import com.example.a101_monitoring.data.model.PatientIdentityFieldType
 import com.example.a101_monitoring.data.model.RespiratoryRate
 import com.example.a101_monitoring.data.model.Saturation
 
@@ -19,13 +20,13 @@ interface MeasurementsDao {
     fun getAllRespiratoryRates(): LiveData<List<RespiratoryRate>>
 
     @Query("SELECT * FROM heart_rates WHERE patient_id = :patientId")
-    fun getAllHeartRatesForPatient(patientId: Int): LiveData<HeartRate>
+    fun getAllHeartRatesForPatient(patientId: PatientIdentityFieldType): LiveData<HeartRate>
 
     @Query("SELECT * FROM saturations WHERE patient_id = :patientId")
-    fun getAllSaturationsForPatient(patientId: Int): LiveData<Saturation>
+    fun getAllSaturationsForPatient(patientId: PatientIdentityFieldType): LiveData<Saturation>
 
     @Query("SELECT * FROM respirations WHERE patient_id = :patientId")
-    fun getAllRespiratoryRatesForPatient(patientId: Int): LiveData<RespiratoryRate>
+    fun getAllRespiratoryRatesForPatient(patientId: PatientIdentityFieldType): LiveData<RespiratoryRate>
 
     @Query("""
         SELECT *
@@ -35,7 +36,7 @@ interface MeasurementsDao {
             FROM heart_rates
         )
         """)
-    fun getLastHeartRateForPatient(patientId: Int): LiveData<HeartRate?>
+    fun getLastHeartRateForPatient(patientId: PatientIdentityFieldType): LiveData<HeartRate?>
 
     @Query("""
         SELECT *
@@ -45,7 +46,7 @@ interface MeasurementsDao {
             FROM saturations
         )
         """)
-    fun getLastSaturationForPatient(patientId: Int): LiveData<Saturation?>
+    fun getLastSaturationForPatient(patientId: PatientIdentityFieldType): LiveData<Saturation?>
 
     @Query("""
         SELECT *
@@ -55,7 +56,7 @@ interface MeasurementsDao {
             FROM respirations
         )
         """)
-    fun getLastRespiratoryRateForPatient(patientId: Int): LiveData<List<RespiratoryRate>>
+    fun getLastRespiratoryRateForPatient(patientId: PatientIdentityFieldType): LiveData<List<RespiratoryRate>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertHeartRates(vararg heartRate: HeartRate)

@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 open class Measurement(
     @ColumnInfo(name = "value") val value: Int,
     @ColumnInfo(name = "time") val time: Long,
-    @ColumnInfo(name = "patient_id") val patientId: Int
+    @ColumnInfo(name = "patient_id") val patientId: PatientIdentityFieldType
 ) {
     @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "measurement_id") var measurementId: Int = 0
 
@@ -20,7 +20,7 @@ open class Measurement(
 class HeartRate(
     value: Int,
     time: Long,
-    patientId: Int
+    patientId: PatientIdentityFieldType
 ) : Measurement(value, time, patientId)
 
 
@@ -28,12 +28,12 @@ class HeartRate(
 class Saturation(
     value: Int,
     time: Long,
-    patientId: Int
+    patientId: PatientIdentityFieldType
 ) : Measurement(value, time, patientId)
 
 @Entity(tableName = "respirations")
 class RespiratoryRate(
     value: Int,
     time: Long,
-    patientId: Int
+    patientId: PatientIdentityFieldType
 ) : Measurement(value, time, patientId)

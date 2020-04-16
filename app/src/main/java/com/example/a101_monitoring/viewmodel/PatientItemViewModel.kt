@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import com.example.a101_monitoring.MyApplication
 import com.example.a101_monitoring.data.model.HeartRate
+import com.example.a101_monitoring.data.model.PatientIdentityFieldType
 import com.example.a101_monitoring.data.model.RespiratoryRate
 import com.example.a101_monitoring.data.model.Saturation
 import com.example.a101_monitoring.repository.MeasurementsRepository
@@ -14,7 +15,7 @@ import javax.inject.Inject
 
 class PatientItemViewModel(
     private val context: Context,
-    private val patientId: Int
+    private val patientId: PatientIdentityFieldType
 ): ViewModel() {
 
     @Inject lateinit var patientRepository: PatientRepository

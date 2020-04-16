@@ -124,7 +124,7 @@ class RegisterPatientFragment : Fragment() {
 
     fun onRegisterClicked(view: View) {
         registerPatientViewModel.registerPatient(
-            registered_patient_id.text.toString().toInt(),
+            registered_patient_id.text.toString(),
             1,
             "1",
             "1",
