@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.example.a101_monitoring.data.database.ApplicationDatabase
 import dagger.Module
 import dagger.Provides
+import java.util.concurrent.Executors
 import javax.inject.Singleton
 
 @Module
@@ -13,6 +14,10 @@ class ApplicationModule(val context: Application) {
     @Singleton
     @Provides
     fun provideApplicationContext() = context
+
+    @Singleton
+    @Provides
+    fun provideExecutor() = Executors.newSingleThreadExecutor()
 
     @Singleton
     @Provides
@@ -39,5 +44,9 @@ class ApplicationModule(val context: Application) {
     @Singleton
     @Provides
     fun provideRoomDao(database: ApplicationDatabase) = database.roomDao()
+
+    @Singleton
+    @Provides
+    fun provideReleaseReasonsDao(database: ApplicationDatabase) = database.releaseReasonsDao()
 
 }

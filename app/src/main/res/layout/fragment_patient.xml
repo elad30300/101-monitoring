@@ -22,6 +22,19 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:visibility="invisible"
+            tools:visibility="visible"
+            android:id="@+id/patient_item_release_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:backgroundTint="@color/releaseBackgroundColor"
+            app:srcCompat="@drawable/ic_close_24px"
+            app:fabSize="mini"
+            />
+
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/id_container"
             android:layout_width="match_parent"

@@ -16,6 +16,7 @@ import com.example.a101_monitoring.remote.model.PatientBody
 import com.example.a101_monitoring.utils.DataRemoteHelper
 import com.example.a101_monitoring.utils.DefaultCallbacksHelper
 import java.lang.Exception
+import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -26,10 +27,9 @@ class PatientRepository @Inject constructor(
     private val patientDao: PatientDao,
     private val departmentDao: DepartmentDao,
     private val roomDao: RoomDao,
-    private val atalefRemoteAdapter: AtalefRemoteAdapter
+    private val atalefRemoteAdapter: AtalefRemoteAdapter,
+    private val executor: Executor
 ) {
-
-    private val executor = Executors.newSingleThreadExecutor()
 
     private val fetchPatientsState = MutableLiveData<Boolean>()
     private val registerPatientState = MutableLiveData<Boolean>()

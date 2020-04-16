@@ -38,7 +38,18 @@ class PatientsListFragment : Fragment() {
     }
 
     private fun onPatientsChange(patients: List<Patient>?) {
-        list.adapter = MyPatientRecyclerViewAdapter(patients ?: listOf<Patient>(), listener, this)
+        list.adapter = MyPatientRecyclerViewAdapter(patients ?: listOf<Patient>(), listener, this).also {
+            observeEditMode(it)
+        }
+    }
+
+    private fun observeEditMode(adapter: MyPatientRecyclerViewAdapter) {
+        adapter.getEditMode().observe(viewLifecycleOwner, Observer {
+            when (it) {
+                true -> dismiss_edit_button.show()
+                else -> dismiss_edit_button.hide()
+            }
+        })
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,9 +75,12 @@ class PatientsListFragment : Fragment() {
         patientsListViewModel.patients.observe(viewLifecycleOwner, patientsObserver)
 
         add_patient_button.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.registerPatientFragment))
-//        add_patient_button.setOnClickListener() {
-//            onAddPatientClicked(it)
-//        }
+
+        dismiss_edit_button.setOnClickListener {
+            list.adapter?.also {
+                (it as MyPatientRecyclerViewAdapter).dismissEditMode()
+            }
+        }
     }
 
     override fun onAttach(context: Context) {

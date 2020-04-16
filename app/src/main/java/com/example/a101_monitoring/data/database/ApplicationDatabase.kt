@@ -4,10 +4,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.example.a101_monitoring.data.dao.DepartmentDao
-import com.example.a101_monitoring.data.dao.MeasurementsDao
-import com.example.a101_monitoring.data.dao.PatientDao
-import com.example.a101_monitoring.data.dao.RoomDao
+import com.example.a101_monitoring.data.dao.*
 import com.example.a101_monitoring.data.model.*
 
 @Database(entities = [
@@ -16,7 +13,8 @@ import com.example.a101_monitoring.data.model.*
     Saturation::class,
     RespiratoryRate::class,
     Department::class,
-    Room::class
+    Room::class,
+    ReleaseReason::class
 ], version = 1, exportSchema = false)
 abstract class ApplicationDatabase : RoomDatabase() {
 
@@ -27,6 +25,8 @@ abstract class ApplicationDatabase : RoomDatabase() {
     abstract fun departmentDao(): DepartmentDao
 
     abstract fun roomDao(): RoomDao
+
+    abstract fun releaseReasonsDao(): ReleaseReasonsDao
 
 //    companion object {
 //        val migration1to2 = object : Migration(1, 2) {

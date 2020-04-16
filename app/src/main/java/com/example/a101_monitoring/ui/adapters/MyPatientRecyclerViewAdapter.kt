@@ -9,9 +9,7 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.*
 import androidx.navigation.findNavController
 import com.example.a101_monitoring.R
 import com.example.a101_monitoring.data.model.Patient
@@ -23,6 +21,7 @@ import com.example.a101_monitoring.ui.PatientsListFragmentDirections
 import com.example.a101_monitoring.viewmodel.PatientItemViewModel
 import com.example.a101_monitoring.viewmodel.factory.PatientItemViewModelFactory
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 import kotlinx.android.synthetic.main.fragment_patient.view.*
 import kotlinx.android.synthetic.main.sensor_choose_fragment.view.*
@@ -35,6 +34,7 @@ class MyPatientRecyclerViewAdapter(
 ) : RecyclerView.Adapter<MyPatientRecyclerViewAdapter.ViewHolder>() {
 
     private val mOnClickListener: View.OnClickListener
+    private var editMode = MutableLiveData<Boolean>(false)
 
     init {
         mOnClickListener = View.OnClickListener { v ->
@@ -45,6 +45,10 @@ class MyPatientRecyclerViewAdapter(
         }
 
 
+    }
+
+    fun dismissEditMode() {
+        editMode.value = false
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -68,12 +72,21 @@ class MyPatientRecyclerViewAdapter(
 
             setChooseSensorButtonActionListener(item.getIdentityField())
 
+            observeEditMode()
+
+            mView.setOnLongClickListener {
+                editMode.value = true
+                true
+            }
+
             with(mView) {
                 tag = item
                 setOnClickListener(mOnClickListener)
             }
         }
     }
+
+    fun getEditMode(): LiveData<Boolean> = editMode
 
     override fun getItemCount(): Int = mValues.size
 
@@ -84,6 +97,7 @@ class MyPatientRecyclerViewAdapter(
         val mHeartRate: TextView = mView.heart_rate
         val mRespiratoryRate: TextView = mView.respiratory_rate
         val mChooseSensorButton: Button = mView.set_sensor_button
+        val mReleaseButton: FloatingActionButton = mView.patient_item_release_button
 
         lateinit var patientItemViewModel: PatientItemViewModel
 
@@ -130,6 +144,21 @@ class MyPatientRecyclerViewAdapter(
                 mRespiratoryRate.text = it.firstOrNull()?.value?.toString() ?: "--"
             })
         }
+
+
+        fun observeEditMode() {
+            editMode.observe(mFragment.viewLifecycleOwner, Observer {
+                if (it) {
+                    mView.setOnClickListener(null)
+                    mReleaseButton.show()
+                } else {
+                    mView.setOnClickListener(mOnClickListener)
+                    mReleaseButton.hide()
+                }
+            })
+        }
+
+
 
 //        override fun toString(): String {
 //            return super.toString() + " '" + mContentView.text + "'"
