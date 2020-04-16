@@ -30,7 +30,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             android:backgroundTint="@color/colorPrimary"
-            android:tint="@color/primaryTextColor"
+            app:tint="@color/primaryTextColor"
+            app:borderWidth="0dp"
             app:srcCompat="@drawable/ic_add_24dp"
             />
 
