@@ -6,10 +6,12 @@ import androidx.lifecycle.MutableLiveData
 import com.example.a101_monitoring.data.dao.ReleaseReasonsDao
 import com.example.a101_monitoring.data.model.ReleaseReason
 import com.example.a101_monitoring.remote.adapter.AtalefRemoteAdapter
+import com.example.a101_monitoring.remote.model.ReleaseReasonBody
+import com.example.a101_monitoring.utils.DataRemoteHelper
 import com.example.a101_monitoring.utils.DefaultCallbacksHelper
 import com.example.a101_monitoring.utils.ExceptionsHelper
-import java.lang.Exception
 import java.util.concurrent.Executor
+import java.util.concurrent.ExecutorService
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -20,11 +22,16 @@ class ReleaseReasonsRepository @Inject constructor(
     private val executor: Executor
 ) {
 
+    private val password = "2" // TODO: should be hashed so decompiler won't have access to password
     private val releaseReasons = releaseReasonsDao.getReleaseReasons()
 
     fun getReleaseReasons(): LiveData<List<ReleaseReason>> {
         refreshReleaseReasonsFromRemote()
         return releaseReasons
+    }
+
+    fun checkReleaseAccessPassword(password: String): Boolean { // TODO: should implement it with hash
+        return this.password == password
     }
 
     private fun refreshReleaseReasonsFromRemote() {
@@ -41,9 +48,9 @@ class ReleaseReasonsRepository @Inject constructor(
         }
     }
 
-    private fun onGetReleaseReasonsFromRemote(releaseReasons: List<ReleaseReason>) {
+    private fun onGetReleaseReasonsFromRemote(releaseReasons: List<ReleaseReasonBody>) {
         Log.d(TAG, "got ${releaseReasons.size} from remote")
-        insertReleaseReasons(releaseReasons)
+        insertReleaseReasons(DataRemoteHelper.fromRemoteToDataReleaseReasonList(releaseReasons))
     }
 
     private fun insertReleaseReasons(releaseReasons: List<ReleaseReason>) {

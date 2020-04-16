@@ -24,6 +24,9 @@
             app:destination="@id/sensorChooseFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim" />
+        <action
+            android:id="@+id/action_patientFragment_to_releasePatientDialogFragment"
+            app:destination="@id/releasePatientDialogFragment" />
     </fragment>
     <fragment
         android:id="@+id/registerPatientFragment"
@@ -44,6 +47,15 @@
         android:name="com.example.a101_monitoring.ui.SensorChooseFragment"
         android:label="sensor_choose_fragment"
         tools:layout="@layout/sensor_choose_fragment" >
+        <argument
+            android:name="patientId"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/releasePatientDialogFragment"
+        android:name="com.example.a101_monitoring.ui.ReleasePatientDialogFragment"
+        android:label="release_patient_dialog_fragment"
+        tools:layout="@layout/release_patient_dialog_fragment" >
         <argument
             android:name="patientId"
             app:argType="string" />

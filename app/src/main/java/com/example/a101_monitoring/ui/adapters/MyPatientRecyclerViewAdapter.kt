@@ -18,6 +18,7 @@ import com.example.a101_monitoring.data.model.PatientIdentityFieldType
 
 import com.example.a101_monitoring.ui.PatientsListFragment.OnListFragmentInteractionListener
 import com.example.a101_monitoring.ui.PatientsListFragmentDirections
+import com.example.a101_monitoring.ui.ReleasePatientDialogFragment
 import com.example.a101_monitoring.viewmodel.PatientItemViewModel
 import com.example.a101_monitoring.viewmodel.factory.PatientItemViewModelFactory
 import com.google.android.material.button.MaterialButton
@@ -71,6 +72,8 @@ class MyPatientRecyclerViewAdapter(
             setObserverToRespiratoryRate()
 
             setChooseSensorButtonActionListener(item.getIdentityField())
+
+            setReleaseButtonActionListener()
 
             observeEditMode()
 
@@ -145,6 +148,14 @@ class MyPatientRecyclerViewAdapter(
             })
         }
 
+        fun setReleaseButtonActionListener() {
+            mReleaseButton.setOnClickListener {
+                if (mView.tag is Patient && mFragment.activity != null) {
+                    val patientId = (mView.tag as Patient).identityId
+                    ReleasePatientDialogFragment(patientId).show(mFragment.activity!!.supportFragmentManager, "release")
+                }
+            }
+        }
 
         fun observeEditMode() {
             editMode.observe(mFragment.viewLifecycleOwner, Observer {

@@ -31,6 +31,8 @@ interface ApplicationComponent {
 
     fun mainActivityComponent(): MainActivityComponent.Factory
 
+    fun releasePatientComponent(): ReleasePatientComponent.Factory
+
 
     fun inject(noninHandler: NoninHandler)
 

@@ -2,8 +2,7 @@ package com.example.a101_monitoring.remote.adapter
 
 import com.example.a101_monitoring.data.model.ReleaseReason
 import com.example.a101_monitoring.data.model.Room
-import com.example.a101_monitoring.remote.model.DepartmentBody
-import com.example.a101_monitoring.remote.model.PatientBody
+import com.example.a101_monitoring.remote.model.*
 import com.example.a101_monitoring.remote.service.AtalefService
 import retrofit2.Call
 import retrofit2.Callback
@@ -32,9 +31,15 @@ class RetrofitAtalefRemoteAdapter(
         request(atalefService.getAvailableBeds(room.name, room.departmentId), onResponse, onFailed, onError)
     }
 
-    override fun getReleaseReasons(onResponse: OnResponseCallback<List<ReleaseReason>>, onFailed: OnFailedCallback,
+    override fun getReleaseReasons(onResponse: OnResponseCallback<List<ReleaseReasonBody>>, onFailed: OnFailedCallback,
                                    onError: OnErrorCallback) {
         request(atalefService.getReleaseReasons(), onResponse, onFailed, onError)
+    }
+
+    override fun releasePatient(releasePatientRequestBody: ReleasePatientRequestBody, onResponse: OnResponseCallback<GeneralResponse>,
+        onFailed: OnFailedCallback, onError: OnErrorCallback
+    ) {
+        request(atalefService.releasePatient(releasePatientRequestBody), onResponse, onFailed, onError)
     }
 
     private fun <T: Any>request(call: Call<T>, onResponse: OnResponseCallback<T>, onFailed: OnFailedCallback, onError: OnErrorCallback) {

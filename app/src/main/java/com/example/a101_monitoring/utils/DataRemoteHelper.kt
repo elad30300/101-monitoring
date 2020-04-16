@@ -1,11 +1,9 @@
 package com.example.a101_monitoring.utils
 
-import com.example.a101_monitoring.data.model.Department
-import com.example.a101_monitoring.data.model.DepartmentWithRooms
-import com.example.a101_monitoring.data.model.Patient
-import com.example.a101_monitoring.data.model.Room
+import com.example.a101_monitoring.data.model.*
 import com.example.a101_monitoring.remote.model.DepartmentBody
 import com.example.a101_monitoring.remote.model.PatientBody
+import com.example.a101_monitoring.remote.model.ReleaseReasonBody
 
 object DataRemoteHelper {
 
@@ -23,5 +21,9 @@ object DataRemoteHelper {
     fun fromPatientBodyToPatient(patientBody: PatientBody) = patientBody.run {
         Patient(identityNumber, id, deptId, room, bed, haitiId, registeredDoctor, isCitizen, isOxygen, isActive)
     }
+
+    fun fromRemoteToDataReleaseReason(releaseReasonBody: ReleaseReasonBody) = ReleaseReason(releaseReasonBody.id, releaseReasonBody.description)
+
+    fun fromRemoteToDataReleaseReasonList(releaseReasonBodies: List<ReleaseReasonBody>) = releaseReasonBodies.map { fromRemoteToDataReleaseReason(it) }
 
 }

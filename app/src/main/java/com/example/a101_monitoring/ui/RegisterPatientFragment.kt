@@ -113,7 +113,9 @@ class RegisterPatientFragment : Fragment() {
         bed_spinner.setAdapter(ArrayAdapter(context, R.layout.material_dropdown_menu_popup_item, roomsNames).apply {
             setDropDownViewResource(R.layout.material_dropdown_menu_popup_item)
         })
-        bed_spinner.setText(bed_spinner.adapter.getItem(0).toString(), false)
+        if (bed_spinner.adapter.count > 0) {
+            bed_spinner.setText(bed_spinner.adapter.getItem(0).toString(), false)
+        }
     }
 
     override fun onAttach(context: Context) {

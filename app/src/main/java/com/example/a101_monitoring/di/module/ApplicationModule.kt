@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.example.a101_monitoring.data.database.ApplicationDatabase
 import dagger.Module
 import dagger.Provides
+import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import javax.inject.Singleton
 
@@ -17,7 +18,7 @@ class ApplicationModule(val context: Application) {
 
     @Singleton
     @Provides
-    fun provideExecutor() = Executors.newSingleThreadExecutor()
+    fun provideExecutor(): Executor = Executors.newSingleThreadExecutor()
 
     @Singleton
     @Provides

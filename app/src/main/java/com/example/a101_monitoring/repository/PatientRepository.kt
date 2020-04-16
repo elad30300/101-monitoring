@@ -13,10 +13,13 @@ import com.example.a101_monitoring.remote.adapter.OnResponseCallback
 import com.example.a101_monitoring.remote.adapter.OnFailedCallback
 import com.example.a101_monitoring.remote.model.DepartmentBody
 import com.example.a101_monitoring.remote.model.PatientBody
+import com.example.a101_monitoring.remote.model.ReleasePatientRequestBody
 import com.example.a101_monitoring.utils.DataRemoteHelper
 import com.example.a101_monitoring.utils.DefaultCallbacksHelper
+import com.example.a101_monitoring.utils.ExceptionsHelper
 import java.lang.Exception
 import java.util.concurrent.Executor
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -203,6 +206,31 @@ class PatientRepository @Inject constructor(
                 Log.e(TAG, "Set sensor is connected to ${isConnected} with address $sensorAddress in dao failed, stacktrace:")
                 ex.printStackTrace()
 //                registerPatientState.postValue(false)
+            }
+        }
+    }
+
+    fun releasePatient(patientId: PatientIdentityFieldType, releaseReason: ReleaseReason) {
+        executor.execute {
+            val patient = patientDao.getPatient(patientId)
+            atalefRemoteAdapter.releasePatient(
+                ReleasePatientRequestBody(patient.id, patient.deptId, releaseReason.id),
+                {
+                    Log.i(TAG, "patient $patientId was successfully released from remote")
+                    onPatientReleased(patient)
+                }, {
+                    DefaultCallbacksHelper.onErrorDefault(TAG, "failure in release patient $patientId from remote", it)
+                }, {
+                    DefaultCallbacksHelper.onErrorDefault(TAG, "error in release patient $patientId from remote", it)
+                }
+            )
+        }
+    }
+
+    private fun onPatientReleased(patient: Patient) {
+        executor.execute {
+            ExceptionsHelper.tryBlock(TAG, "delete patient ${patient.getIdentityField()} from database") {
+                patientDao.deletePatients(patient)
             }
         }
     }

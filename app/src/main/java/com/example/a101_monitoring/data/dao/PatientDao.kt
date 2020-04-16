@@ -12,6 +12,9 @@ interface PatientDao {
     @Query("SELECT * FROM patients")
     fun getAll(): LiveData<List<Patient>>
 
+    @Query("SELECT * FROM patients WHERE ${Patient.IDENTITY_FIELD_IN_DB} = :patientId")
+    fun getPatient(patientId: PatientIdentityFieldType): Patient
+
     @Query("SELECT ${Patient.IDENTITY_FIELD_IN_DB} FROM patients WHERE address = :address")
     fun getPatientIdBySensorAddress(address: String): PatientIdentityFieldType
 
