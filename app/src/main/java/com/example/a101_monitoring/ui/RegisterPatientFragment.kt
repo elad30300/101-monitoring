@@ -75,7 +75,9 @@ class RegisterPatientFragment : Fragment() {
         department_spinner.setAdapter(ArrayAdapter(context, R.layout.material_dropdown_menu_popup_item, departmentNames).apply {
             setDropDownViewResource(R.layout.material_dropdown_menu_popup_item)
         })
-        department_spinner.setText(department_spinner.adapter.getItem(0).toString(), false)
+        if (department_spinner.adapter.count > 0) {
+            department_spinner.setText(department_spinner.adapter.getItem(0).toString(), false)
+        }
     }
 
     private fun onSetDepartment(department: DepartmentWithRooms) {
@@ -83,7 +85,9 @@ class RegisterPatientFragment : Fragment() {
             room_spinner.setAdapter(ArrayAdapter(context, R.layout.material_dropdown_menu_popup_item, this).apply {
                 setDropDownViewResource(R.layout.material_dropdown_menu_popup_item)
             })
-            room_spinner.setText(room_spinner.adapter.getItem(0).toString(), false)
+            if (room_spinner.adapter.count > 0) {
+                room_spinner.setText(room_spinner.adapter.getItem(0).toString(), false)
+            }
         }
     }
 
