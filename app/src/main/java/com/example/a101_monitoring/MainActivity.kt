@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
 
     override fun onListFragmentInteraction(item: Patient?) {
         item?.apply {
-            val action = PatientsListFragmentDirections.actionPatientFragmentToPatientManualMeasurmentsFragment(id)
+            val action = PatientsListFragmentDirections.actionPatientFragmentToPatientManualMeasurmentsFragment(getIdentityField())
             nav_host_fragment.findNavController().navigate(action) // TODO check if this is correct implementation
         }
     }

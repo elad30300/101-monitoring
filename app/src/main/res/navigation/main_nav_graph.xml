@@ -37,7 +37,7 @@
         tools:layout="@layout/patient_manual_measurments_fragment" >
         <argument
             android:name="patientId"
-            app:argType="integer" />
+            app:argType="string" />
     </fragment>
     <fragment
         android:id="@+id/sensorChooseFragment"
@@ -46,6 +46,6 @@
         tools:layout="@layout/sensor_choose_fragment" >
         <argument
             android:name="patientId"
-            app:argType="integer" />
+            app:argType="string" />
     </fragment>
 </navigation>

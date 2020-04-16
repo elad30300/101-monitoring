@@ -3,6 +3,7 @@ package com.example.a101_monitoring.repository
 import android.util.Log
 import com.example.a101_monitoring.data.dao.MeasurementsDao
 import com.example.a101_monitoring.data.model.HeartRate
+import com.example.a101_monitoring.data.model.PatientIdentityFieldType
 import com.example.a101_monitoring.data.model.RespiratoryRate
 import com.example.a101_monitoring.data.model.Saturation
 import com.example.a101_monitoring.utils.DefaultCallbacksHelper
@@ -25,17 +26,17 @@ class MeasurementsRepository @Inject constructor(
 
     fun getAllRespiratoryRates() = measurementsDao.getAllRespiratoryRates()
 
-    fun getAllHeartRatesForPatient(patientId: Int) = measurementsDao.getAllHeartRatesForPatient(patientId)
+    fun getAllHeartRatesForPatient(patientId: PatientIdentityFieldType) = measurementsDao.getAllHeartRatesForPatient(patientId)
 
-    fun getAllSaturationsForPatient(patientId: Int) = measurementsDao.getAllSaturationsForPatient(patientId)
+    fun getAllSaturationsForPatient(patientId: PatientIdentityFieldType) = measurementsDao.getAllSaturationsForPatient(patientId)
 
-    fun getAllRespiratoryRatesForPatient(patientId: Int) = measurementsDao.getAllRespiratoryRatesForPatient(patientId)
+    fun getAllRespiratoryRatesForPatient(patientId: PatientIdentityFieldType) = measurementsDao.getAllRespiratoryRatesForPatient(patientId)
 
-    fun getLastHeartRateForPatient(patientId: Int) = measurementsDao.getLastHeartRateForPatient(patientId)
+    fun getLastHeartRateForPatient(patientId: PatientIdentityFieldType) = measurementsDao.getLastHeartRateForPatient(patientId)
 
-    fun getLastSaturationForPatient(patientId: Int) = measurementsDao.getLastSaturationForPatient(patientId)
+    fun getLastSaturationForPatient(patientId: PatientIdentityFieldType) = measurementsDao.getLastSaturationForPatient(patientId)
 
-    fun getLastRespiratoryRateForPatient(patientId: Int) = measurementsDao.getLastRespiratoryRateForPatient(patientId)
+    fun getLastRespiratoryRateForPatient(patientId: PatientIdentityFieldType) = measurementsDao.getLastRespiratoryRateForPatient(patientId)
 
     fun insertMeasurements(heartRate: HeartRate?, saturation: Saturation?, respiratoryRate: RespiratoryRate?) {
         heartRate?.apply {

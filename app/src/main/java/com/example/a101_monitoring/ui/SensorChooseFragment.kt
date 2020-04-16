@@ -1,7 +1,6 @@
 package com.example.a101_monitoring.ui
 
 import android.content.Context
-import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -12,6 +11,7 @@ import androidx.navigation.fragment.navArgs
 import com.example.a101_monitoring.MyApplication
 
 import com.example.a101_monitoring.R
+import com.example.a101_monitoring.data.model.PatientIdentityFieldType
 import com.example.a101_monitoring.viewmodel.SensorChooseViewModel
 import kotlinx.android.synthetic.main.sensor_choose_fragment.*
 import javax.inject.Inject
@@ -54,13 +54,13 @@ class SensorChooseFragment : Fragment() {
         }
     }
 
-    private fun observePatientSensorAddress(patientId: Int) {
+    private fun observePatientSensorAddress(patientId: PatientIdentityFieldType) {
         viewModel.getSensor(patientId).observe(viewLifecycleOwner, Observer {
             sensor_address.setText(it ?: "")
         })
     }
 
-    private fun setSaveAddressButtonOnClickListener(patientId: Int) {
+    private fun setSaveAddressButtonOnClickListener(patientId: PatientIdentityFieldType) {
         sensor_address_save_button.setOnClickListener {
             viewModel.setSensor(patientId, sensor_address.text.toString())
         }
