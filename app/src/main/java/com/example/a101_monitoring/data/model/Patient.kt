@@ -20,7 +20,7 @@ data class Patient(
     val isCitizen: Boolean,
     val isOxygen: Int,
     val isActive: Boolean,
-    @Embedded var sensor: Sensor? = null
+    @Embedded var sensor: Sensor = Sensor("")
 ) {
     fun getIdentityField() = identityId
 

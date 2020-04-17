@@ -167,7 +167,7 @@ class PatientRepository @Inject constructor(
 
     private fun onPatientRegisteredSuccessfullyToRemote(patientBody: PatientBody, sensorAddress: String = "") {
         val patient = DataRemoteHelper.fromPatientBodyToPatient(patientBody).apply {
-            sensor = if (sensorAddress == "") Sensor(sensorAddress) else null
+            sensor = Sensor(sensorAddress)
         }
         insertPatient(patient)
     }
@@ -178,7 +178,7 @@ class PatientRepository @Inject constructor(
                 {
                     onSignInResponse(it)
                 }, {
-                    DefaultCallbacksHelper.onErrorDefault(TAG, "Failure: sign in request for patient ${patientId} to remote failed", it)
+                    DefaultCallbacksHelper.onErrorDefault(TAG, "Failure: sign in request for patient ${patientId} to remote failed - patient not exist", it)
                 }, {
                     DefaultCallbacksHelper.onErrorDefault(TAG, "Error: sign in request for patient ${patientId} to remote failed", it)
                 }
@@ -187,10 +187,8 @@ class PatientRepository @Inject constructor(
     }
 
     private fun onSignInResponse(patientBody: PatientBody) {
-        TODO("check what to do with this response!!")
-//        val patientFromRemote = DataRemoteHelper.fromPatientBodyToPatient(patientBody)
-//        val patientFromDatabase = patientDao.getPatient(patientBody.getPatientEntityMatchingIdentityField())
-//        if (patientFromDatabase.equals(patientFromRemote))
+        val patientFromRemote = DataRemoteHelper.fromPatientBodyToPatient(patientBody)
+        insertPatient(patientFromRemote)
     }
 
     private fun insertPatient(patient: Patient) {
