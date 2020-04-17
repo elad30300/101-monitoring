@@ -31,5 +31,7 @@
     <string name="release_dialog_negative_button_text">בטל</string>
     <string name="no_release_reason_alert_message">לא הוזנה סיבת שחרור</string>
     <string name="wrong_release_password_message">סיסמה שגויה</string>
+    <string name="sign_in_fragment_title">התחברות</string>
+    <string name="sign_in_button_text">התחבר</string>
 <!--    <string name="register_patient_fail_message">רישום מטופל נכשל</string>-->
 </resources>

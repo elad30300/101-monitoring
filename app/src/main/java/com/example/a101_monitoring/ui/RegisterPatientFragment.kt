@@ -13,6 +13,7 @@ import android.widget.SpinnerAdapter
 import androidx.core.widget.doAfterTextChanged
 import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Observer
+import androidx.navigation.findNavController
 import com.example.a101_monitoring.MyApplication
 import com.example.a101_monitoring.R
 import com.example.a101_monitoring.data.model.Department
@@ -50,9 +51,18 @@ class RegisterPatientFragment : Fragment() {
             onRegisterClicked(it)
         }
 
+        login_button.setOnClickListener {
+            navigateToSignInScreen()
+        }
+
         initializeDepartments()
 
         initializeBeds()
+    }
+
+    private fun navigateToSignInScreen() {
+        val action = RegisterPatientFragmentDirections.actionRegisterPatientFragmentToSignInPatientFragment()
+        login_button.findNavController().navigate(action)
     }
 
     private fun initializeDepartments() {

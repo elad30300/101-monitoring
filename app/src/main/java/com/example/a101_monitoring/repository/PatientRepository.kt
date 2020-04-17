@@ -13,6 +13,7 @@ import com.example.a101_monitoring.remote.adapter.OnResponseCallback
 import com.example.a101_monitoring.remote.adapter.OnFailedCallback
 import com.example.a101_monitoring.remote.model.DepartmentBody
 import com.example.a101_monitoring.remote.model.PatientBody
+import com.example.a101_monitoring.remote.model.PatientSignInBody
 import com.example.a101_monitoring.remote.model.ReleasePatientRequestBody
 import com.example.a101_monitoring.utils.DataRemoteHelper
 import com.example.a101_monitoring.utils.DefaultCallbacksHelper
@@ -166,9 +167,28 @@ class PatientRepository @Inject constructor(
 
     private fun onPatientRegisteredSuccessfullyToRemote(patientBody: PatientBody, sensorAddress: String = "") {
         val patient = DataRemoteHelper.fromPatientBodyToPatient(patientBody).apply {
-            sensor = if (sensorAddress == "") Sensor(sensorAddress) else null
+            sensor = Sensor(sensorAddress)
         }
         insertPatient(patient)
+    }
+
+    fun signIn(patientId: PatientIdentityFieldType) {
+        executor.execute {
+            atalefRemoteAdapter.signIn(PatientSignInBody(patientId),
+                {
+                    onSignInResponse(it)
+                }, {
+                    DefaultCallbacksHelper.onErrorDefault(TAG, "Failure: sign in request for patient ${patientId} to remote failed - patient not exist", it)
+                }, {
+                    DefaultCallbacksHelper.onErrorDefault(TAG, "Error: sign in request for patient ${patientId} to remote failed", it)
+                }
+            )
+        }
+    }
+
+    private fun onSignInResponse(patientBody: PatientBody) {
+        val patientFromRemote = DataRemoteHelper.fromPatientBodyToPatient(patientBody)
+        insertPatient(patientFromRemote)
     }
 
     private fun insertPatient(patient: Patient) {

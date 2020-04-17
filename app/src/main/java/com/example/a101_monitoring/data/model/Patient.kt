@@ -20,9 +20,26 @@ data class Patient(
     val isCitizen: Boolean,
     val isOxygen: Int,
     val isActive: Boolean,
-    @Embedded var sensor: Sensor? = null
+    @Embedded var sensor: Sensor = Sensor("")
 ) {
     fun getIdentityField() = identityId
+
+    override fun equals(other: Any?): Boolean {
+        if (other == null || !(other!! is Patient)) {
+            return false
+        }
+        val otherPatient = other as Patient
+        return (
+                id == otherPatient.id
+                        && deptId == otherPatient.deptId
+                        && room == otherPatient.room
+                        && bed == otherPatient.bed
+                        && haitiId == otherPatient.haitiId
+                        && registeredDoctor == otherPatient.registeredDoctor
+//                        && isCitizen == otherPatient.isCitizen
+//                        && id == otherPatient.id
+                )
+    }
 
     companion object {
         const val IDENTITY_FIELD_IN_DB = "identityId"

@@ -21,6 +21,10 @@ class RetrofitAtalefRemoteAdapter(
         request(atalefService.register(patient), onResponse, onFailed, onError)
     }
 
+    override fun signIn(patient: PatientSignInBody, onResponse: OnResponseCallback<PatientBody>, onFailed: OnFailedCallback, onError: OnErrorCallback) {
+        request(atalefService.signIn(patient), onResponse, onFailed, onError)
+    }
+
     override fun getDepartments(onResponse: OnResponseCallback<List<DepartmentBody>>, onFailed: OnFailedCallback,
                                 onError: OnErrorCallback) {
         request(atalefService.getDepartments(), onResponse, onFailed, onError)

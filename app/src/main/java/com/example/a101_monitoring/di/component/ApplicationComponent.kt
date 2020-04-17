@@ -33,6 +33,8 @@ interface ApplicationComponent {
 
     fun releasePatientComponent(): ReleasePatientComponent.Factory
 
+    fun signInComponent(): SignInComponent.Factory
+
 
     fun inject(noninHandler: NoninHandler)
 

@@ -11,6 +11,8 @@ interface AtalefRemoteAdapter {
 
     fun register(patient: PatientBody, onResponse: OnResponseCallback<PatientBody>, onFailed: OnFailedCallback, onError: OnErrorCallback)
 
+    fun signIn(patient: PatientSignInBody, onResponse: OnResponseCallback<PatientBody>, onFailed: OnFailedCallback, onError: OnErrorCallback)
+
     fun getDepartments(onResponse: OnResponseCallback<List<DepartmentBody>>, onFailed: OnFailedCallback, onError: OnErrorCallback)
 
     fun getAvailableBeds(room: String, departmentId: Int, onResponse: OnResponseCallback<List<String>>, onFailed: OnFailedCallback, onError: OnErrorCallback)
