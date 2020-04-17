@@ -10,6 +10,9 @@ interface AtalefService {
     @POST("patients/register")
     fun register(@Body body: PatientBody): Call<PatientBody>
 
+    @POST("patients/signIn")
+    fun signIn(@Body patientId: PatientSignInBody): Call<PatientBody>
+
     @GET("departments")
     fun getDepartments(): Call<List<DepartmentBody>>
 

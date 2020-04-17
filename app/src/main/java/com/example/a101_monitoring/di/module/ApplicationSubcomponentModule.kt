@@ -10,7 +10,8 @@ import dagger.Module
     PatientItemComponent::class,
     SensorChooseComponent::class,
     MainActivityComponent::class,
-    ReleasePatientComponent::class
+    ReleasePatientComponent::class,
+    SignInComponent::class
 ])
 class ApplicationSubcomponentModule {
 

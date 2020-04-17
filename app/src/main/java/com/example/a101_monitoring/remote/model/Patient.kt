@@ -1,5 +1,6 @@
 package com.example.a101_monitoring.remote.model
 
+import com.example.a101_monitoring.data.model.PatientIdentityFieldType
 import com.google.gson.annotations.SerializedName
 
 data class PatientBody (
@@ -13,8 +14,10 @@ data class PatientBody (
     @SerializedName("isCitizen") val isCitizen: Boolean,
     @SerializedName("isOxygen") val isOxygen: Int,
     @SerializedName("isActive") val isActive: Boolean
-)
+) {
+    fun getPatientEntityMatchingIdentityField() = identityNumber
+}
 
 data class PatientIdBody(@SerializedName("patientId") val patientId: Int)
 
-data class PatientSignInBody(@SerializedName("patientIdentityNumber") val patientIdentityNumber: String)
+data class PatientSignInBody(@SerializedName("patientIdentityNumber") val patientIdentityNumber: PatientIdentityFieldType)

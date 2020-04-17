@@ -32,7 +32,11 @@
         android:id="@+id/registerPatientFragment"
         android:name="com.example.a101_monitoring.ui.RegisterPatientFragment"
         android:label="register_patient_fragment"
-        tools:layout="@layout/register_patient_fragment" />
+        tools:layout="@layout/register_patient_fragment" >
+        <action
+            android:id="@+id/action_registerPatientFragment_to_signInPatientFragment"
+            app:destination="@id/signInPatientFragment" />
+    </fragment>
     <fragment
         android:id="@+id/patientManualMeasurmentsFragment"
         android:name="com.example.a101_monitoring.ui.PatientManualMeasurmentsFragment"
@@ -60,4 +64,9 @@
             android:name="patientId"
             app:argType="string" />
     </fragment>
+    <fragment
+        android:id="@+id/signInPatientFragment"
+        android:name="com.example.a101_monitoring.ui.SignInPatientFragment"
+        android:label="sign_in_patient_fragment"
+        tools:layout="@layout/sign_in_patient_fragment" />
 </navigation>
