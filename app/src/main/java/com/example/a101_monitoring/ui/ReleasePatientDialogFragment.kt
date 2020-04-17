@@ -1,5 +1,6 @@
 package com.example.a101_monitoring.ui
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.app.Application
 import android.app.Dialog
@@ -21,6 +22,7 @@ import com.example.a101_monitoring.MyApplication
 import com.example.a101_monitoring.R
 import com.example.a101_monitoring.data.model.PatientIdentityFieldType
 import com.example.a101_monitoring.viewmodel.ReleasePatientDialogViewModel
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.release_patient_dialog_fragment.*
 import kotlinx.android.synthetic.main.release_patient_dialog_fragment.view.*
 import javax.inject.Inject
@@ -31,8 +33,8 @@ class ReleasePatientDialogFragment(
 
     private lateinit var mReleaseReasonsSpinner: AutoCompleteTextView
     private lateinit var mPasswordEditText: EditText
+    private var mActivity: Activity? = null
 
-    @Inject lateinit var mApplicationContext: Application
     @Inject lateinit var viewModel: ReleasePatientDialogViewModel
 
     override fun onAttach(context: Context) {
@@ -41,16 +43,11 @@ class ReleasePatientDialogFragment(
         initializeDependencies(context)
     }
 
-//    override fun onActivityCreated(savedInstanceState: Bundle?) {
-//        super.onActivityCreated(savedInstanceState)
-//
-//
-//    }
-
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         super.onCreateDialog(savedInstanceState)
         return activity?.let {
-            val builder = AlertDialog.Builder(it)
+            mActivity = activity
+            val builder = MaterialAlertDialogBuilder(it)
             val inflater = requireActivity().layoutInflater;
             builder.setView(inflater.inflate(R.layout.release_patient_dialog_fragment, null).also {
                 initializeChildViews(it)
@@ -84,7 +81,8 @@ class ReleasePatientDialogFragment(
 
         viewModel.releaseReasons.observe(activity!!, Observer {
             val releaseReasonsDescriptions = it.map { it.description }
-            mReleaseReasonsSpinner.setAdapter(ArrayAdapter<String>(mApplicationContext, R.layout.material_dropdown_menu_popup_item, releaseReasonsDescriptions).also {
+
+            mReleaseReasonsSpinner.setAdapter(ArrayAdapter<String>(mActivity!!, R.layout.material_dropdown_menu_popup_item, releaseReasonsDescriptions).also {
                 it.setDropDownViewResource(R.layout.material_dropdown_menu_popup_item)
             })
             if (mReleaseReasonsSpinner.adapter.count > 0) {
