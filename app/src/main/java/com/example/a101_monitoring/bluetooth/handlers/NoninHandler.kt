@@ -12,6 +12,7 @@ import com.example.a101_monitoring.utils.DefaultCallbacksHelper
 import com.example.a101_monitoring.utils.TimeHelper
 import com.polidea.rxandroidble2.RxBleConnection
 import com.polidea.rxandroidble2.RxBleDevice
+import io.reactivex.disposables.Disposable
 import java.lang.Exception
 import java.util.*
 import javax.inject.Inject
@@ -24,6 +25,7 @@ class NoninHandler(
     device: RxBleDevice
 ) : BleDeviceHandler(device) {
 
+    private var oximeteryCharacteristicNotificationsDisposable: Disposable? = null
     private var lastRespiratoryRate = NoninGattAttributes.OximeteryService.Characteritics.RESPIRATORY_RATE_MISSING_VALUE
 
     @Inject lateinit var patientRepository: PatientRepository
@@ -53,8 +55,8 @@ class NoninHandler(
 
     private fun setupNotificationsForCharacteristic(uuid: UUID,
                                                     notificationCallback: CharacteristicNotificationCallback,
-                                                    errorCallback: ErrorCallback) {
-        getConnection()?.setupNotification(uuid)!!
+                                                    errorCallback: ErrorCallback): Disposable {
+        return getConnection()?.setupNotification(uuid)!!
             .doOnNext {
                 it
             }
@@ -70,13 +72,17 @@ class NoninHandler(
 
     private fun setupOximeteryMeasurementsCharacteristicNotifications() {
         val uuid = UUID.fromString(NoninGattAttributes.OximeteryService.Characteritics.NONIN_OXIMTERY_MEASURMENT)
-        setupNotificationsForCharacteristic(
+        oximeteryCharacteristicNotificationsDisposable = setupNotificationsForCharacteristic(
             uuid, {
                 handleOximteryCharacteristicNotification(it)
             }, {
                 DefaultCallbacksHelper.onErrorDefault(TAG, "Setup nonin oximetry characteristic notifications failed", it)
             }
         )
+    }
+
+    private fun disableOximeteryMeasurementsCharacteristicNotifications() {
+        oximeteryCharacteristicNotificationsDisposable?.dispose()
     }
 
     private fun setupRespirationCharacteristicNotifications() {
@@ -105,16 +111,27 @@ class NoninHandler(
 
     private fun onOximeteryMeasurements(heartRateValue: Int, saturationValue: Int) {
         try {
-            val time = TimeHelper.instance.getTimeInMiliSeconds()
+            val time = TimeHelper.instance.getTimeInMilliSeconds()
             val patientId = patientRepository.getPatientIdBySensorAddress(getDevice().macAddress)
             measurementsRepository.insertMeasurements(
                 if (isHeartRateValueMissing(heartRateValue)) null else HeartRate(heartRateValue, time, patientId),
                 if (isSaturationValueMissing(saturationValue)) null else Saturation(saturationValue, time, patientId),
                 if (isRespiratoryRateValueMissing(lastRespiratoryRate)) null else RespiratoryRate(lastRespiratoryRate, time, patientId)
             )
+            pauseMeasurements(SAMPLE_RATE_SEC.toLong())
         } catch (exception: Exception) {
             DefaultCallbacksHelper.onErrorDefault(TAG, "Couldn't handle measurements after parsing", exception)
         }
+    }
+
+    private fun pauseMeasurements(duration: Long) {
+        TimeHelper.instance.executeWithConstantDelaySequentiallyInBackground(duration,
+            {
+                disableOximeteryMeasurementsCharacteristicNotifications()
+            }, {
+                setupOximeteryMeasurementsCharacteristicNotifications()
+            }
+        )
     }
 
     private fun isHeartRateValueMissing(value: Int) = isMeasurmentMissing(value, NoninGattAttributes.OximeteryService.Characteritics.HEART_RATE_MISSING_VALUE)
@@ -139,6 +156,7 @@ class NoninHandler(
 
     companion object {
         const val TAG = "NoninHandler"
+        const val SAMPLE_RATE_SEC = 60
     }
 
 }
