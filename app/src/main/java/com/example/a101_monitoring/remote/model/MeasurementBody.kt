@@ -9,4 +9,11 @@ data class MeasurementBody (
     @SerializedName("heartbeat") private val heartBeat: String,
     @SerializedName("saturation") private val saturation: String,
     @SerializedName("breathing") private val breathing: String
-)
+) {
+    companion object {
+        const val DEFAULT_MISSING_VALUE = 0
+        const val HEART_BEAT_MISSING_VALUE = DEFAULT_MISSING_VALUE
+        const val SATURATION_MISSING_VALUE = DEFAULT_MISSING_VALUE
+        const val BREATHING_MISSING_VALUE = DEFAULT_MISSING_VALUE
+    }
+}

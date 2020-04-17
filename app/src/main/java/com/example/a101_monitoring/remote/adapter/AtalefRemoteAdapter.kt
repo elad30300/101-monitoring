@@ -19,4 +19,6 @@ interface AtalefRemoteAdapter {
 
     fun releasePatient(releasePatientRequestBody: ReleasePatientRequestBody, onResponse: OnResponseCallback<GeneralResponse>, onFailed: OnFailedCallback, onError: OnErrorCallback)
 
+    fun sendMeasurement(measurementBody: MeasurementBody, onResponse: OnResponseCallback<GeneralResponse>, onFailed: OnFailedCallback, onError: OnErrorCallback)
+
 }

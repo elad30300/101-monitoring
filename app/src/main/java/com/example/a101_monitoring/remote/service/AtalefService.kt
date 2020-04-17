@@ -22,4 +22,7 @@ interface AtalefService {
     @PUT("patients/release")
     fun releasePatient(@Body releasePatientRequestBody: ReleasePatientRequestBody): Call<GeneralResponse>
 
+    @POST("measurements/auto")
+    fun postMeasurements(@Body measurementBody: MeasurementBody): Call<GeneralResponse>
+
 }

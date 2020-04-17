@@ -2,10 +2,14 @@ package com.example.a101_monitoring.repository
 
 import android.util.Log
 import com.example.a101_monitoring.data.dao.MeasurementsDao
+import com.example.a101_monitoring.data.dao.PatientDao
 import com.example.a101_monitoring.data.model.HeartRate
 import com.example.a101_monitoring.data.model.PatientIdentityFieldType
 import com.example.a101_monitoring.data.model.RespiratoryRate
 import com.example.a101_monitoring.data.model.Saturation
+import com.example.a101_monitoring.remote.adapter.AtalefRemoteAdapter
+import com.example.a101_monitoring.remote.model.MeasurementBody
+import com.example.a101_monitoring.utils.DataRemoteHelper
 import com.example.a101_monitoring.utils.DefaultCallbacksHelper
 import java.lang.Exception
 import java.util.concurrent.Executor
@@ -17,6 +21,8 @@ import javax.inject.Singleton
 @Singleton
 class MeasurementsRepository @Inject constructor(
     private val measurementsDao: MeasurementsDao,
+    private val patientDao: PatientDao,
+    private val atalefRemoteAdapter: AtalefRemoteAdapter,
     private val executor: Executor
 ) {
 
@@ -48,6 +54,36 @@ class MeasurementsRepository @Inject constructor(
         respiratoryRate?.apply {
             insertRespiratoryRates(this)
         }
+        sendMeasurements(heartRate, saturation, respiratoryRate)
+    }
+
+    private fun sendMeasurements(heartRate: HeartRate?, saturation: Saturation?, respiratoryRate: RespiratoryRate?) {
+        if (heartRate == null && saturation == null && respiratoryRate == null) {
+            Log.e(TAG, "try to send to remote all missing measurements")
+            return
+        }
+        val patientId = heartRate?.patientId ?: saturation?.patientId ?: respiratoryRate?.patientId
+        val patient = patientDao.getPatient(patientId!!)
+        val measurementBody = DataRemoteHelper.fromDataToRemoteMeasurements(heartRate, saturation, respiratoryRate, patient)
+        sendMeasurementsToRemote(measurementBody)
+    }
+
+    private fun sendMeasurementsToRemote(measurements: MeasurementBody) {
+        executor.execute {
+            atalefRemoteAdapter.sendMeasurement(measurements,
+                {
+                    onMeasurementSentToRemote(measurements)
+                }, {
+                    DefaultCallbacksHelper.onErrorDefault(TAG, "failure: send measurements to remote $measurements")
+                }, {
+                    DefaultCallbacksHelper.onErrorDefault(TAG, "error: send measurements to remote $measurements")
+                }
+            )
+        }
+    }
+
+    private fun onMeasurementSentToRemote(sentMeasurements: MeasurementBody) {
+        DefaultCallbacksHelper.onSuccessDefault(TAG, "sent measurements $sentMeasurements successfully to remote")
     }
 
     fun insertHeartRates(heartRate: HeartRate) {
@@ -144,7 +180,7 @@ class MeasurementsRepository @Inject constructor(
     }
 
     companion object {
-        val TAG = "${this.javaClass::class.java.name}"
+        val TAG = "MeasurementsRepository"
     }
 
 }
