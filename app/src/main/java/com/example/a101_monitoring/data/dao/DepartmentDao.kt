@@ -8,9 +8,11 @@ import com.example.a101_monitoring.data.model.DepartmentWithRooms
 @Dao
 interface DepartmentDao {
 
+    @Transaction
     @Query("SELECT * FROM departments")
     fun getAll(): LiveData<List<DepartmentWithRooms>>
 
+    @Transaction
     @Query("SELECT * FROM departments WHERE id = :id")
     fun get(id: Int): DepartmentWithRooms
 
