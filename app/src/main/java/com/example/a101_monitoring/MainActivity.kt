@@ -1,22 +1,31 @@
 package com.example.a101_monitoring
 
 import android.Manifest
+import android.app.AlertDialog
+import android.app.Application
 import android.bluetooth.BluetoothAdapter
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkRequest
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.example.a101_monitoring.bluetooth.BluetoothController
 import com.example.a101_monitoring.data.model.Patient
 import com.example.a101_monitoring.ui.PatientsListFragment
 import com.example.a101_monitoring.ui.PatientsListFragmentDirections
+import com.example.a101_monitoring.utils.TimeHelper
 import com.example.a101_monitoring.viewmodel.SensorViewModel
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.activity_main.*
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInteractionListener {
+
+    private var networkConnectionDialog: AlertDialog? = null
 
 //    @Inject lateinit var statesViewModel: StatesViewModel
     @Inject lateinit var sensorViewModel: SensorViewModel
@@ -36,6 +45,14 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
         checkIfBluetoothOn()
 
         initializeBleScanComponents()
+
+        registerNetworkConnectionCallback()
+
+        if (!hasNetworkConnection()) {
+            forceNetworkConnection()
+        } else {
+            TimeHelper.instance.initializeTimer()
+        }
     }
 
     override fun onDestroy() {
@@ -87,6 +104,50 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
             1234)
     }
 
+    private fun registerNetworkConnectionCallback() {
+        val connectivityManager = getSystemService(Application.CONNECTIVITY_SERVICE) as ConnectivityManager
+        connectivityManager.registerNetworkCallback(
+            NetworkRequest.Builder().build(),
+            object : ConnectivityManager.NetworkCallback() {
+                override fun onAvailable(network: Network?) {
+                    super.onAvailable(network)
+                    Log.i(TAG, "Network is available")
+                    networkConnectionDialog?.dismiss()
+                    TimeHelper.instance.initializeTimer()
+                }
+
+                override fun onLost(network: Network?) {
+                    super.onLost(network)
+                    Log.i(TAG, "Network is lost")
+                    Thread.sleep(500)
+                    forceNetworkConnection()
+                }
+            }
+        )
+    }
+
+    private fun forceNetworkConnection() {
+        if (!hasNetworkConnection()) {
+            networkConnectionDialog = AlertDialog.Builder(this)
+                .setTitle("Network error")
+                .setMessage("אין לך אינטרנט, בבקשה להתחבר לוויפי או להפעיל נתונים סלולרים")
+                .setPositiveButton("הגדרות") { _, _ ->
+                    startActivityForResult(Intent(android.provider.Settings.ACTION_SETTINGS), REQUEST_ENABLE_NETWORK)
+                }.setNegativeButton("ביטול", null).setCancelable(false)
+                .show()?.apply {
+                    getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener {
+                        if (hasNetworkConnection()) {
+                            dismiss()
+                        } else {
+                            Toast.makeText(context, "נא להתחבר לאינטרנט!", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
+        }
+    }
+
+    private fun hasNetworkConnection() = (getSystemService(Application.CONNECTIVITY_SERVICE) as ConnectivityManager).activeNetwork != null
+
 //    private fun setStatesObservers() {
 //        statesViewModel.registerPatientState.observe(this, Observer {
 //            if (!it) {
@@ -98,6 +159,8 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
 //    }
 
     companion object {
+        private const val TAG = "MainActivity"
         private const val REQUEST_ENABLE_BT = 1
+        private const val REQUEST_ENABLE_NETWORK = 2
     }
 }
