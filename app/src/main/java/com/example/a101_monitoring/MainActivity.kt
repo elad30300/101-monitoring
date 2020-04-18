@@ -12,12 +12,16 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.example.a101_monitoring.bluetooth.BluetoothController
 import com.example.a101_monitoring.data.model.Patient
+import com.example.a101_monitoring.states.RegisterPatientDoneState
+import com.example.a101_monitoring.states.RegisterPatientFailedState
 import com.example.a101_monitoring.ui.PatientsListFragment
 import com.example.a101_monitoring.ui.PatientsListFragmentDirections
 import com.example.a101_monitoring.utils.TimeHelper
+import com.example.a101_monitoring.viewmodel.MainViewModel
 import com.example.a101_monitoring.viewmodel.SensorViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.activity_main.*
@@ -27,8 +31,7 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
 
     private var networkConnectionDialog: AlertDialog? = null
 
-//    @Inject lateinit var statesViewModel: StatesViewModel
-    @Inject lateinit var sensorViewModel: SensorViewModel
+    @Inject lateinit var mainViewModel: MainViewModel
     @Inject lateinit var bluetoothController: BluetoothController
 
 
@@ -53,6 +56,8 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
         } else {
             TimeHelper.instance.initializeTimer()
         }
+
+        observeStates()
     }
 
     override fun onDestroy() {
@@ -148,15 +153,26 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
 
     private fun hasNetworkConnection() = (getSystemService(Application.CONNECTIVITY_SERVICE) as ConnectivityManager).activeNetwork != null
 
-//    private fun setStatesObservers() {
-//        statesViewModel.registerPatientState.observe(this, Observer {
-//            if (!it) {
-//                runOnUiThread {
-//                    Toast.makeText(this, "רישום מטופל נכשל", Toast.LENGTH_SHORT).show()
-//                }
-//            }
-//        })
-//    }
+    private fun observeStates() {
+        observerRegisterPatientState()
+    }
+
+    private fun observerRegisterPatientState() {
+        mainViewModel.getRegisterPatientState().observe(this, Observer {
+            when(it.javaClass) {
+                RegisterPatientDoneState::class.java -> onPatientRegisteredSuccessfully()
+                RegisterPatientFailedState::class.java -> onPatientRegisterFailed()
+            }
+        })
+    }
+
+    private fun onPatientRegisteredSuccessfully() {
+        Toast.makeText(this, R.string.register_patient_success_message, Toast.LENGTH_LONG).show()
+    }
+
+    private fun onPatientRegisterFailed() {
+        Toast.makeText(this, R.string.register_patient_fail_message, Toast.LENGTH_LONG).show()
+    }
 
     companion object {
         private const val TAG = "MainActivity"

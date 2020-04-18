@@ -15,6 +15,10 @@ import com.example.a101_monitoring.remote.model.DepartmentBody
 import com.example.a101_monitoring.remote.model.PatientBody
 import com.example.a101_monitoring.remote.model.PatientSignInBody
 import com.example.a101_monitoring.remote.model.ReleasePatientRequestBody
+import com.example.a101_monitoring.states.RegisterPatientDoneState
+import com.example.a101_monitoring.states.RegisterPatientFailedState
+import com.example.a101_monitoring.states.RegisterPatientNotWorkingState
+import com.example.a101_monitoring.states.RegisterPatientState
 import com.example.a101_monitoring.utils.DataRemoteHelper
 import com.example.a101_monitoring.utils.DefaultCallbacksHelper
 import com.example.a101_monitoring.utils.ExceptionsHelper
@@ -36,12 +40,12 @@ class PatientRepository @Inject constructor(
 ) {
 
     private val fetchPatientsState = MutableLiveData<Boolean>()
-    private val registerPatientState = MutableLiveData<Boolean>()
+    private val registerPatientState = MutableLiveData<RegisterPatientState>()
 
     private val availableBeds = MutableLiveData<List<String>>()
 
     fun getFetchPatientsState(): LiveData<Boolean> = fetchPatientsState
-    fun getRegisterPatientState(): LiveData<Boolean> = registerPatientState
+    fun getRegisterPatientState(): LiveData<RegisterPatientState> = registerPatientState
 
     fun getPatients() = patientDao.getAll()
 
@@ -196,10 +200,11 @@ class PatientRepository @Inject constructor(
             try {
                 patientDao.insertPatients(patient)
                 Log.d(TAG, "insert patient with id ${patient.id} in dao successfully")
+                registerPatientState.postValue(RegisterPatientDoneState())
             } catch (ex: Exception) {
                 Log.e(TAG, "insert patient with id ${patient.id} in dao failed, stacktrace:")
                 ex.printStackTrace()
-                registerPatientState.postValue(false)
+                registerPatientState.postValue(RegisterPatientFailedState())
             }
         }
     }

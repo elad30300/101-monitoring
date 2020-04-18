@@ -34,4 +34,6 @@ class RegisterPatientViewModel @Inject constructor(
     ) {
         patientRepository.registerPatient(id, deptId, room, bed, haitiId, registeredDoctor, isCitizen, isOxygen, isActive, sensorAddress)
     }
+
+    fun getRegisterPatientState() = patientRepository.getRegisterPatientState()
 }

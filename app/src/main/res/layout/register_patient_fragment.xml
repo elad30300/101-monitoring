@@ -195,4 +195,17 @@
         android:text="@string/login_button_text"
         />
 
+    <include
+        layout="@layout/default_circled_progress_bar"
+        android:id="@+id/register_patient_progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        tools:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="@id/login_button"
+        app:layout_constraintStart_toEndOf="@id/register_button"
+        app:layout_constraintTop_toTopOf="@id/register_button"
+        android:layout_margin="16dp"
+        />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

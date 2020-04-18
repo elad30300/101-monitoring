@@ -13,12 +13,16 @@ import android.widget.SpinnerAdapter
 import androidx.core.widget.doAfterTextChanged
 import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Observer
+import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import com.example.a101_monitoring.MyApplication
 import com.example.a101_monitoring.R
 import com.example.a101_monitoring.data.model.Department
 import com.example.a101_monitoring.data.model.DepartmentWithRooms
 import com.example.a101_monitoring.di.component.RegisterPatientComponent
+import com.example.a101_monitoring.states.RegisterPatientDoneState
+import com.example.a101_monitoring.states.RegisterPatientFailedState
+import com.example.a101_monitoring.states.RegisterPatientWorkingState
 import com.example.a101_monitoring.viewmodel.RegisterPatientViewModel
 import kotlinx.android.synthetic.main.register_patient_fragment.*
 import javax.inject.Inject
@@ -58,6 +62,31 @@ class RegisterPatientFragment : Fragment() {
         initializeDepartments()
 
         initializeBeds()
+
+        observerRegisterPatientState()
+    }
+
+    private fun observerRegisterPatientState() {
+        registerPatientViewModel.getRegisterPatientState().observe(this, Observer {
+            when(it.javaClass) {
+                RegisterPatientDoneState::class.java -> onPatientRegisteredSuccessfully()
+                RegisterPatientWorkingState::class.java -> onPatientRegisterWorking()
+                RegisterPatientFailedState::class.java -> onPatientRegisterFailed()
+            }
+        })
+    }
+
+    private fun onPatientRegisteredSuccessfully() {
+        register_patient_progress_bar.visibility = View.INVISIBLE
+//        view?.findNavController()?.popBackStack()
+    }
+
+    private fun onPatientRegisterWorking() {
+        register_patient_progress_bar.visibility = View.VISIBLE
+    }
+
+    private fun onPatientRegisterFailed() {
+        register_patient_progress_bar.visibility = View.INVISIBLE
     }
 
     private fun navigateToSignInScreen() {
