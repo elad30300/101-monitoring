@@ -17,4 +17,6 @@ class MainViewModel @Inject constructor(
 
     fun getSignInPatientState() = patientRepository.getSignInPatientState()
 
+    fun getSubmitSensorToPatientState() = patientRepository.getSubmitSensorToPatientState()
+
 }

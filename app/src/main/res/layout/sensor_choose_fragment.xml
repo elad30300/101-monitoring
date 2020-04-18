@@ -63,4 +63,17 @@
         android:text="@string/sensor_address_save_button_text"
         />
 
+    <include
+        android:id="@+id/choose_sensor_progress_bar"
+        layout="@layout/default_circled_progress_bar"
+        android:visibility="invisible"
+        tools:visibility="visible"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/sensor_address_save_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

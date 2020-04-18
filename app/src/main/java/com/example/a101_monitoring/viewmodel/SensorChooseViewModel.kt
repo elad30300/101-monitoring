@@ -15,4 +15,6 @@ class SensorChooseViewModel @Inject constructor(
         patientRepository.setSensor(patientId, sensorAddress)
     }
 
+    fun getSubmitSensorToPatientState() = patientRepository.getSubmitSensorToPatientState()
+
 }

@@ -12,6 +12,9 @@ import com.example.a101_monitoring.MyApplication
 
 import com.example.a101_monitoring.R
 import com.example.a101_monitoring.data.model.PatientIdentityFieldType
+import com.example.a101_monitoring.states.SubmitSensorToPatientDoneState
+import com.example.a101_monitoring.states.SubmitSensorToPatientFailedState
+import com.example.a101_monitoring.states.SubmitSensorToPatientWorkingState
 import com.example.a101_monitoring.viewmodel.SensorChooseViewModel
 import kotlinx.android.synthetic.main.sensor_choose_fragment.*
 import javax.inject.Inject
@@ -40,6 +43,8 @@ class SensorChooseFragment : Fragment() {
             observePatientSensorAddress(it)
             setSaveAddressButtonOnClickListener(it)
         }
+
+        observeSubmitSensorToPatientState()
     }
 
     override fun onAttach(context: Context) {
@@ -64,6 +69,28 @@ class SensorChooseFragment : Fragment() {
         sensor_address_save_button.setOnClickListener {
             viewModel.setSensor(patientId, sensor_address.text.toString())
         }
+    }
+
+    private fun observeSubmitSensorToPatientState() {
+        viewModel.getSubmitSensorToPatientState().observe(this, Observer {
+            when(it.javaClass) {
+                SubmitSensorToPatientDoneState::class.java -> onSubmitSensorToPatientSuccessfully()
+                SubmitSensorToPatientFailedState::class.java -> onSubmitSensorToPatientFailed()
+                SubmitSensorToPatientWorkingState::class.java -> onSubmitSensorToPatientWorking()
+            }
+        })
+    }
+
+    private fun onSubmitSensorToPatientSuccessfully() {
+        choose_sensor_progress_bar.visibility = View.INVISIBLE
+    }
+
+    private fun onSubmitSensorToPatientFailed() {
+        choose_sensor_progress_bar.visibility = View.INVISIBLE
+    }
+
+    private fun onSubmitSensorToPatientWorking() {
+        choose_sensor_progress_bar.visibility = View.VISIBLE
     }
 
 }

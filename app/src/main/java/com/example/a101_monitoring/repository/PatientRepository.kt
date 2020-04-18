@@ -38,11 +38,13 @@ class PatientRepository @Inject constructor(
 
     private val registerPatientState = MutableLiveData<RegisterPatientState>()
     private val signInPatientState = MutableLiveData<SignInPatientState>()
+    private val submitSensorToPatientState = MutableLiveData<SubmitSensorToPatientState>()
 
     private val availableBeds = MutableLiveData<List<String>>()
 
     fun getRegisterPatientState(): LiveData<RegisterPatientState> = registerPatientState
     fun getSignInPatientState(): LiveData<SignInPatientState> = signInPatientState
+    fun getSubmitSensorToPatientState(): LiveData<SubmitSensorToPatientState> = submitSensorToPatientState
 
     fun getPatients() = patientDao.getAll()
 
@@ -222,14 +224,16 @@ class PatientRepository @Inject constructor(
     }
 
     fun setSensor(patientId: PatientIdentityFieldType, sensorAddress: String) {
+        submitSensorToPatientState.postValue(SubmitSensorToPatientWorkingState())
         executor.execute {
             try {
                 patientDao.updateSensorToPatient(patientId, sensorAddress)
                 Log.d(TAG, "Set sensor with address $sensorAddress to patient with id $patientId in dao successfully")
+                submitSensorToPatientState.postValue(SubmitSensorToPatientDoneState())
             } catch (ex: Exception) {
                 Log.e(TAG, "Set sensor with address $sensorAddress to patient with id $patientId in dao failed, stacktrace:")
                 ex.printStackTrace()
-//                registerPatientState.postValue(false)
+                submitSensorToPatientState.postValue(SubmitSensorToPatientFailedState())
             }
         }
     }

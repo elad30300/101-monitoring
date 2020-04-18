@@ -37,4 +37,6 @@
     <string name="register_patient_success_message">מטופל נרשם בהצלחה</string>
     <string name="sign_in_patient_fail_message">לא ניתן להתחבר למטופל זה</string>
     <string name="sign_in_patient_success_message">מטופל התחבר בהצלחה</string>
+    <string name="submit_sensor_to_patient_fail_message">חיישן לא נשמר עבור המטופל, אנא נסה שוב.</string>
+    <string name="submit_sensor_to_patient_success_message">חיישן נשמר בהצלחה</string>
 </resources>

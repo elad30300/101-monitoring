@@ -16,10 +16,7 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.example.a101_monitoring.bluetooth.BluetoothController
 import com.example.a101_monitoring.data.model.Patient
-import com.example.a101_monitoring.states.RegisterPatientDoneState
-import com.example.a101_monitoring.states.RegisterPatientFailedState
-import com.example.a101_monitoring.states.SignInPatientDoneState
-import com.example.a101_monitoring.states.SignInPatientFailedState
+import com.example.a101_monitoring.states.*
 import com.example.a101_monitoring.ui.PatientsListFragment
 import com.example.a101_monitoring.ui.PatientsListFragmentDirections
 import com.example.a101_monitoring.utils.TimeHelper
@@ -158,6 +155,7 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
     private fun observeStates() {
         observerRegisterPatientState()
         observeSignInPatientState()
+        observeSubmitSensorToPatientState()
     }
 
     private fun observerRegisterPatientState() {
@@ -192,6 +190,23 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
 
     private fun onPatientSignInFailed() {
         Toast.makeText(this, R.string.sign_in_patient_fail_message, Toast.LENGTH_LONG).show()
+    }
+
+    private fun observeSubmitSensorToPatientState() {
+        mainViewModel.getSubmitSensorToPatientState().observe(this, Observer {
+            when(it.javaClass) {
+                SubmitSensorToPatientDoneState::class.java -> onSubmitSensorToPatientSuccessfully()
+                SubmitSensorToPatientFailedState::class.java -> onSubmitSensorToPatientFailed()
+            }
+        })
+    }
+
+    private fun onSubmitSensorToPatientSuccessfully() {
+        Toast.makeText(this, R.string.submit_sensor_to_patient_success_message, Toast.LENGTH_LONG).show()
+    }
+
+    private fun onSubmitSensorToPatientFailed() {
+        Toast.makeText(this, R.string.submit_sensor_to_patient_fail_message, Toast.LENGTH_LONG).show()
     }
 
     companion object {
