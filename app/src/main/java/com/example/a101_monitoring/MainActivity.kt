@@ -18,6 +18,8 @@ import com.example.a101_monitoring.bluetooth.BluetoothController
 import com.example.a101_monitoring.data.model.Patient
 import com.example.a101_monitoring.states.RegisterPatientDoneState
 import com.example.a101_monitoring.states.RegisterPatientFailedState
+import com.example.a101_monitoring.states.SignInPatientDoneState
+import com.example.a101_monitoring.states.SignInPatientFailedState
 import com.example.a101_monitoring.ui.PatientsListFragment
 import com.example.a101_monitoring.ui.PatientsListFragmentDirections
 import com.example.a101_monitoring.utils.TimeHelper
@@ -155,6 +157,7 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
 
     private fun observeStates() {
         observerRegisterPatientState()
+        observeSignInPatientState()
     }
 
     private fun observerRegisterPatientState() {
@@ -172,6 +175,23 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
 
     private fun onPatientRegisterFailed() {
         Toast.makeText(this, R.string.register_patient_fail_message, Toast.LENGTH_LONG).show()
+    }
+
+    private fun observeSignInPatientState() {
+        mainViewModel.getSignInPatientState().observe(this, Observer {
+            when(it.javaClass) {
+                SignInPatientDoneState::class.java -> onPatientSignedInSuccessfully()
+                SignInPatientFailedState::class.java -> onPatientSignInFailed()
+            }
+        })
+    }
+
+    private fun onPatientSignedInSuccessfully() {
+        Toast.makeText(this, R.string.sign_in_patient_success_message, Toast.LENGTH_LONG).show()
+    }
+
+    private fun onPatientSignInFailed() {
+        Toast.makeText(this, R.string.sign_in_patient_fail_message, Toast.LENGTH_LONG).show()
     }
 
     companion object {

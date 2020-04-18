@@ -35,4 +35,6 @@
     <string name="sign_in_button_text">התחבר</string>
     <string name="register_patient_fail_message">רישום מטופל נכשל</string>
     <string name="register_patient_success_message">מטופל נרשם בהצלחה</string>
+    <string name="sign_in_patient_fail_message">לא ניתן להתחבר למטופל זה</string>
+    <string name="sign_in_patient_success_message">מטופל התחבר בהצלחה</string>
 </resources>

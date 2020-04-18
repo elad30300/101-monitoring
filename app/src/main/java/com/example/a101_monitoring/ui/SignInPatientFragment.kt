@@ -6,9 +6,13 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Observer
 import com.example.a101_monitoring.MyApplication
 
 import com.example.a101_monitoring.R
+import com.example.a101_monitoring.states.SignInPatientDoneState
+import com.example.a101_monitoring.states.SignInPatientFailedState
+import com.example.a101_monitoring.states.SignInPatientWorkingState
 import com.example.a101_monitoring.viewmodel.SignInPatientViewModel
 import kotlinx.android.synthetic.main.sign_in_patient_fragment.*
 import javax.inject.Inject
@@ -35,6 +39,8 @@ class SignInPatientFragment : Fragment() {
                 viewModel.signIn(sign_in_patient_id.text.toString())
             }
         }
+
+        observeSignInPatientState()
     }
 
     override fun onAttach(context: Context) {
@@ -50,6 +56,29 @@ class SignInPatientFragment : Fragment() {
 
     private fun isInputValid(): Boolean {
         return true
+    }
+
+    private fun observeSignInPatientState() {
+        viewModel.getSignInPatientState().observe(this, Observer {
+            when(it.javaClass) {
+                SignInPatientDoneState::class.java -> onPatientSignInedSuccessfully()
+                SignInPatientWorkingState::class.java -> onPatientSignInWorking()
+                SignInPatientFailedState::class.java -> onPatientSignInFailed()
+            }
+        })
+    }
+
+    private fun onPatientSignInedSuccessfully() {
+        sign_in_patient_progress_bar.visibility = View.INVISIBLE
+//        view?.findNavController()?.popBackStack()
+    }
+
+    private fun onPatientSignInWorking() {
+        sign_in_patient_progress_bar.visibility = View.VISIBLE
+    }
+
+    private fun onPatientSignInFailed() {
+        sign_in_patient_progress_bar.visibility = View.INVISIBLE
     }
 
 }

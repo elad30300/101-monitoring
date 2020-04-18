@@ -15,10 +15,7 @@ import com.example.a101_monitoring.remote.model.DepartmentBody
 import com.example.a101_monitoring.remote.model.PatientBody
 import com.example.a101_monitoring.remote.model.PatientSignInBody
 import com.example.a101_monitoring.remote.model.ReleasePatientRequestBody
-import com.example.a101_monitoring.states.RegisterPatientDoneState
-import com.example.a101_monitoring.states.RegisterPatientFailedState
-import com.example.a101_monitoring.states.RegisterPatientNotWorkingState
-import com.example.a101_monitoring.states.RegisterPatientState
+import com.example.a101_monitoring.states.*
 import com.example.a101_monitoring.utils.DataRemoteHelper
 import com.example.a101_monitoring.utils.DefaultCallbacksHelper
 import com.example.a101_monitoring.utils.ExceptionsHelper
@@ -39,13 +36,13 @@ class PatientRepository @Inject constructor(
     private val executor: Executor
 ) {
 
-    private val fetchPatientsState = MutableLiveData<Boolean>()
     private val registerPatientState = MutableLiveData<RegisterPatientState>()
+    private val signInPatientState = MutableLiveData<SignInPatientState>()
 
     private val availableBeds = MutableLiveData<List<String>>()
 
-    fun getFetchPatientsState(): LiveData<Boolean> = fetchPatientsState
     fun getRegisterPatientState(): LiveData<RegisterPatientState> = registerPatientState
+    fun getSignInPatientState(): LiveData<SignInPatientState> = signInPatientState
 
     fun getPatients() = patientDao.getAll()
 
@@ -152,13 +149,16 @@ class PatientRepository @Inject constructor(
     fun registerPatient(identityNumber: String, deptId: Int, room: String, bed: String, haitiId: String, registeredDoctor: String,
                         isCitizen: Boolean, isOxygen: Int, isActive: Boolean, sensorAddress: String = "") {
         val patientBody = PatientBody(0, identityNumber, deptId, room, bed, haitiId, registeredDoctor, isCitizen, isOxygen, isActive)
+        registerPatientState.postValue(RegisterPatientWorkingState())
         registerPatientToRemote(patientBody,
             {
                 onPatientRegisteredSuccessfullyToRemote(it, sensorAddress)
             }, {
                 DefaultCallbacksHelper.onErrorDefault(TAG, "Failure: register patient ${identityNumber} to remote failed", it)
+                registerPatientState.postValue(RegisterPatientFailedState())
             }, {
                 DefaultCallbacksHelper.onErrorDefault(TAG, "Error: register patient ${identityNumber} to remote failed", it)
+                registerPatientState.postValue(RegisterPatientFailedState())
             }
         )
     }
@@ -173,18 +173,27 @@ class PatientRepository @Inject constructor(
         val patient = DataRemoteHelper.fromPatientBodyToPatient(patientBody).apply {
             sensor = Sensor(sensorAddress)
         }
-        insertPatient(patient)
+        insertPatient(patient, {
+            DefaultCallbacksHelper.onSuccessDefault(TAG, "insert patient with id ${patient.id} in dao successfully")
+            registerPatientState.postValue(RegisterPatientDoneState())
+        }, {
+            DefaultCallbacksHelper.onErrorDefault(TAG, "insert patient with id ${patient.id} in dao failed", it)
+            registerPatientState.postValue(RegisterPatientFailedState())
+        })
     }
 
     fun signIn(patientId: PatientIdentityFieldType) {
+        signInPatientState.postValue(SignInPatientWorkingState())
         executor.execute {
             atalefRemoteAdapter.signIn(PatientSignInBody(patientId),
                 {
                     onSignInResponse(it)
                 }, {
                     DefaultCallbacksHelper.onErrorDefault(TAG, "Failure: sign in request for patient ${patientId} to remote failed - patient not exist", it)
+                    signInPatientState.postValue(SignInPatientFailedState())
                 }, {
                     DefaultCallbacksHelper.onErrorDefault(TAG, "Error: sign in request for patient ${patientId} to remote failed", it)
+                    signInPatientState.postValue(SignInPatientFailedState())
                 }
             )
         }
@@ -192,19 +201,22 @@ class PatientRepository @Inject constructor(
 
     private fun onSignInResponse(patientBody: PatientBody) {
         val patientFromRemote = DataRemoteHelper.fromPatientBodyToPatient(patientBody)
-        insertPatient(patientFromRemote)
+        insertPatient(patientFromRemote, {
+            DefaultCallbacksHelper.onSuccessDefault(TAG, "sign in patient with id ${it.id} in dao successfully")
+            signInPatientState.postValue(SignInPatientDoneState())
+        }, {
+            DefaultCallbacksHelper.onErrorDefault(TAG, "sign in patient with id ${patientBody.id} in dao failed", it)
+            signInPatientState.postValue(SignInPatientFailedState())
+        })
     }
 
-    private fun insertPatient(patient: Patient) {
+    private fun insertPatient(patient: Patient, onPatientInsert: (patient: Patient) -> Unit, onFail: (throwable: Throwable) -> Unit) {
         executor.execute {
             try {
                 patientDao.insertPatients(patient)
-                Log.d(TAG, "insert patient with id ${patient.id} in dao successfully")
-                registerPatientState.postValue(RegisterPatientDoneState())
+                onPatientInsert(patient)
             } catch (ex: Exception) {
-                Log.e(TAG, "insert patient with id ${patient.id} in dao failed, stacktrace:")
-                ex.printStackTrace()
-                registerPatientState.postValue(RegisterPatientFailedState())
+                onFail(ex)
             }
         }
     }

@@ -13,4 +13,6 @@ class SignInPatientViewModel @Inject constructor(
         patientRepository.signIn(patientId)
     }
 
+    fun getSignInPatientState() = patientRepository.getSignInPatientState()
+
 }

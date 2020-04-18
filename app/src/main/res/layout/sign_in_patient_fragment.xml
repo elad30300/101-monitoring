@@ -48,4 +48,18 @@
         android:text="@string/sign_in_button_text"
         />
 
+    <include
+        layout="@layout/default_circled_progress_bar"
+        android:id="@+id/sign_in_patient_progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        tools:visibility="visible"
+        app:layout_constraintTop_toBottomOf="@id/sign_in_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@id/sign_in_button"
+        app:layout_constraintEnd_toEndOf="@id/sign_in_button"
+        android:layout_margin="16dp"
+        />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
