@@ -101,4 +101,8 @@ dependencies {
     api("com.squareup.retrofit2:retrofit:2.6.0")
     implementation("com.squareup.retrofit2:converter-gson:2.5.0")
     //
+
+    // True time
+    implementation 'com.github.instacart.truetime-android:library-extension-rx:3.3'
+    //
 }
