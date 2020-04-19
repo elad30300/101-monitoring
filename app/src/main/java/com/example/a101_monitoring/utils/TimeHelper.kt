@@ -25,9 +25,11 @@ class TimeHelper {
         object : Thread() {
             override fun run() {
                 super.run()
-                ExceptionsHelper.tryBlock(TAG, "initialize true time") {
-                    if (!isTrueTimeInitialized()) {
-                        initializeTrueTime(TRUE_TIME_INIT_MAX_TRIES)
+                synchronized(trueTimeMutex) {
+                    ExceptionsHelper.tryBlock(TAG, "initialize true time") {
+                        if (!isTrueTimeInitialized()) {
+                            initializeTrueTime(TRUE_TIME_INIT_MAX_TRIES)
+                        }
                     }
                 }
             }
