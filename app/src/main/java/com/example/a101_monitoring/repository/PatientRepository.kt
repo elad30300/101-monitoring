@@ -48,6 +48,10 @@ class PatientRepository @Inject constructor(
     fun getBodyTemperatureState(): LiveData<BodyTemperatureState> = bodyTemperatureState
     fun getBloodPressureState(): LiveData<BloodPressureState> = bloodPressureState
 
+    init {
+        setAllSensorsIsConnected(false)
+    }
+
     fun getPatients() = patientDao.getAll()
 
     fun getPatientIdBySensorAddress(address: String) = patientDao.getPatientIdBySensorAddress(address)
@@ -249,6 +253,18 @@ class PatientRepository @Inject constructor(
                 Log.e(TAG, "Set sensor is connected to ${isConnected} with address $sensorAddress in dao failed, stacktrace:")
                 ex.printStackTrace()
 //                registerPatientState.postValue(false)
+            }
+        }
+    }
+
+    fun setAllSensorsIsConnected(isConnected: Boolean) {
+        executor.execute {
+            try {
+                patientDao.setAllSensorsIsConnected(isConnected)
+                Log.d(TAG, "Set all sensors is connected to ${isConnected} in dao successfully")
+            } catch (ex: Exception) {
+                Log.e(TAG, "Set all sensors is connected to ${isConnected} in dao failed, stacktrace:")
+                ex.printStackTrace()
             }
         }
     }
