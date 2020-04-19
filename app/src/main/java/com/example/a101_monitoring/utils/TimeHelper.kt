@@ -22,15 +22,16 @@ class TimeHelper {
     private fun fromSecToMillis(sec: Long) = sec * 1000
 
     fun initializeTimer() {
-        Thread().run {
-            runBlocking {
-                trueTimeMutex.withLock {
+        object : Thread() {
+            override fun run() {
+                super.run()
+                ExceptionsHelper.tryBlock(TAG, "initialize true time") {
                     if (!isTrueTimeInitialized()) {
                         initializeTrueTime(TRUE_TIME_INIT_MAX_TRIES)
                     }
                 }
             }
-        }
+        }.start()
     }
 
     private fun isTrueTimeInitialized() = TrueTime.isInitialized()
@@ -68,13 +69,16 @@ class TimeHelper {
 
 
     fun executeWithConstantDelaySequentiallyInBackground(delaySeconds: Long, vararg blocks: () -> Unit) {
-        Thread().run {
-            blocks.slice(0 until (blocks.size - 1)).forEach {
-                it()
-                Thread.sleep(fromSecToMillis(delaySeconds))
+        object : Thread() {
+            override fun run() {
+                super.run()
+                blocks.slice(0 until (blocks.size - 1)).forEach {
+                    it()
+                    Thread.sleep(fromSecToMillis(delaySeconds))
+                }
+                blocks.last()()
             }
-            blocks.last()()
-        }
+        }.start()
     }
 
     companion object {
