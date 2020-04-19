@@ -113,6 +113,10 @@ class NoninHandler(
         try {
             val time = TimeHelper.instance.getTimeInMilliSeconds()
             val patientId = patientRepository.getPatientIdBySensorAddress(getDevice().macAddress)
+            if (isHeartRateValueMissing(heartRateValue) && isSaturationValueMissing(saturationValue) && isRespiratoryRateValueMissing(lastRespiratoryRate)) {
+                Log.i(TAG, "all measurements missing, not send the values")
+                return
+            }
             measurementsRepository.insertMeasurements(
                 if (isHeartRateValueMissing(heartRateValue)) null else HeartRate(heartRateValue, time, patientId),
                 if (isSaturationValueMissing(saturationValue)) null else Saturation(saturationValue, time, patientId),
