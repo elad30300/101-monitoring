@@ -30,6 +30,9 @@ interface PatientDao {
     @Query("UPDATE patients SET is_connected = :isConnected WHERE address = :sensorAddress")
     fun setSensorIsConnected(sensorAddress: String, isConnected: Boolean)
 
+    @Query("UPDATE patients SET is_connected = :isConnected")
+    fun setAllSensorsIsConnected(isConnected: Boolean)
+
     @Query("SELECT is_connected FROM patients WHERE ${Patient.IDENTITY_FIELD_IN_DB} = :patientId")
     fun isPatientConnectedToSensor(patientId: PatientIdentityFieldType): LiveData<Boolean?>
 
