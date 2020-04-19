@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.lifecycle.Observer
 import com.example.a101_monitoring.MyApplication
 
@@ -37,6 +38,8 @@ class SignInPatientFragment : Fragment() {
         sign_in_button.setOnClickListener {
             if (isInputValid()) {
                 viewModel.signIn(sign_in_patient_id.text.toString())
+            } else {
+                Toast.makeText(context, R.string.sign_in_invalid_input_message, Toast.LENGTH_LONG).show()
             }
         }
 
@@ -54,9 +57,9 @@ class SignInPatientFragment : Fragment() {
         }
     }
 
-    private fun isInputValid(): Boolean {
-        return true
-    }
+    private fun isInputValid() = isIdInputValid()
+
+    private fun isIdInputValid() = sign_in_patient_id.text.toString().trim().length == 9
 
     private fun observeSignInPatientState() {
         viewModel.getSignInPatientState().observe(this, Observer {

@@ -1,11 +1,14 @@
 package com.example.a101_monitoring.ui
 
+import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.navArgs
 import com.example.a101_monitoring.MyApplication
@@ -67,7 +70,11 @@ class SensorChooseFragment : Fragment() {
 
     private fun setSaveAddressButtonOnClickListener(patientId: PatientIdentityFieldType) {
         sensor_address_save_button.setOnClickListener {
-            viewModel.setSensor(patientId, sensor_address.text.toString())
+            if (isInputValid()) {
+                viewModel.setSensor(patientId, sensor_address.text.toString().trim().toUpperCase())
+            } else {
+                Toast.makeText(context, R.string.sensor_address_invalid_input_message, Toast.LENGTH_LONG).show()
+            }
         }
     }
 
@@ -92,5 +99,7 @@ class SensorChooseFragment : Fragment() {
     private fun onSubmitSensorToPatientWorking() {
         choose_sensor_progress_bar.visibility = View.VISIBLE
     }
+
+    private fun isInputValid() = BluetoothAdapter.checkBluetoothAddress(sensor_address.text.toString().trim().toUpperCase())
 
 }

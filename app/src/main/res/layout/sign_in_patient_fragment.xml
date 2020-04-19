@@ -15,13 +15,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="@id/sign_in_button"
         android:hint="@string/id"
+        app:counterEnabled="true"
+        app:counterMaxLength="9"
         >
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/sign_in_patient_id"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="numberDecimal"
+            android:inputType="number"
             />
 
     </com.google.android.material.textfield.TextInputLayout>

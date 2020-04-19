@@ -47,4 +47,7 @@
     <string name="blood_pressure_illegal_input_message">לחץ הדם שהוזן אינו תקין</string>
     <string name="manual_measurements_fail_message">הזנת מדדים ידניים נכשלה, אנא נסה שוב</string>
     <string name="manual_measurements_success_message">מדדים ידניים הוזנו בהצלחה</string>
+    <string name="register_invalid_input_message">חלק מהשדות שהוזנו אינם תקינים</string>
+    <string name="sign_in_invalid_input_message">תעודת הזהות שהוזנה אינה תקינה</string>
+    <string name="sensor_address_invalid_input_message">הכתובת שהוזנה אינה תקינה, אנא שים לב לפורמט FF:FF:FF:FF:FF:FF</string>
 </resources>

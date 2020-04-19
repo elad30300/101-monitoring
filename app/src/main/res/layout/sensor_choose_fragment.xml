@@ -32,13 +32,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/choose_sensor_description"
         app:layout_constraintBottom_toTopOf="@id/sensor_address_save_button"
+        app:counterEnabled="true"
+        app:counterMaxLength="17"
         >
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/sensor_address"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text" />
+            android:inputType="textCapCharacters" />
 
     </com.google.android.material.textfield.TextInputLayout>
 

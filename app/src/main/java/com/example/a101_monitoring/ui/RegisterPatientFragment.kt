@@ -6,10 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.ListAdapter
-import android.widget.SpinnerAdapter
+import android.widget.*
 import androidx.core.widget.doAfterTextChanged
 import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Observer
@@ -24,6 +21,7 @@ import com.example.a101_monitoring.states.RegisterPatientDoneState
 import com.example.a101_monitoring.states.RegisterPatientFailedState
 import com.example.a101_monitoring.states.RegisterPatientWorkingState
 import com.example.a101_monitoring.viewmodel.RegisterPatientViewModel
+import kotlinx.android.synthetic.main.fragment_patient.*
 import kotlinx.android.synthetic.main.register_patient_fragment.*
 import javax.inject.Inject
 
@@ -167,28 +165,44 @@ class RegisterPatientFragment : Fragment() {
         registerPatientComponent.inject(this)
     }
 
-    fun onRegisterClicked(view: View) {
-        val department = getSelectedDepartment()
+    private fun onRegisterClicked(view: View) {
         if (isInputValid()) {
             registerPatientViewModel.registerPatient(
-                registered_patient_id.text.toString(),
+                registered_patient_id.text.toString().trim(),
                 getSelectedDepartment()!!.id,
-                room_spinner.text.toString(),
-                bed_spinner.text.toString(),
-                patient_haiti.text.toString(),
-                doctor.text.toString(),
+                room_spinner.text.toString().trim(),
+                bed_spinner.text.toString().trim(),
+                patient_haiti.text.toString().trim(),
+                doctor.text.toString().trim(),
                 is_civilian_switch.isSelected,
                 0,
                 true
             )
+        } else {
+            Toast.makeText(context, R.string.register_invalid_input_message, Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun isInputValid(): Boolean {
-        return getSelectedDepartment() != null
-    }
+    private fun isInputValid(): Boolean = isIdInputValid()
+                                            && isHaitiIdInputValid()
+                                            && isDoctorIdInputValid()
+                                            && isDepartmentInputValid()
+                                            && isRoomInputValid()
+                                            && isBedInputValid()
 
-    fun getSelectedDepartment(): Department? {
+    private fun isIdInputValid(): Boolean = registered_patient_id.text.toString().trim().length == 9
+
+    private fun isHaitiIdInputValid(): Boolean = patient_haiti.text.toString().trim().length == 4
+
+    private fun isDoctorIdInputValid(): Boolean = doctor.text.toString().trim().length == 4
+
+    private fun isDepartmentInputValid(): Boolean = getSelectedDepartment() != null
+
+    private fun isBedInputValid(): Boolean = bed_spinner.text.toString().trim() != ""
+
+    private fun isRoomInputValid(): Boolean = room_spinner.text.toString().trim() != ""
+
+    private fun getSelectedDepartment(): Department? {
         val departmentText = department_spinner.text.toString()
         return registerPatientViewModel.departments.value?.let {
              it.filter { it.department.name == departmentText }.firstOrNull()?.department
