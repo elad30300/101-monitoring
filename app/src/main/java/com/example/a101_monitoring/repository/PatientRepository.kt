@@ -297,7 +297,7 @@ class PatientRepository @Inject constructor(
     }
 
     private fun onBloodPressureSentResponse(patientId: PatientIdentityFieldType, response: BooleanResponse) {
-        if (response.result) {
+        if (!response.result) {
             DefaultCallbacksHelper.onSuccessDefault(TAG, "blood pressure was sent successfully for $patientId")
             bloodPressureState.postValue(BloodPressureDoneState())
         } else {
@@ -325,7 +325,7 @@ class PatientRepository @Inject constructor(
     }
 
     private fun onBodyTemperatureSentResponse(patientId: PatientIdentityFieldType, response: BooleanResponse) {
-        if (response.result) {
+        if (!response.result) {
             DefaultCallbacksHelper.onSuccessDefault(TAG, "body temperature was sent successfully for $patientId")
             bodyTemperatureState.postValue(BodyTemperatureDoneState())
         } else {
