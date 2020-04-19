@@ -13,10 +13,14 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.Observer
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.setupWithNavController
 import com.example.a101_monitoring.bluetooth.BluetoothController
 import com.example.a101_monitoring.data.model.Patient
 import com.example.a101_monitoring.states.*
+import com.example.a101_monitoring.ui.AppBarContainer
 import com.example.a101_monitoring.ui.PatientsListFragment
 import com.example.a101_monitoring.ui.PatientsListFragmentDirections
 import com.example.a101_monitoring.utils.TimeHelper
@@ -26,7 +30,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.activity_main.*
 import javax.inject.Inject
 
-class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInteractionListener {
+class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInteractionListener,
+    AppBarContainer {
 
     private var networkConnectionDialog: AlertDialog? = null
 
@@ -41,6 +46,8 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
         (applicationContext as MyApplication).applicationComponent.mainActivityComponent().create().also {
             it.inject(this)
         }
+
+        initializeAppBar()
 
         initializePermissions()
 
@@ -63,6 +70,16 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
         super.onDestroy()
 
         deinitializeBleScanComponents()
+    }
+
+    override fun onFragmentSetTitleRequest(title: String) {
+        toolbar.title = title
+    }
+
+    private fun initializeAppBar() {
+        val navController = findNavController(R.id.nav_host_fragment)
+        val appBarConfiguration = AppBarConfiguration(navController.graph)
+        toolbar.setupWithNavController(navController, appBarConfiguration)
     }
 
     private fun initializeBleScanComponents() {

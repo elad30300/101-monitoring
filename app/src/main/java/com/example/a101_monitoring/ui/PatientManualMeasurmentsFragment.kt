@@ -16,6 +16,7 @@ import com.example.a101_monitoring.di.component.PatientManualMeasurmentsComponen
 import com.example.a101_monitoring.states.*
 import com.example.a101_monitoring.utils.TimeHelper
 import com.example.a101_monitoring.viewmodel.PatientManualMeasurmentsViewModel
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.patient_manual_measurments_fragment.*
 import javax.inject.Inject
 
@@ -39,8 +40,6 @@ class PatientManualMeasurmentsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        patient_manual_measurments_title.text = navigationArguments.patientId
-
         setSendButtonOnClick()
 
         observeStates()
@@ -48,6 +47,8 @@ class PatientManualMeasurmentsFragment : Fragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
+
+        (context as? AppBarContainer)?.onFragmentSetTitleRequest(navigationArguments.patientId)
 
         initializePatientManualMeasurmentsComponent(context)
     }

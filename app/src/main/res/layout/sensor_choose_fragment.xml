@@ -6,25 +6,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.SensorChooseFragment">
 
+
     <TextView
-        android:id="@+id/sensor_address_choose_title"
+        android:id="@+id/choose_sensor_description"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:textSize="40sp"
-        android:text="@string/sensor_address_choose_title"
-        android:layout_marginTop="16dp"
-        />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/sensor_address_choose_title"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"
+        app:layout_constraintBottom_toTopOf="@id/sensor_address_container"
         android:textSize="20sp"
         android:text="@string/sensor_address_choose_description"
         android:gravity="center"
@@ -40,8 +30,8 @@
         app:placeholderText="@string/sensor_address_placeholder"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/choose_sensor_description"
+        app:layout_constraintBottom_toTopOf="@id/sensor_address_save_button"
         >
 
         <com.google.android.material.textfield.TextInputEditText
@@ -57,9 +47,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/sensor_address_container"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@id/sensor_address_container"
+        app:layout_constraintEnd_toEndOf="@id/sensor_address_container"
+        app:layout_constraintBottom_toBottomOf="@id/choose_sensor_progress_bar"
         android:text="@string/sensor_address_save_button_text"
         />
 
@@ -72,8 +62,8 @@
         android:layout_width="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/sensor_address_save_button"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/sensor_address_save_button"
+        app:layout_constraintEnd_toEndOf="@id/sensor_address_save_button"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

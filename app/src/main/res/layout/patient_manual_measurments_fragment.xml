@@ -6,18 +6,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.PatientManualMeasurmentsFragment">
 
-    <TextView
-        android:id="@+id/patient_manual_measurments_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"
-        tools:text="313599466"
-        android:textSize="50sp"
-        />
-
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/patient_manual_temperature_container"
         android:layout_width="240dp"
@@ -26,7 +14,7 @@
         android:hint="@string/temperature"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/patient_manual_measurments_title"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/systolic_diastolic_divider"
         >
 
@@ -92,12 +80,12 @@
         android:id="@+id/send_manual_measurments_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/systolic_diastolic_divider"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="20dp"
         android:text="@string/send_manual_measurements_button_text"
-        />
+        app:layout_constraintBottom_toTopOf="@id/manual_measurements_progress_bar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/systolic_diastolic_divider" />
 
     <include
         layout="@layout/default_circled_progress_bar"
