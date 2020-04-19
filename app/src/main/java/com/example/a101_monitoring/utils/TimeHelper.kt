@@ -1,5 +1,7 @@
 package com.example.a101_monitoring.utils
 
+import android.util.Log
+import com.instacart.library.truetime.TrueTime
 import com.instacart.library.truetime.TrueTimeRx
 import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.runBlocking
@@ -11,19 +13,19 @@ class TimeHelper {
     private val trueTimeMutex = Mutex()
 
     fun getTimeInMilliSeconds(): Long {
-        if (TrueTimeRx.isInitialized()) {
-            return TrueTimeRx.now().time
+        if (isTrueTimeInitialized()) {
+            return getCurrentTimeFromTrueTime()
         }
         return System.currentTimeMillis()
     }
 
-    fun fromSecToMillis(sec: Long) = sec * 1000
+    private fun fromSecToMillis(sec: Long) = sec * 1000
 
     fun initializeTimer() {
         Thread().run {
             runBlocking {
                 trueTimeMutex.withLock {
-                    if (!TrueTimeRx.isInitialized()) {
+                    if (!isTrueTimeInitialized()) {
                         initializeTrueTime(TRUE_TIME_INIT_MAX_TRIES)
                     }
                 }
@@ -31,24 +33,36 @@ class TimeHelper {
         }
     }
 
+    private fun isTrueTimeInitialized() = TrueTime.isInitialized()
+
+    private fun getCurrentTimeFromTrueTime() = TrueTime.now().time
+
     private fun initializeTrueTime(tries: Int) {
-        if (tries > 0 && !TrueTimeRx.isInitialized()) {
-            TrueTimeRx.build()
-                .initializeRx("time.google.com")
-                .subscribeOn(Schedulers.io())
-                .subscribe({
-                    DefaultCallbacksHelper.onSuccessDefault(
-                        TAG,
-                        "TrueTime was initialized and we have a time: $it"
-                    )
-                }, {
-                    DefaultCallbacksHelper.onErrorDefault(
-                        TAG,
-                        "error with initializing true time, remaining tries: ${tries - 1}",
-                        it
-                    )
-                    initializeTrueTime(tries - 1)
-                })
+        if (tries > 0 && !isTrueTimeInitialized()) {
+            TrueTime.build().initialize()
+            if (!isTrueTimeInitialized()) {
+                Log.i(TAG, "problem with initializing true time, remaining tries ${tries - 1}")
+                initializeTrueTime(tries)
+            } else {
+                Log.i(TAG, "true time was initialized successfully")
+            }
+
+//            TrueTimeRx.build()
+//                .initializeRx("time.google.com")
+//                .subscribeOn(Schedulers.io())
+//                .subscribe({
+//                    DefaultCallbacksHelper.onSuccessDefault(
+//                        TAG,
+//                        "TrueTime was initialized and we have a time: $it"
+//                    )
+//                }, {
+//                    DefaultCallbacksHelper.onErrorDefault(
+//                        TAG,
+//                        "error with initializing true time, remaining tries: ${tries - 1}",
+//                        it
+//                    )
+//                    initializeTrueTime(tries - 1)
+//                })
         }
     }
 
