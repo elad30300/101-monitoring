@@ -25,8 +25,12 @@ class ReleaseReasonsRepository @Inject constructor(
     private val password = "2" // TODO: should be hashed so decompiler won't have access to password
     private val releaseReasons = releaseReasonsDao.getReleaseReasons()
 
-    fun getReleaseReasons(): LiveData<List<ReleaseReason>> {
+    init {
         refreshReleaseReasonsFromRemote()
+    }
+
+    fun getReleaseReasons(): LiveData<List<ReleaseReason>> {
+//        refreshReleaseReasonsFromRemote()
         return releaseReasons
     }
 

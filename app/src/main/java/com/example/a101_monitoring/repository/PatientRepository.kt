@@ -40,6 +40,7 @@ class PatientRepository @Inject constructor(
     private val bodyTemperatureState = MutableLiveData<BodyTemperatureState>()
     private val bloodPressureState = MutableLiveData<BloodPressureState>()
 
+    private val departments = departmentDao.getAll()
     private val availableBeds = MutableLiveData<List<String>>()
 
     fun getRegisterPatientState(): LiveData<RegisterPatientState> = registerPatientState
@@ -50,6 +51,7 @@ class PatientRepository @Inject constructor(
 
     init {
         setAllSensorsIsConnected(false)
+        getDepartmentsFromRemote()
     }
 
     fun getPatients() = patientDao.getAll()
@@ -63,7 +65,7 @@ class PatientRepository @Inject constructor(
     fun getSensors() = patientDao.getAllSensors()
 
     fun getDepartments(): LiveData<List<DepartmentWithRooms>> {
-        getDepartmentsFromRemote()
+//        getDepartmentsFromRemote()
         return departmentDao.getAll()
     }
 
