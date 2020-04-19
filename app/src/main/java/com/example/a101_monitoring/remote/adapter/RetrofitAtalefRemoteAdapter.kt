@@ -51,6 +51,14 @@ class RetrofitAtalefRemoteAdapter(
         request(atalefService.postMeasurements(measurementBody), onResponse, onFailed, onError)
     }
 
+    override fun sendBloodPressure(bloodPressureBody: BloodPressureBody, onResponse: OnResponseCallback<BooleanResponse>, onFailed: OnFailedCallback, onError: OnErrorCallback) {
+        request(atalefService.postBloodPressure(bloodPressureBody), onResponse, onFailed, onError)
+    }
+
+    override fun sendBodyTemperature(bodyTemperatureBody: BodyTemperatureBody, onResponse: OnResponseCallback<BooleanResponse>, onFailed: OnFailedCallback, onError: OnErrorCallback) {
+        request(atalefService.postBodyTemperature(bodyTemperatureBody), onResponse, onFailed, onError)
+    }
+
     private fun <T: Any>request(call: Call<T>, onResponse: OnResponseCallback<T>, onFailed: OnFailedCallback, onError: OnErrorCallback) {
         call.enqueue(object : Callback<T> {
             override fun onResponse(call: Call<T>, response: Response<T>) {

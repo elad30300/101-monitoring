@@ -11,14 +11,12 @@ import com.example.a101_monitoring.remote.adapter.AtalefRemoteAdapter
 import com.example.a101_monitoring.remote.adapter.OnErrorCallback
 import com.example.a101_monitoring.remote.adapter.OnResponseCallback
 import com.example.a101_monitoring.remote.adapter.OnFailedCallback
-import com.example.a101_monitoring.remote.model.DepartmentBody
-import com.example.a101_monitoring.remote.model.PatientBody
-import com.example.a101_monitoring.remote.model.PatientSignInBody
-import com.example.a101_monitoring.remote.model.ReleasePatientRequestBody
+import com.example.a101_monitoring.remote.model.*
 import com.example.a101_monitoring.states.*
 import com.example.a101_monitoring.utils.DataRemoteHelper
 import com.example.a101_monitoring.utils.DefaultCallbacksHelper
 import com.example.a101_monitoring.utils.ExceptionsHelper
+import com.example.a101_monitoring.utils.TimeHelper
 import java.lang.Exception
 import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
@@ -273,6 +271,52 @@ class PatientRepository @Inject constructor(
             ExceptionsHelper.tryBlock(TAG, "delete patient ${patient.getIdentityField()} from database") {
                 patientDao.deletePatients(patient)
             }
+        }
+    }
+
+    fun sendBloodPressure(diastolic: Int, systolic: Int, patientId: PatientIdentityFieldType) {
+        executor.execute {
+            val patient = patientDao.getPatient(patientId)
+            val bloodPressureBody = BloodPressureBody(patient.id, patient.deptId, diastolic, systolic, TimeHelper.instance.getTimeInMilliSeconds())
+            atalefRemoteAdapter.sendBloodPressure(bloodPressureBody,
+                {
+                    onBloodPressureSentResponse(patientId, it)
+                }, {
+                    DefaultCallbacksHelper.onErrorDefault(TAG, "failure: send blood pressure pressure for $patientId")
+                }, {
+                    DefaultCallbacksHelper.onErrorDefault(TAG, "error: send blood pressure pressure for $patientId")
+                })
+        }
+    }
+
+    private fun onBloodPressureSentResponse(patientId: PatientIdentityFieldType, response: BooleanResponse) {
+        if (response.result) {
+            DefaultCallbacksHelper.onSuccessDefault(TAG, "blood pressure was sent successfully for $patientId")
+        } else {
+            DefaultCallbacksHelper.onSuccessDefault(TAG, "failed send blood pressure pressure for $patientId")
+        }
+    }
+
+    fun sendBodyTemperature(temperature: Float, patientId: PatientIdentityFieldType) {
+        executor.execute {
+            val patient = patientDao.getPatient(patientId)
+            val bodyTemperatureBody = BodyTemperatureBody(patient.id, patient.deptId, temperature, TimeHelper.instance.getTimeInMilliSeconds())
+            atalefRemoteAdapter.sendBodyTemperature(bodyTemperatureBody,
+                {
+                    onBodyTemperatureSentResponse(patientId, it)
+                }, {
+                    DefaultCallbacksHelper.onErrorDefault(TAG, "failure: send body temperature pressure for $patientId")
+                }, {
+                    DefaultCallbacksHelper.onErrorDefault(TAG, "error: send body temperature pressure for $patientId")
+                })
+        }
+    }
+
+    private fun onBodyTemperatureSentResponse(patientId: PatientIdentityFieldType, response: BooleanResponse) {
+        if (response.result) {
+            DefaultCallbacksHelper.onSuccessDefault(TAG, "body temperature was sent successfully for $patientId")
+        } else {
+            DefaultCallbacksHelper.onSuccessDefault(TAG, "failed send body temperature pressure for $patientId")
         }
     }
 

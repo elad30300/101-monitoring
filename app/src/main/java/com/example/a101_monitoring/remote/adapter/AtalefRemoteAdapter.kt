@@ -23,4 +23,8 @@ interface AtalefRemoteAdapter {
 
     fun sendMeasurement(measurementBody: MeasurementBody, onResponse: OnResponseCallback<GeneralResponse>, onFailed: OnFailedCallback, onError: OnErrorCallback)
 
+    fun sendBloodPressure(bloodPressureBody: BloodPressureBody, onResponse: OnResponseCallback<BooleanResponse>, onFailed: OnFailedCallback, onError: OnErrorCallback)
+
+    fun sendBodyTemperature(body: BodyTemperatureBody, onResponse: OnResponseCallback<BooleanResponse>, onFailed: OnFailedCallback, onError: OnErrorCallback)
+
 }

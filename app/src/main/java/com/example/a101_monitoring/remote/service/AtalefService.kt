@@ -28,4 +28,9 @@ interface AtalefService {
     @POST("measurements/auto")
     fun postMeasurements(@Body measurementBody: MeasurementBody): Call<GeneralResponse>
 
+    @POST("measurements/manual/bodyTemperature")
+    fun postBodyTemperature(@Body bodyTemperatureBody: BodyTemperatureBody): Call<BooleanResponse>
+
+    @POST("measurements/manual/bloodPressure")
+    fun postBloodPressure(@Body bloodPressureBody: BloodPressureBody): Call<BooleanResponse>
 }
