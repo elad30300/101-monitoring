@@ -247,6 +247,7 @@ class PatientRepository @Inject constructor(
     fun setSensorIsConnected(sensorAddress: String, isConnected: Boolean) {
         executor.execute {
             try {
+                sendSensorConnectionStatusToRemote(patientDao.getPatientBySensorAddress(sensorAddress), isConnected)
                 patientDao.setSensorIsConnected(sensorAddress, isConnected)
                 Log.d(TAG, "Set sensor is connected to ${isConnected} with address $sensorAddress in dao successfully")
             } catch (ex: Exception) {
@@ -257,10 +258,14 @@ class PatientRepository @Inject constructor(
         }
     }
 
-    fun setAllSensorsIsConnected(isConnected: Boolean) {
+    private fun setAllSensorsIsConnected(isConnected: Boolean) {
         executor.execute {
             try {
                 patientDao.setAllSensorsIsConnected(isConnected)
+                patientDao.getAll().value?.forEach {
+                    Log.i(TAG, "about to send sensor connection for ${it.getIdentityField()}")
+                    sendSensorConnectionStatusToRemote(patientDao.getPatientBySensorAddress(it.sensor.address), isConnected)
+                }
                 Log.d(TAG, "Set all sensors is connected to ${isConnected} in dao successfully")
             } catch (ex: Exception) {
                 Log.e(TAG, "Set all sensors is connected to ${isConnected} in dao failed, stacktrace:")
@@ -350,8 +355,35 @@ class PatientRepository @Inject constructor(
         }
     }
 
+    private fun sendSensorConnectionStatusToRemote(patient: Patient, isConnected: Boolean) {
+        executor.execute {
+            val statusCode = if (isConnected) MONITOR_CONNECTED_CODE else MONITOR_DISCONNECTED_CODE
+            val measurementBody = MeasurementBody(
+                patient.id,
+                patient.deptId,
+                TimeHelper.instance.getTimeInMilliSeconds(),
+                statusCode, statusCode, statusCode
+            )
+            atalefRemoteAdapter.sendMeasurement(measurementBody,
+                {
+                    onSensorConnectionStatusSuccess(patient, isConnected)
+                }, {
+                    DefaultCallbacksHelper.onErrorDefault(TAG, "failure: send connection status (connected = $isConnected) for patient ${patient.getIdentityField()}")
+                }, {
+                    DefaultCallbacksHelper.onErrorDefault(TAG, "error: send connection status (connected = $isConnected) for patient ${patient.getIdentityField()}")
+                }
+            )
+        }
+    }
+
+    private fun onSensorConnectionStatusSuccess(patient: Patient, isConnected: Boolean) {
+        DefaultCallbacksHelper.onSuccessDefault(TAG, "sent connection status (connected = $isConnected) for patient ${patient.getIdentityField()} successfully")
+    }
+
     companion object {
         const val TAG = "PatientRepository"
+        private const val MONITOR_CONNECTED_CODE = "-1"
+        private const val MONITOR_DISCONNECTED_CODE = "-2"
         val FRESH_TIMEOUT = TimeUnit.DAYS.toMillis(1)
     }
 
