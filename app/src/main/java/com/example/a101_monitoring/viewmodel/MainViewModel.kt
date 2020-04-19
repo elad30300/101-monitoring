@@ -19,4 +19,8 @@ class MainViewModel @Inject constructor(
 
     fun getSubmitSensorToPatientState() = patientRepository.getSubmitSensorToPatientState()
 
+    fun getBloodPressureState() = patientRepository.getBloodPressureState()
+
+    fun getBodyTemperatureState() = patientRepository.getBodyTemperatureState()
+
 }

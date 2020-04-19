@@ -37,12 +37,16 @@ class PatientRepository @Inject constructor(
     private val registerPatientState = MutableLiveData<RegisterPatientState>()
     private val signInPatientState = MutableLiveData<SignInPatientState>()
     private val submitSensorToPatientState = MutableLiveData<SubmitSensorToPatientState>()
+    private val bodyTemperatureState = MutableLiveData<BodyTemperatureState>()
+    private val bloodPressureState = MutableLiveData<BloodPressureState>()
 
     private val availableBeds = MutableLiveData<List<String>>()
 
     fun getRegisterPatientState(): LiveData<RegisterPatientState> = registerPatientState
     fun getSignInPatientState(): LiveData<SignInPatientState> = signInPatientState
     fun getSubmitSensorToPatientState(): LiveData<SubmitSensorToPatientState> = submitSensorToPatientState
+    fun getBodyTemperatureState(): LiveData<BodyTemperatureState> = bodyTemperatureState
+    fun getBloodPressureState(): LiveData<BloodPressureState> = bloodPressureState
 
     fun getPatients() = patientDao.getAll()
 
@@ -275,6 +279,7 @@ class PatientRepository @Inject constructor(
     }
 
     fun sendBloodPressure(diastolic: Int, systolic: Int, patientId: PatientIdentityFieldType) {
+        bloodPressureState.postValue(BloodPressureWorkingState())
         executor.execute {
             val patient = patientDao.getPatient(patientId)
             val bloodPressureBody = BloodPressureBody(patient.id, patient.deptId, diastolic, systolic, TimeHelper.instance.getTimeInMilliSeconds())
@@ -283,8 +288,10 @@ class PatientRepository @Inject constructor(
                     onBloodPressureSentResponse(patientId, it)
                 }, {
                     DefaultCallbacksHelper.onErrorDefault(TAG, "failure: send blood pressure pressure for $patientId")
+                    bloodPressureState.postValue(BloodPressureFailedState())
                 }, {
                     DefaultCallbacksHelper.onErrorDefault(TAG, "error: send blood pressure pressure for $patientId")
+                    bloodPressureState.postValue(BloodPressureFailedState())
                 })
         }
     }
@@ -292,12 +299,15 @@ class PatientRepository @Inject constructor(
     private fun onBloodPressureSentResponse(patientId: PatientIdentityFieldType, response: BooleanResponse) {
         if (response.result) {
             DefaultCallbacksHelper.onSuccessDefault(TAG, "blood pressure was sent successfully for $patientId")
+            bloodPressureState.postValue(BloodPressureDoneState())
         } else {
             DefaultCallbacksHelper.onSuccessDefault(TAG, "failed send blood pressure pressure for $patientId")
+            bloodPressureState.postValue(BloodPressureFailedState())
         }
     }
 
     fun sendBodyTemperature(temperature: Float, patientId: PatientIdentityFieldType) {
+        bodyTemperatureState.postValue(BodyTemperatureWorkingState())
         executor.execute {
             val patient = patientDao.getPatient(patientId)
             val bodyTemperatureBody = BodyTemperatureBody(patient.id, patient.deptId, temperature, TimeHelper.instance.getTimeInMilliSeconds())
@@ -306,8 +316,10 @@ class PatientRepository @Inject constructor(
                     onBodyTemperatureSentResponse(patientId, it)
                 }, {
                     DefaultCallbacksHelper.onErrorDefault(TAG, "failure: send body temperature pressure for $patientId")
+                    bodyTemperatureState.postValue(BodyTemepratureFailedState())
                 }, {
                     DefaultCallbacksHelper.onErrorDefault(TAG, "error: send body temperature pressure for $patientId")
+                    bodyTemperatureState.postValue(BodyTemepratureFailedState())
                 })
         }
     }
@@ -315,8 +327,10 @@ class PatientRepository @Inject constructor(
     private fun onBodyTemperatureSentResponse(patientId: PatientIdentityFieldType, response: BooleanResponse) {
         if (response.result) {
             DefaultCallbacksHelper.onSuccessDefault(TAG, "body temperature was sent successfully for $patientId")
+            bodyTemperatureState.postValue(BodyTemperatureDoneState())
         } else {
             DefaultCallbacksHelper.onSuccessDefault(TAG, "failed send body temperature pressure for $patientId")
+            bodyTemperatureState.postValue(BodyTemepratureFailedState())
         }
     }
 

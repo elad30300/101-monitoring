@@ -20,4 +20,8 @@ class PatientManualMeasurmentsViewModel @Inject constructor(
         patientRepository.sendBodyTemperature(temperature, patientId)
     }
 
+    fun getBloodPressureState() = patientRepository.getBloodPressureState()
+
+    fun getBodyTemperatureState() = patientRepository.getBodyTemperatureState()
+
 }

@@ -7,11 +7,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.navArgs
 import com.example.a101_monitoring.MyApplication
 
 import com.example.a101_monitoring.R
 import com.example.a101_monitoring.di.component.PatientManualMeasurmentsComponent
+import com.example.a101_monitoring.states.*
 import com.example.a101_monitoring.utils.TimeHelper
 import com.example.a101_monitoring.viewmodel.PatientManualMeasurmentsViewModel
 import kotlinx.android.synthetic.main.patient_manual_measurments_fragment.*
@@ -40,6 +42,8 @@ class PatientManualMeasurmentsFragment : Fragment() {
         patient_manual_measurments_title.text = navigationArguments.patientId
 
         setSendButtonOnClick()
+
+        observeStates()
     }
 
     override fun onAttach(context: Context) {
@@ -96,6 +100,63 @@ class PatientManualMeasurmentsFragment : Fragment() {
         val systolicText = patient_manual_systolic.text.toString().trim()
 
         return diastolicText != "" && systolicText != "" && diastolicText.toIntOrNull() != null && systolicText.toIntOrNull() != null
+    }
+
+    private fun observeStates() {
+        observeBloodPressureState()
+        observeBodyTemperatureState()
+    }
+
+    private fun observeBloodPressureState() {
+        viewModel.getBloodPressureState().observe(this, Observer {
+            when(it.javaClass) {
+                BloodPressureDoneState::class.java -> onSubmitBloodPressureSuccessfully()
+                BloodPressureFailedState::class.java -> onSubmitBloodPressureFailed()
+                BloodPressureWorkingState::class.java -> onSubmitBloodPressureWorking()
+            }
+        })
+    }
+
+    private fun onSubmitBloodPressureSuccessfully() {
+        if (viewModel.getBodyTemperatureState().value !is BodyTemperatureWorkingState) {
+            manual_measurements_progress_bar.visibility = View.INVISIBLE
+        }
+    }
+
+    private fun onSubmitBloodPressureFailed() {
+        if (viewModel.getBodyTemperatureState().value !is BodyTemperatureWorkingState) {
+            manual_measurements_progress_bar.visibility = View.INVISIBLE
+        }
+    }
+
+    private fun onSubmitBloodPressureWorking() {
+        manual_measurements_progress_bar.visibility = View.VISIBLE
+    }
+
+    private fun observeBodyTemperatureState() {
+        viewModel.getBodyTemperatureState().observe(this, Observer {
+            when(it.javaClass) {
+                BodyTemperatureDoneState::class.java -> onSubmitBodyTemperatureSuccessfully()
+                BodyTemepratureFailedState::class.java -> onSubmitBodyTemperatureFailed()
+                BodyTemperatureWorkingState::class.java -> onSubmitBodyTemperatureWorking()
+            }
+        })
+    }
+
+    private fun onSubmitBodyTemperatureSuccessfully() {
+        if (viewModel.getBloodPressureState().value !is BloodPressureWorkingState) {
+            manual_measurements_progress_bar.visibility = View.INVISIBLE
+        }
+    }
+
+    private fun onSubmitBodyTemperatureFailed() {
+        if (viewModel.getBloodPressureState().value !is BloodPressureWorkingState) {
+            manual_measurements_progress_bar.visibility = View.INVISIBLE
+        }
+    }
+
+    private fun onSubmitBodyTemperatureWorking() {
+        manual_measurements_progress_bar.visibility = View.VISIBLE
     }
 
 }

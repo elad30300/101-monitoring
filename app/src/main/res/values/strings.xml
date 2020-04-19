@@ -39,6 +39,12 @@
     <string name="sign_in_patient_success_message">מטופל התחבר בהצלחה</string>
     <string name="submit_sensor_to_patient_fail_message">חיישן לא נשמר עבור המטופל, אנא נסה שוב.</string>
     <string name="submit_sensor_to_patient_success_message">חיישן נשמר בהצלחה</string>
+    <string name="body_temperature_fail_message">הזנת חום נכשלה, אנא נסה שוב.</string>
+    <string name="body_temperature_success_message">חום הוזן בהצלחה</string>
+    <string name="blood_pressure_fail_message">הזנת לחץ דם נכשלה, אנא נסה שוב.</string>
+    <string name="blood_pressure_success_message">לחץ דם הוזן בהצלחה</string>
     <string name="body_temperature_illegal_input_message">החום שהוזן אינו תקין</string>
     <string name="blood_pressure_illegal_input_message">לחץ הדם שהוזן אינו תקין</string>
+    <string name="manual_measurements_fail_message">הזנת מדדים ידניים נכשלה, אנא נסה שוב</string>
+    <string name="manual_measurements_success_message">מדדים ידניים הוזנו בהצלחה</string>
 </resources>

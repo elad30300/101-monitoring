@@ -156,6 +156,8 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
         observerRegisterPatientState()
         observeSignInPatientState()
         observeSubmitSensorToPatientState()
+        observeBloodPressureState()
+        observeBodyTemperatureState()
     }
 
     private fun observerRegisterPatientState() {
@@ -208,6 +210,41 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
     private fun onSubmitSensorToPatientFailed() {
         Toast.makeText(this, R.string.submit_sensor_to_patient_fail_message, Toast.LENGTH_LONG).show()
     }
+
+    private fun observeBloodPressureState() {
+        mainViewModel.getBloodPressureState().observe(this, Observer {
+            when(it.javaClass) {
+                BloodPressureDoneState::class.java -> onSubmitBloodPressureSuccessfully()
+                BloodPressureFailedState::class.java -> onSubmitBloodPressureFailed()
+            }
+        })
+    }
+
+    private fun onSubmitBloodPressureSuccessfully() {
+        Toast.makeText(this, R.string.manual_measurements_success_message, Toast.LENGTH_LONG).show()
+    }
+
+    private fun onSubmitBloodPressureFailed() {
+        Toast.makeText(this, R.string.manual_measurements_fail_message, Toast.LENGTH_LONG).show()
+    }
+
+    private fun observeBodyTemperatureState() {
+        mainViewModel.getBodyTemperatureState().observe(this, Observer {
+            when(it.javaClass) {
+                BodyTemperatureDoneState::class.java -> onSubmitBodyTemperatureSuccessfully()
+                BodyTemepratureFailedState::class.java -> onSubmitBodyTemperatureFailed()
+            }
+        })
+    }
+
+    private fun onSubmitBodyTemperatureSuccessfully() {
+        Toast.makeText(this, R.string.manual_measurements_success_message, Toast.LENGTH_LONG).show()
+    }
+
+    private fun onSubmitBodyTemperatureFailed() {
+        Toast.makeText(this, R.string.manual_measurements_fail_message, Toast.LENGTH_LONG).show()
+    }
+
 
     companion object {
         private const val TAG = "MainActivity"

@@ -99,4 +99,18 @@
         android:text="@string/send_manual_measurements_button_text"
         />
 
+    <include
+        layout="@layout/default_circled_progress_bar"
+        android:id="@+id/manual_measurements_progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        tools:visibility="visible"
+        app:layout_constraintTop_toBottomOf="@id/send_manual_measurments_button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_margin="16dp"
+        />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
