@@ -2,7 +2,14 @@ package com.example.a101_monitoring.ui
 
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
+import android.content.IntentFilter
+import android.nfc.NfcAdapter
+import android.nfc.Tag
+import android.nfc.tech.Ndef
+import android.nfc.tech.NfcA
+import android.nfc.tech.NfcF
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -18,15 +25,12 @@ import com.example.a101_monitoring.data.model.PatientIdentityFieldType
 import com.example.a101_monitoring.states.SubmitSensorToPatientDoneState
 import com.example.a101_monitoring.states.SubmitSensorToPatientFailedState
 import com.example.a101_monitoring.states.SubmitSensorToPatientWorkingState
+import com.example.a101_monitoring.utils.DefaultCallbacksHelper
 import com.example.a101_monitoring.viewmodel.SensorChooseViewModel
 import kotlinx.android.synthetic.main.sensor_choose_fragment.*
 import javax.inject.Inject
 
 class SensorChooseFragment : Fragment() {
-
-    companion object {
-        fun newInstance() = SensorChooseFragment()
-    }
 
     @Inject lateinit var viewModel: SensorChooseViewModel
 
@@ -101,5 +105,10 @@ class SensorChooseFragment : Fragment() {
     }
 
     private fun isInputValid() = BluetoothAdapter.checkBluetoothAddress(sensor_address.text.toString().trim().toUpperCase())
+
+    companion object {
+        fun newInstance() = SensorChooseFragment()
+        private const val TAG = "SensorChooseFragment"
+    }
 
 }
