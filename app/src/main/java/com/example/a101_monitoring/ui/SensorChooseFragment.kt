@@ -3,11 +3,6 @@ package com.example.a101_monitoring.ui
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.content.IntentFilter
-import android.nfc.NfcAdapter
-import android.nfc.Tag
-import android.nfc.tech.Ndef
-import android.nfc.tech.NfcA
-import android.nfc.tech.NfcF
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -15,26 +10,29 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Observer
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.fragment.navArgs
 import com.example.a101_monitoring.MyApplication
 
 import com.example.a101_monitoring.R
 import com.example.a101_monitoring.data.model.PatientIdentityFieldType
+import com.example.a101_monitoring.receiver.BluetoothAddressBroadcastReceiver
 import com.example.a101_monitoring.states.SubmitSensorToPatientDoneState
 import com.example.a101_monitoring.states.SubmitSensorToPatientFailedState
 import com.example.a101_monitoring.states.SubmitSensorToPatientWorkingState
-import com.example.a101_monitoring.utils.DefaultCallbacksHelper
+import com.example.a101_monitoring.utils.IndicationHelper
 import com.example.a101_monitoring.viewmodel.SensorChooseViewModel
 import kotlinx.android.synthetic.main.sensor_choose_fragment.*
 import javax.inject.Inject
 
-class SensorChooseFragment : Fragment() {
+class SensorChooseFragment : Fragment(), BluetoothAddressBroadcastReceiver.BluetoothAddressReceiverListener {
 
     @Inject lateinit var viewModel: SensorChooseViewModel
+    @Inject lateinit var localBroadcastManager: LocalBroadcastManager
 
     private val navigationArguments: SensorChooseFragmentArgs by navArgs()
+    private lateinit var bluetoothAddressBroadcastReceiver: BluetoothAddressBroadcastReceiver
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -58,6 +56,41 @@ class SensorChooseFragment : Fragment() {
         super.onAttach(context)
 
         initializeDaggerComponent(context)
+
+        initializeBluetoothAddressReceiver()
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        registerBluetoothAddressReceiver()
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        unregisterBluetoothAddressReceiver()
+    }
+
+    private fun registerBluetoothAddressReceiver() {
+        context?.also {
+            val filter = IntentFilter(BluetoothAddressBroadcastReceiver.ACTION_BLUETOOTH_ADDRESS_SUBMITTED).apply {
+                addAction(BluetoothAddressBroadcastReceiver.ACTION_BLUETOOTH_ADDRESS_SUBMITTED)
+            }
+            localBroadcastManager.registerReceiver(bluetoothAddressBroadcastReceiver, filter)
+        } ?: Log.i(TAG, "Couldn't register receiver because context is null")
+    }
+
+    private fun unregisterBluetoothAddressReceiver() {
+        context?.also {
+            localBroadcastManager.unregisterReceiver(bluetoothAddressBroadcastReceiver)
+        } ?: Log.i(TAG, "Couldn't un-register receiver because context is null")
+    }
+
+    private fun initializeBluetoothAddressReceiver() {
+        bluetoothAddressBroadcastReceiver = BluetoothAddressBroadcastReceiver().also {
+            it.listener = this
+        }
     }
 
     private fun initializeDaggerComponent(context: Context) {
@@ -83,7 +116,7 @@ class SensorChooseFragment : Fragment() {
     }
 
     private fun observeSubmitSensorToPatientState() {
-        viewModel.getSubmitSensorToPatientState().observe(this, Observer {
+        viewModel.getSubmitSensorToPatientState().observe(viewLifecycleOwner, Observer {
             when(it.javaClass) {
                 SubmitSensorToPatientDoneState::class.java -> onSubmitSensorToPatientSuccessfully()
                 SubmitSensorToPatientFailedState::class.java -> onSubmitSensorToPatientFailed()
@@ -105,6 +138,13 @@ class SensorChooseFragment : Fragment() {
     }
 
     private fun isInputValid() = BluetoothAdapter.checkBluetoothAddress(sensor_address.text.toString().trim().toUpperCase())
+
+    override fun onBtAddressSubmitted(address: String) {
+        sensor_address.setText(address)
+        context?.also {
+            IndicationHelper.vibrate(it)
+        }
+    }
 
     companion object {
         fun newInstance() = SensorChooseFragment()

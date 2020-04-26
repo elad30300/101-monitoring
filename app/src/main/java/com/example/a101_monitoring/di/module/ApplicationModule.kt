@@ -1,6 +1,7 @@
 package com.example.a101_monitoring.di.module
 
 import android.app.Application
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.room.Room
 import com.example.a101_monitoring.data.database.ApplicationDatabase
 import dagger.Module
@@ -15,6 +16,10 @@ class ApplicationModule(val context: Application) {
     @Singleton
     @Provides
     fun provideApplicationContext() = context
+
+    @Singleton
+    @Provides
+    fun provideLocalBroadcastManager(context: Application) = LocalBroadcastManager.getInstance(context)
 
     @Singleton
     @Provides

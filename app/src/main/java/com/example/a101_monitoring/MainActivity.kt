@@ -10,12 +10,15 @@ import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkRequest
+import android.nfc.NdefMessage
 import android.nfc.NfcAdapter
 import android.nfc.Tag
+import android.nfc.tech.MifareUltralight
 import android.nfc.tech.NfcA
 import android.nfc.tech.NfcF
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Parcelable
 import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.Observer
@@ -25,6 +28,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
 import com.example.a101_monitoring.bluetooth.BluetoothController
 import com.example.a101_monitoring.data.model.Patient
+import com.example.a101_monitoring.nfc.NfcController
 import com.example.a101_monitoring.states.*
 import com.example.a101_monitoring.ui.AppBarContainer
 import com.example.a101_monitoring.ui.PatientsListFragment
@@ -36,6 +40,7 @@ import com.example.a101_monitoring.viewmodel.MainViewModel
 import com.example.a101_monitoring.viewmodel.SensorViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.activity_main.*
+import java.nio.charset.Charset
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInteractionListener,
@@ -48,6 +53,7 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
 
     @Inject lateinit var mainViewModel: MainViewModel
     @Inject lateinit var bluetoothController: BluetoothController
+    @Inject lateinit var nfcController: NfcController
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,24 +64,7 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
             it.inject(this)
         }
 
-        // nfc code
-//        NfcAdapter.getDefaultAdapter(this)?.also {
-//            val intent = Intent(this, javaClass).apply {
-//                addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-//            }
-//            pendingIntent = PendingIntent.getActivity(this, 0, intent, 0)
-//            val ndef = IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED).apply {
-//                try {
-//                    addDataType("plain/text")    /* Handles all MIME based dispatches.
-//                                 You should specify only the ones that you need. */
-//                } catch (e: IntentFilter.MalformedMimeTypeException) {
-//                    DefaultCallbacksHelper.onErrorDefault(TAG, "addDataType failed", e)
-//                }
-//            }
-//            intentFiltersArray = arrayOf(ndef)
-//            techListsArray = arrayOf(arrayOf(NfcF::class.java.name))
-//        } ?: Log.i(TAG, "this device doesn't have NFC / NFC is off")
-        //
+        initializeNfc()
 
         initializeAppBar()
 
@@ -96,33 +85,59 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
         observeStates()
     }
 
-//    override fun onPause() {
-//        super.onPause()
-//        NfcAdapter.getDefaultAdapter(this)?.disableForegroundDispatch(this)
-//    }
-//
-//    override fun onResume() {
-//        super.onResume()
-//        NfcAdapter.getDefaultAdapter(this)?.enableForegroundDispatch(this, pendingIntent, intentFiltersArray, techListsArray)
-//    }
+    private fun initializeNfc() {
+        NfcAdapter.getDefaultAdapter(this)?.also {
+            val intent = Intent(this, javaClass).apply {
+                addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            }
+            pendingIntent = PendingIntent.getActivity(this, 0, intent, 0)
+            val ndef = IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED).apply {
+                try {
+                    addDataType("text/plain")    /* Handles all MIME based dispatches.
+                                 You should specify only the ones that you need. */
+                } catch (e: IntentFilter.MalformedMimeTypeException) {
+                    DefaultCallbacksHelper.onErrorDefault(TAG, "addDataType failed", e)
+                }
+            }
+            intentFiltersArray = arrayOf(ndef)
+            techListsArray = arrayOf(arrayOf(NfcF::class.java.name))
+        } ?: Log.i(TAG, "this device doesn't have NFC / NFC is off")
+    }
 
-//    override fun onNewIntent(intent: Intent?) {
-//        super.onNewIntent(intent)
-//        intent?.also {
-//            when (it.action) {
-//                NfcAdapter.ACTION_NDEF_DISCOVERED -> onNdefTagScanned(it.getParcelableExtra(NfcAdapter.EXTRA_TAG))
-//                NfcAdapter.ACTION_ADAPTER_STATE_CHANGED -> onNfcAdapterStateChanged(it.getIntExtra(NfcAdapter.EXTRA_ADAPTER_STATE, 0))
-//            }
-//        }
-//    }
-//
-//    private fun onNdefTagScanned(tag: Tag) {
-//
-//    }
-//
-//    private fun onNfcAdapterStateChanged(state: Int) {
-//        NfcAdapter.ReaderCallback
-//    }
+    override fun onPause() {
+        super.onPause()
+        NfcAdapter.getDefaultAdapter(this)?.disableForegroundDispatch(this)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        NfcAdapter.getDefaultAdapter(this)?.enableForegroundDispatch(this, pendingIntent, intentFiltersArray, techListsArray)
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        intent?.also {
+            when (it.action) {
+                NfcAdapter.ACTION_NDEF_DISCOVERED -> { onNdefTagScanned(it.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES)) }
+                NfcAdapter.ACTION_ADAPTER_STATE_CHANGED -> onNfcAdapterStateChanged(it.getIntExtra(NfcAdapter.EXTRA_ADAPTER_STATE, 0))
+            }
+        }
+    }
+
+    private fun onNdefTagScanned(rawMessages: Array<Parcelable>) {
+        try {
+            val messages = rawMessages.map { it as NdefMessage }
+            nfcController.onNdefTagScanned(messages)
+        } catch (exception: Exception) {
+            Log.i(TAG, "Tag was scanned but is not NDEF tag, exception: ${exception.message}")
+            exception.printStackTrace()
+        }
+
+    }
+
+    private fun onNfcAdapterStateChanged(state: Int) {
+        TODO("Not implemented")
+    }
 
     override fun onDestroy() {
         super.onDestroy()
