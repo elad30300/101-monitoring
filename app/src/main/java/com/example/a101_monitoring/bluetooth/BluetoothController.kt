@@ -55,11 +55,16 @@ class BluetoothController @Inject constructor(
         }
 
         // for each sensor that in db and not connected - connect
-        sensorsAddresses.forEach {
-            if (!connectedAddresses.contains(it)) {
-                scan(it)
+        it.forEach {
+            if (!it.isConnected) {
+                scan(it.address)
             }
         }
+//        sensorsAddresses.forEach {
+//            if (!connectedAddresses.contains(it)) {
+//                scan(it)
+//            }
+//        }
 
         val unrelevantAddresses = connectedAddresses.filter {
             !sensorsAddresses.contains(it)
