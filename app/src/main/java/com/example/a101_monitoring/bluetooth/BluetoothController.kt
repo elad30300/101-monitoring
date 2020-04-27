@@ -3,7 +3,9 @@ package com.example.a101_monitoring.bluetooth
 import android.app.Application
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import com.example.a101_monitoring.bluetooth.handlers.BleDeviceHandler
@@ -29,6 +31,7 @@ class BluetoothController @Inject constructor(
 ) : Closeable {
 
     lateinit var sensors: LiveData<List<Sensor>>
+    private val scanDisposables = mutableMapOf<String, Disposable>()
 
     override fun close() {
         sensors.removeObserver(sensorsObserver)
@@ -46,6 +49,12 @@ class BluetoothController @Inject constructor(
     }
 
     private val sensorsObserver = Observer<List<Sensor>> {
+        scanDisposables.forEach { address, scanDisposable ->
+            scanDisposable.dispose()
+        }
+
+        scanDisposables.clear()
+
         val connectedAddresses = connectedDevicesList.map {
             it.getDevice()?.macAddress
         }
@@ -90,18 +99,17 @@ class BluetoothController @Inject constructor(
         val filters = buildScanFilter(address)
 
         Log.i(TAG, "Start scan for address $address")
-        var disposable: Disposable? = null
-         rxBleClient.scanBleDevices(settings, filters)
+        rxBleClient.scanBleDevices(settings, filters)
             .subscribe(
                 {
-                    onScanResult(it, disposable)
+                    onScanResult(it)
                 }, {
                     DefaultCallbacksHelper.onErrorDefault(TAG, "Scan for address $address failed", it)
                 }, {
                     DefaultCallbacksHelper.onSuccessDefault(TAG, "Scan for address $address completed")
                 }, {
                     DefaultCallbacksHelper.onSuccessDefault(TAG, "Scan for address $address was subscribed")
-                    disposable = it
+                    scanDisposables.put(address, it)
                 }
             )
     }
@@ -123,6 +131,7 @@ class BluetoothController @Inject constructor(
     private fun onScanResult(scanResult: ScanResult, scanDisposable: Disposable? = null) {
         DefaultCallbacksHelper.onSuccessDefault(TAG, "Scan for address ${scanResult.bleDevice.macAddress} succeeded, try to connect")
         scanDisposable?.dispose()
+        scanDisposables[scanResult.bleDevice.macAddress]?.dispose()
         getBleDeviceHandlerByScanResult(scanResult)?.apply {
             connect(this)
         } ?: Log.i(TAG, "Device from scan isn't from the supported sensors")
