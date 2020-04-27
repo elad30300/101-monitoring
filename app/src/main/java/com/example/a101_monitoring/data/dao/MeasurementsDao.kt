@@ -34,6 +34,7 @@ interface MeasurementsDao {
         WHERE patient_id = :patientId AND time = (
             SELECT MAX(time)
             FROM heart_rates
+            WHERE patient_id = :patientId
         )
         """)
     fun getLastHeartRateForPatient(patientId: PatientIdentityFieldType): LiveData<HeartRate?>
@@ -44,6 +45,7 @@ interface MeasurementsDao {
         WHERE patient_id = :patientId AND time = (
             SELECT MAX(time)
             FROM saturations
+            WHERE patient_id = :patientId
         )
         """)
     fun getLastSaturationForPatient(patientId: PatientIdentityFieldType): LiveData<Saturation?>
@@ -54,6 +56,7 @@ interface MeasurementsDao {
         WHERE patient_id = :patientId AND time = (
             SELECT MAX(time)
             FROM respirations
+            WHERE patient_id = :patientId
         )
         """)
     fun getLastRespiratoryRateForPatient(patientId: PatientIdentityFieldType): LiveData<List<RespiratoryRate>>

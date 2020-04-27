@@ -1,5 +1,6 @@
 package com.example.a101_monitoring.remote.adapter
 
+import android.util.Log
 import com.example.a101_monitoring.data.model.ReleaseReason
 import com.example.a101_monitoring.data.model.Room
 import com.example.a101_monitoring.remote.model.*

@@ -110,10 +110,8 @@ class MyPatientRecyclerViewAdapter(
         )
 
         fun initializePatientItemViewModel(patientId: PatientIdentityFieldType) {
-            patientItemViewModel = ViewModelProviders.of(
-                mFragment,
-                PatientItemViewModelFactory(mView.context, patientId))
-                .get(PatientItemViewModel::class.java)
+            patientItemViewModel = PatientItemViewModel(mFragment.context!!, patientId)
+            Log.d(PatientListItemViewHolderTag, "view model - $patientItemViewModel")
         }
 
         fun setChooseSensorButtonActionListener(patientId: PatientIdentityFieldType) {
@@ -175,4 +173,9 @@ class MyPatientRecyclerViewAdapter(
 //            return super.toString() + " '" + mContentView.text + "'"
 //        }
     }
+
+    companion object {
+        private const val PatientListItemViewHolderTag = "PatientItemViewHolder"
+    }
+
 }
