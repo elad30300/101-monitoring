@@ -15,6 +15,8 @@ class MainViewModel @Inject constructor(
     private val versioningRepository: VersioningRepository
 ) : ViewModel() {
 
+    fun getCheckPatientExistState() = patientRepository.getCheckPatientExistState()
+
     fun getRegisterPatientState() = patientRepository.getRegisterPatientState()
 
     fun getSignInPatientState() = patientRepository.getSignInPatientState()
