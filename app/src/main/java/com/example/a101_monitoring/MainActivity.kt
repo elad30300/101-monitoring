@@ -1,12 +1,13 @@
 package com.example.a101_monitoring
 
 import android.Manifest
-import android.app.AlertDialog
-import android.app.Application
-import android.app.PendingIntent
+import android.app.*
 import android.bluetooth.BluetoothAdapter
+import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkRequest
@@ -16,11 +17,15 @@ import android.nfc.Tag
 import android.nfc.tech.MifareUltralight
 import android.nfc.tech.NfcA
 import android.nfc.tech.NfcF
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Parcelable
+import android.provider.Settings
+import android.telephony.TelephonyManager
 import android.util.Log
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
@@ -28,6 +33,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
 import com.example.a101_monitoring.bluetooth.BluetoothController
 import com.example.a101_monitoring.data.model.Patient
+import com.example.a101_monitoring.download.DownloadController
 import com.example.a101_monitoring.nfc.NfcController
 import com.example.a101_monitoring.states.*
 import com.example.a101_monitoring.ui.AppBarContainer
@@ -191,7 +197,8 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_FINE_LOCATION
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.READ_PHONE_STATE
         )
         requestPermissions(
             PERMISSIONS_STORAGE,
@@ -208,6 +215,9 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
                     Log.i(TAG, "Network is available")
                     networkConnectionDialog?.dismiss()
                     TimeHelper.instance.initializeTimer()
+                    runOnUiThread {
+                        validateVersion()
+                    }
                 }
 
                 override fun onLost(network: Network?) {
@@ -335,6 +345,76 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
         Toast.makeText(this, R.string.manual_measurements_fail_message, Toast.LENGTH_LONG).show()
     }
 
+    private fun validateVersion() {
+        Log.i(TAG, "Called validate version")
+        val phoneId: String
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)
+            == PackageManager.PERMISSION_GRANTED) {
+            Log.i(TAG, "Permission granted")
+            val tm = (getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager)
+            phoneId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                tm.imei
+                    ?: Settings.Secure.getString(applicationContext.contentResolver, Settings.Secure.ANDROID_ID)
+            } else {
+                tm.deviceId
+                    ?: Settings.Secure.getString(applicationContext.contentResolver, Settings.Secure.ANDROID_ID)
+            }
+
+            mainViewModel.getLatestVersion(phoneId, tm.voiceMailNumber, BuildConfig.VERSION_CODE.toString()).observe(this, Observer {
+                it?.let { uri ->
+                    Log.i(TAG, "Received apk uri, calling download")
+                    showProgress(DownloadController(this, uri.toString()).enqueueDownload())
+                }
+            })
+        } else {
+            Log.i("Permission", "no Permissions")
+        }
+    }
+
+    private fun showProgress(downloadId: Long) {
+        val progressBarDialog = ProgressDialog(this)
+        progressBarDialog.setTitle("Download App Data, Please Wait")
+        progressBarDialog.setCancelable(false)
+        progressBarDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL)
+        progressBarDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "אישור") { _, _ -> }
+
+        progressBarDialog.progress = 0
+
+        Thread(Runnable {
+            var downloading = true
+            val manager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+            while (downloading) {
+
+                val q = DownloadManager.Query()
+                q.setFilterById(downloadId)
+                val cursor = manager.query(q)
+                cursor.moveToFirst()
+                var bytes_downloaded = cursor.getInt(cursor
+                    .getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR))
+                var bytes_total = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES))
+
+                if (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)) == DownloadManager.STATUS_SUCCESSFUL) {
+                    downloading = false
+                }
+
+                val dl_progress: Int = ((bytes_downloaded * 100L) / bytes_total).toInt()
+
+                runOnUiThread {
+                    progressBarDialog.progress = dl_progress
+                }
+                cursor.close()
+            }
+        }).start()
+
+        progressBarDialog.show()
+        progressBarDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setOnClickListener {
+            if (progressBarDialog.progress == 100) {
+                progressBarDialog.dismiss()
+            } else {
+                Toast.makeText(this, "נא להמתין לסיום עדכון התוכנה", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
 
     companion object {
         private const val TAG = "MainActivity"

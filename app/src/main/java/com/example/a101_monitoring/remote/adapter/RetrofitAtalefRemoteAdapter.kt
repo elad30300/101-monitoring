@@ -5,6 +5,7 @@ import com.example.a101_monitoring.data.model.ReleaseReason
 import com.example.a101_monitoring.data.model.Room
 import com.example.a101_monitoring.remote.model.*
 import com.example.a101_monitoring.remote.service.AtalefService
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -14,53 +15,107 @@ import javax.inject.Singleton
 @Singleton
 class RetrofitAtalefRemoteAdapter(
     private val atalefService: AtalefService
-)  : AtalefRemoteAdapter {
+) : AtalefRemoteAdapter {
 
 
-    override fun register(patient: PatientBody, onResponse: OnResponseCallback<PatientBody>, onFailed: OnFailedCallback,
-                          onError: OnErrorCallback) {
+    override fun register(
+        patient: PatientBody,
+        onResponse: OnResponseCallback<PatientBody>,
+        onFailed: OnFailedCallback,
+        onError: OnErrorCallback
+    ) {
         request(atalefService.register(patient), onResponse, onFailed, onError)
     }
 
-    override fun signIn(patient: PatientSignInBody, onResponse: OnResponseCallback<PatientBody>, onFailed: OnFailedCallback, onError: OnErrorCallback) {
+    override fun signIn(
+        patient: PatientSignInBody,
+        onResponse: OnResponseCallback<PatientBody>,
+        onFailed: OnFailedCallback,
+        onError: OnErrorCallback
+    ) {
         request(atalefService.signIn(patient), onResponse, onFailed, onError)
     }
 
-    override fun getDepartments(onResponse: OnResponseCallback<List<DepartmentBody>>, onFailed: OnFailedCallback,
-                                onError: OnErrorCallback) {
+    override fun getDepartments(
+        onResponse: OnResponseCallback<List<DepartmentBody>>, onFailed: OnFailedCallback,
+        onError: OnErrorCallback
+    ) {
         request(atalefService.getDepartments(), onResponse, onFailed, onError)
     }
 
-    override fun getAvailableBeds(room: String, departmentId: Int, onResponse: OnResponseCallback<List<String>>,
-                                  onFailed: OnFailedCallback, onError: OnErrorCallback) {
+    override fun getAvailableBeds(
+        room: String, departmentId: Int, onResponse: OnResponseCallback<List<String>>,
+        onFailed: OnFailedCallback, onError: OnErrorCallback
+    ) {
         request(atalefService.getAvailableBeds(room, departmentId), onResponse, onFailed, onError)
     }
 
-    override fun getReleaseReasons(onResponse: OnResponseCallback<List<ReleaseReasonBody>>, onFailed: OnFailedCallback,
-                                   onError: OnErrorCallback) {
+    override fun getReleaseReasons(
+        onResponse: OnResponseCallback<List<ReleaseReasonBody>>, onFailed: OnFailedCallback,
+        onError: OnErrorCallback
+    ) {
         request(atalefService.getReleaseReasons(), onResponse, onFailed, onError)
     }
 
-    override fun releasePatient(releasePatientRequestBody: ReleasePatientRequestBody, onResponse: OnResponseCallback<GeneralResponse>,
-        onFailed: OnFailedCallback, onError: OnErrorCallback
+    override fun releasePatient(
+        releasePatientRequestBody: ReleasePatientRequestBody,
+        onResponse: OnResponseCallback<GeneralResponse>,
+        onFailed: OnFailedCallback,
+        onError: OnErrorCallback
     ) {
-        request(atalefService.releasePatient(releasePatientRequestBody), onResponse, onFailed, onError)
+        request(
+            atalefService.releasePatient(releasePatientRequestBody),
+            onResponse,
+            onFailed,
+            onError
+        )
     }
 
-    override fun sendMeasurement(measurementBody: MeasurementBody, onResponse: OnResponseCallback<GeneralResponse>,
-                                 onFailed: OnFailedCallback, onError: OnErrorCallback) {
+    override fun sendMeasurement(
+        measurementBody: MeasurementBody, onResponse: OnResponseCallback<GeneralResponse>,
+        onFailed: OnFailedCallback, onError: OnErrorCallback
+    ) {
         request(atalefService.postMeasurements(measurementBody), onResponse, onFailed, onError)
     }
 
-    override fun sendBloodPressure(bloodPressureBody: BloodPressureBody, onResponse: OnResponseCallback<BooleanResponse>, onFailed: OnFailedCallback, onError: OnErrorCallback) {
+    override fun sendBloodPressure(
+        bloodPressureBody: BloodPressureBody,
+        onResponse: OnResponseCallback<BooleanResponse>,
+        onFailed: OnFailedCallback,
+        onError: OnErrorCallback
+    ) {
         request(atalefService.postBloodPressure(bloodPressureBody), onResponse, onFailed, onError)
     }
 
-    override fun sendBodyTemperature(bodyTemperatureBody: BodyTemperatureBody, onResponse: OnResponseCallback<BooleanResponse>, onFailed: OnFailedCallback, onError: OnErrorCallback) {
-        request(atalefService.postBodyTemperature(bodyTemperatureBody), onResponse, onFailed, onError)
+    override fun sendBodyTemperature(
+        bodyTemperatureBody: BodyTemperatureBody,
+        onResponse: OnResponseCallback<BooleanResponse>,
+        onFailed: OnFailedCallback,
+        onError: OnErrorCallback
+    ) {
+        request(
+            atalefService.postBodyTemperature(bodyTemperatureBody),
+            onResponse,
+            onFailed,
+            onError
+        )
     }
 
-    private fun <T: Any>request(call: Call<T>, onResponse: OnResponseCallback<T>, onFailed: OnFailedCallback, onError: OnErrorCallback) {
+    override fun getLatestVersion(
+        version: Version,
+        onResponse: OnResponseCallback<ResponseBody>,
+        onFailed: OnFailedCallback,
+        onError: OnErrorCallback
+    ) {
+        request(atalefService.getLatestVersion(version), onResponse, onFailed, onError)
+    }
+
+    private fun <T : Any> request(
+        call: Call<T>,
+        onResponse: OnResponseCallback<T>,
+        onFailed: OnFailedCallback,
+        onError: OnErrorCallback
+    ) {
         call.enqueue(object : Callback<T> {
             override fun onResponse(call: Call<T>, response: Response<T>) {
                 if (response.isSuccessful && response.body() != null) {
@@ -70,13 +125,17 @@ class RetrofitAtalefRemoteAdapter(
                     onFailed(Exception(failMessage))
                 }
             }
+
             override fun onFailure(call: Call<T>, t: Throwable) {
                 onError(t)
             }
         })
     }
 
-    private fun <T: Any>buildFailMessageForResponse(response: Response<T>, baseMessage: String): String = baseMessage
+    private fun <T : Any> buildFailMessageForResponse(
+        response: Response<T>,
+        baseMessage: String
+    ): String = baseMessage
 
     companion object {
         const val TAG = "RetrofitAtalefAdapter"
