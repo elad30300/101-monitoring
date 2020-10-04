@@ -1,7 +1,5 @@
 package com.example.a101_monitoring.di.component
 
-import com.example.a101_monitoring.MainActivity
-import com.example.a101_monitoring.MyApplication
 import com.example.a101_monitoring.bluetooth.handlers.NoninHandler
 import com.example.a101_monitoring.di.module.ApplicationModule
 import com.example.a101_monitoring.di.module.ApplicationSubcomponentModule
