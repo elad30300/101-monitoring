@@ -2,6 +2,7 @@ package com.example.a101_monitoring.remote.service
 
 import com.example.a101_monitoring.data.model.ReleaseReason
 import com.example.a101_monitoring.remote.model.*
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.*
 
@@ -17,7 +18,10 @@ interface AtalefService {
     fun getDepartments(): Call<List<DepartmentBody>>
 
     @GET("patients/beds")
-    fun getAvailableBeds(@Query("roomNumber") room: String, @Query("DepartmentId") departmentId: Int): Call<List<String>>
+    fun getAvailableBeds(
+        @Query("roomNumber") room: String,
+        @Query("DepartmentId") departmentId: Int
+    ): Call<List<String>>
 
     @GET("releaseReasons")
     fun getReleaseReasons(): Call<List<ReleaseReasonBody>>
@@ -33,4 +37,7 @@ interface AtalefService {
 
     @POST("measurements/manual/bloodPressure")
     fun postBloodPressure(@Body bloodPressureBody: BloodPressureBody): Call<BooleanResponse>
+
+    @POST("version/update")
+    fun getLatestVersion(@Body version: Version): Call<ResponseBody>
 }

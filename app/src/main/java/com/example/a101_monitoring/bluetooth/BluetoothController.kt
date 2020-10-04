@@ -2,10 +2,7 @@ package com.example.a101_monitoring.bluetooth
 
 import android.app.Application
 import android.bluetooth.BluetoothAdapter
-import android.content.Context
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import com.example.a101_monitoring.bluetooth.handlers.BleDeviceHandler

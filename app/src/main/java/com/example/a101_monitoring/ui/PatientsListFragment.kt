@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
+import com.example.a101_monitoring.BuildConfig
 import com.example.a101_monitoring.MyApplication
 import com.example.a101_monitoring.R
 import com.example.a101_monitoring.data.model.Patient
@@ -88,6 +89,8 @@ class PatientsListFragment : Fragment() {
         if (context is OnListFragmentInteractionListener) {
             listener = context
         }
+
+        (context as? AppBarContainer)?.onFragmentSetTitleRequest("${resources.getString(R.string.app_name)} - v${BuildConfig.VERSION_NAME}")
 
         initializePatientsListComponent(context)
     }
