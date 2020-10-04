@@ -253,11 +253,29 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
     private fun hasNetworkConnection() = (getSystemService(Application.CONNECTIVITY_SERVICE) as ConnectivityManager).activeNetwork != null
 
     private fun observeStates() {
+        observerCheckPatientExistState()
         observerRegisterPatientState()
         observeSignInPatientState()
         observeSubmitSensorToPatientState()
         observeBloodPressureState()
         observeBodyTemperatureState()
+    }
+
+    private fun observerCheckPatientExistState() {
+        mainViewModel.getCheckPatientExistState().observe(this, Observer {
+            when(it.javaClass) {
+                CheckPatientExistDoneState::class.java -> onFoundPatientExist()
+                CheckPatientExistFailedState::class.java -> onCheckPatientExistFailed()
+            }
+        })
+    }
+
+    private fun onFoundPatientExist() {
+        Toast.makeText(this, R.string.check_patient_exist_success_message, Toast.LENGTH_LONG).show()
+    }
+
+    private fun onCheckPatientExistFailed() {
+        Toast.makeText(this, R.string.check_patient_exist_fail_message, Toast.LENGTH_LONG).show()
     }
 
     private fun observerRegisterPatientState() {

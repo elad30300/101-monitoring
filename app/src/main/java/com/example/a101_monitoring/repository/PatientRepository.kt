@@ -34,6 +34,7 @@ class PatientRepository @Inject constructor(
     private val executor: Executor
 ) {
 
+    private val checkPatientExistState = MutableLiveData<CheckPatientExistState>()
     private val registerPatientState = MutableLiveData<RegisterPatientState>()
     private val signInPatientState = MutableLiveData<SignInPatientState>()
     private val submitSensorToPatientState = MutableLiveData<SubmitSensorToPatientState>()
@@ -43,6 +44,7 @@ class PatientRepository @Inject constructor(
     private val departments = departmentDao.getAll()
     private val availableBeds = MutableLiveData<List<String>>()
 
+    fun getCheckPatientExistState(): LiveData<CheckPatientExistState> = checkPatientExistState
     fun getRegisterPatientState(): LiveData<RegisterPatientState> = registerPatientState
     fun getSignInPatientState(): LiveData<SignInPatientState> = signInPatientState
     fun getSubmitSensorToPatientState(): LiveData<SubmitSensorToPatientState> = submitSensorToPatientState
@@ -159,18 +161,32 @@ class PatientRepository @Inject constructor(
     fun registerPatient(identityNumber: String, deptId: Int, room: String, bed: String, haitiId: String, registeredDoctor: String,
                         isCitizen: Boolean, isOxygen: Int, isActive: Boolean, sensorAddress: String = "") {
         val patientBody = PatientBody(0, identityNumber, deptId, room, bed, haitiId, registeredDoctor, isCitizen, isOxygen, isActive)
-        registerPatientState.postValue(RegisterPatientWorkingState())
-        registerPatientToRemote(patientBody,
-            {
-                onPatientRegisteredSuccessfullyToRemote(it, sensorAddress)
-            }, {
-                DefaultCallbacksHelper.onErrorDefault(TAG, "Failure: register patient ${identityNumber} to remote failed", it)
-                registerPatientState.postValue(RegisterPatientFailedState())
-            }, {
-                DefaultCallbacksHelper.onErrorDefault(TAG, "Error: register patient ${identityNumber} to remote failed", it)
-                registerPatientState.postValue(RegisterPatientFailedState())
-            }
-        )
+        executor.execute {
+            checkPatientExistState.postValue(CheckPatientExistWorkingState())
+            atalefRemoteAdapter.signIn(PatientSignInBody(identityNumber),
+                {
+                    Log.d(TAG, "try to register to an existing patient")
+                    checkPatientExistState.postValue(CheckPatientExistDoneState())
+                }, {
+                    checkPatientExistState.postValue(CheckPatientExistNotWorkingState())
+                    registerPatientState.postValue(RegisterPatientWorkingState())
+                    registerPatientToRemote(patientBody,
+                        {
+                            onPatientRegisteredSuccessfullyToRemote(it, sensorAddress)
+                        }, {
+                            DefaultCallbacksHelper.onErrorDefault(TAG, "Failure: register patient ${identityNumber} to remote failed", it)
+                            registerPatientState.postValue(RegisterPatientFailedState())
+                        }, {
+                            DefaultCallbacksHelper.onErrorDefault(TAG, "Error: register patient ${identityNumber} to remote failed", it)
+                            registerPatientState.postValue(RegisterPatientFailedState())
+                        }
+                    )
+                }, {
+                    DefaultCallbacksHelper.onErrorDefault(TAG, "Error: sign in request for patient ${identityNumber} to remote failed", it)
+                    checkPatientExistState.postValue(CheckPatientExistFailedState())
+                }
+            )
+        }
     }
 
     private fun registerPatientToRemote(patientBody: PatientBody, onResponseCallback: OnResponseCallback<PatientBody>, onFailed: OnFailedCallback, onError: OnErrorCallback) {
