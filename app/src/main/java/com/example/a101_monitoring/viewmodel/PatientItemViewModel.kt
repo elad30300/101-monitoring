@@ -22,6 +22,8 @@ class PatientItemViewModel(
     @Inject lateinit var measurementsRepository: MeasurementsRepository
 
     var isPatientConnectedToSensor: LiveData<Boolean?>
+    var isPatientSensorConnecting: LiveData<Boolean?>
+    var isPatientSensorScanning: LiveData<Boolean?>
 
     val heartRate: LiveData<HeartRate?>
     val saturation: LiveData<Saturation?>
@@ -33,6 +35,8 @@ class PatientItemViewModel(
         }
 
         isPatientConnectedToSensor = patientRepository.isPatientConnectedToSensor(patientId)
+        isPatientSensorConnecting = patientRepository.isPatientSensorConnecting(patientId)
+        isPatientSensorScanning = patientRepository.isPatientSensorScanning(patientId)
         heartRate = measurementsRepository.getLastHeartRateForPatient(patientId)
         saturation = measurementsRepository.getLastSaturationForPatient(patientId)
         respiratoryRate = measurementsRepository.getLastRespiratoryRateForPatient(patientId)

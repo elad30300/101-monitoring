@@ -24,7 +24,7 @@ interface PatientDao {
     @Query("SELECT address FROM patients WHERE ${Patient.IDENTITY_FIELD_IN_DB} = :patientId")
     fun getSensorAddress(patientId: PatientIdentityFieldType): LiveData<String?>
 
-    @Query("SELECT address, is_connected FROM patients")
+    @Query("SELECT address, is_scanning, is_connecting, is_connected FROM patients")
     fun getAllSensors(): LiveData<List<Sensor>>
 
     @Query("UPDATE patients SET address = :sensorAddress , is_connected = :isConnected WHERE ${Patient.IDENTITY_FIELD_IN_DB} = :patientId")
@@ -33,11 +33,20 @@ interface PatientDao {
     @Query("UPDATE patients SET is_connected = :isConnected WHERE address = :sensorAddress")
     fun setSensorIsConnected(sensorAddress: String, isConnected: Boolean)
 
+    @Query("UPDATE patients SET is_scanning = :isScanning, is_connecting = :isConnecting, is_connected = :isConnected WHERE address = :sensorAddress")
+    fun setSensorState(sensorAddress: String, isScanning: Boolean, isConnecting: Boolean, isConnected: Boolean)
+
     @Query("UPDATE patients SET is_connected = :isConnected")
     fun setAllSensorsIsConnected(isConnected: Boolean)
 
     @Query("SELECT is_connected FROM patients WHERE ${Patient.IDENTITY_FIELD_IN_DB} = :patientId")
     fun isPatientConnectedToSensor(patientId: PatientIdentityFieldType): LiveData<Boolean?>
+
+    @Query("SELECT is_scanning FROM patients WHERE ${Patient.IDENTITY_FIELD_IN_DB} = :patientId")
+    fun isPatientSensorScanning(patientId: PatientIdentityFieldType): LiveData<Boolean?>
+
+    @Query("SELECT is_connecting FROM patients WHERE ${Patient.IDENTITY_FIELD_IN_DB} = :patientId")
+    fun isPatientSensorConnecting(patientId: PatientIdentityFieldType): LiveData<Boolean?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertPatients(vararg patients: Patient)

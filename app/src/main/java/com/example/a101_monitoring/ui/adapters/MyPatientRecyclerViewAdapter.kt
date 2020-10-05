@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
@@ -25,6 +26,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 import kotlinx.android.synthetic.main.fragment_patient.view.*
+import kotlinx.android.synthetic.main.sensor_choose_fragment.*
 import kotlinx.android.synthetic.main.sensor_choose_fragment.view.*
 
 
@@ -96,6 +98,8 @@ class MyPatientRecyclerViewAdapter(
     inner class ViewHolder(val mView: View) : RecyclerView.ViewHolder(mView) {
         val mIdView: TextView = mView.patient_id
         val mSensorIndicator: ImageView = mView.sensor_connection_indicator
+        val mSensorProgressBar: ProgressBar = mView.sensor_proccess_progress_bar
+        val mSensorStatus: TextView = mView.sensor_procces_status_text_view
         val mSaturation: TextView = mView.saturation
         val mHeartRate: TextView = mView.heart_rate
         val mRespiratoryRate: TextView = mView.respiratory_rate
@@ -125,6 +129,30 @@ class MyPatientRecyclerViewAdapter(
             patientItemViewModel.isPatientConnectedToSensor.observe(mFragment.viewLifecycleOwner, Observer {
                 val resourceId = (if (it == null) indicatorBackgroundMap[false] else indicatorBackgroundMap[it!!])
                 mSensorIndicator.background = mView.context.resources.getDrawable(resourceId!!)
+                mSensorProgressBar.visibility = View.GONE
+                mSensorStatus.visibility = View.GONE
+            })
+            patientItemViewModel.isPatientSensorScanning.observe(mFragment.viewLifecycleOwner, Observer {
+                it?.also { scanning ->
+                    val connecting = patientItemViewModel.isPatientSensorConnecting.value
+                    val visibilityBool = if (connecting == null) scanning else (connecting!! || scanning)
+                    mSensorProgressBar.visibility = if (visibilityBool) View.VISIBLE else View.GONE
+                    mSensorStatus.visibility = if (visibilityBool) View.VISIBLE else View.GONE
+                    if (scanning) {
+                        mSensorStatus.text = "סורק"
+                    }
+                }
+            })
+            patientItemViewModel.isPatientSensorConnecting.observe(mFragment.viewLifecycleOwner, Observer {
+                it?.also { connecting ->
+                    val scanning = patientItemViewModel.isPatientSensorScanning.value
+                    val visibilityBool = if (scanning == null) connecting else (scanning!! || connecting)
+                    mSensorProgressBar.visibility = if (visibilityBool) View.VISIBLE else View.GONE
+                    mSensorStatus.visibility = if (visibilityBool) View.VISIBLE else View.GONE
+                    if (connecting) {
+                        mSensorStatus.text = "מתחבר"
+                    }
+                }
             })
         }
 

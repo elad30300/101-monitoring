@@ -61,6 +61,8 @@ class PatientRepository @Inject constructor(
     fun getPatientIdBySensorAddress(address: String) = patientDao.getPatientIdBySensorAddress(address)
 
     fun isPatientConnectedToSensor(patientId: PatientIdentityFieldType) = patientDao.isPatientConnectedToSensor(patientId)
+    fun isPatientSensorConnecting(patientId: PatientIdentityFieldType) = patientDao.isPatientSensorConnecting(patientId)
+    fun isPatientSensorScanning(patientId: PatientIdentityFieldType) = patientDao.isPatientSensorScanning(patientId)
 
     fun getSensorAddress(patientId: PatientIdentityFieldType) = patientDao.getSensorAddress(patientId)
 
@@ -270,6 +272,19 @@ class PatientRepository @Inject constructor(
                 Log.d(TAG, "Set sensor is connected to ${isConnected} with address $sensorAddress in dao successfully")
             } catch (ex: Exception) {
                 Log.e(TAG, "Set sensor is connected to ${isConnected} with address $sensorAddress in dao failed, stacktrace:")
+                ex.printStackTrace()
+//                registerPatientState.postValue(false)
+            }
+        }
+    }
+
+    fun setSensorState(sensorAddress: String, isScanning: Boolean, isConnecting: Boolean, isConnected: Boolean) {
+        executor.execute {
+            try {
+                patientDao.setSensorState(sensorAddress, isScanning, isConnecting, isConnected)
+                Log.d(TAG, "Set sensor is state: scanning($isScanning), connecting($isConnecting), connected($isConnected) with address $sensorAddress in dao successfully")
+            } catch (ex: Exception) {
+                Log.e(TAG, "Set sensor state: scanning($isScanning), connecting($isConnecting), connected($isConnected) with address $sensorAddress in dao failed, stacktrace:")
                 ex.printStackTrace()
 //                registerPatientState.postValue(false)
             }

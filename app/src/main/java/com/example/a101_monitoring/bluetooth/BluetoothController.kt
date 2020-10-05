@@ -103,6 +103,9 @@ class BluetoothController @Inject constructor(
     private val scanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: android.bluetooth.le.ScanResult?) {
             super.onScanResult(callbackType, result)
+            getCurrentScanAddress()?.also {
+                patientRepository.setSensorState(it, false, false, false)
+            }
             setIsScanning(false)
             result?.device?.also { device ->
                 if (isDeviceInConnectingList(device.address) || isDeviceInConnectedList(device.address) || getCurrentScanAddress() != device.address) {
@@ -148,7 +151,8 @@ class BluetoothController @Inject constructor(
                 Log.d(TAG, "added ${it.device.address} to connected devices list")
                 printConnectedDevices()
             }
-            patientRepository.setSensorIsConnected(gatt.device.address, true)
+//            patientRepository.setSensorIsConnected(gatt.device.address, true)
+            patientRepository.setSensorState(gatt.device.address, false, false, true)
             executor.execute {
                 Log.d(TAG, "about to discover services")
                 it.discoverServices()
@@ -175,7 +179,8 @@ class BluetoothController @Inject constructor(
                 Log.d(TAG, "removed device ${gatt.device.address} from connected devices list")
                 printConnectedDevices()
             }
-            patientRepository.setSensorIsConnected(it.device.address, false)
+//            patientRepository.setSensorIsConnected(it.device.address, false)
+            patientRepository.setSensorState(gatt.device.address, false, false, false)
         }
     }
 
@@ -430,7 +435,11 @@ class BluetoothController @Inject constructor(
     }
 
     private fun initializeSensors() {
+
         sensors = patientRepository.getSensors().apply {
+//            this.value?.forEach {
+//                patientRepository.setSensorState()
+//            }
             observeForever(sensorsObserver)
         }
     }
@@ -538,6 +547,9 @@ class BluetoothController @Inject constructor(
         scanCallback: ScanCallback
     ) {
         setIsScanning(true)
+        getCurrentScanAddress()?.also {
+            patientRepository.setSensorState(it, true, false, false)
+        }
         bluetoothLeScanner.startScan(scanFilters, scanSettings, scanCallback)
     }
 
@@ -545,6 +557,9 @@ class BluetoothController @Inject constructor(
         if (getIsScanning()) {
             bluetoothLeScanner.stopScan(scanCallback)
             setIsScanning(false)
+            getCurrentScanAddress()?.also {
+                patientRepository.setSensorState(it, false, false, false)
+            }
             continueScanQueue()
             maintainScans()
         }
@@ -639,6 +654,7 @@ class BluetoothController @Inject constructor(
         executor.execute {
             Log.d(TAG, "about to connect to ${device.address}")
             synchronized(sharedResourcesLock) {
+                patientRepository.setSensorState(device.address, false, true, false)
                 connectingDevices.add(device.address)
                 Log.d(TAG, "added ${device.address} to connecting devices list")
                 printConnectingDevices()
