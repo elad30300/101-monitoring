@@ -76,6 +76,7 @@ class RegisterPatientFragment : Fragment() {
 
     private fun onPatientRegisteredSuccessfully() {
         register_patient_progress_bar.visibility = View.INVISIBLE
+        fetchBedsForRoom()
 //        view?.findNavController()?.popBackStack()
     }
 
@@ -141,6 +142,19 @@ class RegisterPatientFragment : Fragment() {
                     room?.apply {
                         registerPatientViewModel.updateAvailableBeds(this)
                     }
+                }
+            }
+        }
+    }
+
+    private fun fetchBedsForRoom() {
+        val roomText = room_spinner.text.toString()
+        registerPatientViewModel.departments.value?.also {
+            val department = it.filter { it.department.name == department_spinner.text.toString() }.firstOrNull()
+            department?.also {
+                val room = department.rooms.filter { it.name == roomText }.firstOrNull()
+                room?.apply {
+                    registerPatientViewModel.updateAvailableBeds(this)
                 }
             }
         }
