@@ -134,6 +134,20 @@ class BluetoothController @Inject constructor(
         }
     }
 
+    private fun removeFromConnectingDevicesList(address: String) {
+        if (connectingDevices.removeIf { it == address }) {
+            Log.d(TAG, "removed device $address from connecting devices list")
+            printConnectingDevices()
+        }
+    }
+
+    private fun removeFromConnectedDevicesList(address: String) {
+        if (connectedDevices.removeIf { it.device.address == address }) {
+            Log.d(TAG, "removed device ${address} from connected devices list")
+            printConnectingDevices()
+        }
+    }
+
     override fun onConnected(gatt: BluetoothGatt?) {
         gatt?.also {
             DefaultCallbacksHelper.onSuccessDefault(
@@ -141,12 +155,8 @@ class BluetoothController @Inject constructor(
                 "Establish connection to device with address ${it.device.address} succeeded"
             )
             synchronized(sharedResourcesLock) {
-                connectingDevices.removeIf { connectingAddress -> connectingAddress == it.device.address }
-                Log.d(TAG, "removed ${it.device.address} to connecting devices list")
-                printConnectingDevices()
-                connectedDevices.add(it)
-                Log.d(TAG, "added ${it.device.address} to connected devices list")
-                printConnectedDevices()
+                removeFromConnectingDevicesList(it.device.address)
+                removeFromConnectedDevicesList(it.device.address)
             }
             patientRepository.setSensorIsConnected(gatt.device.address, true)
             executor.execute {
@@ -171,9 +181,8 @@ class BluetoothController @Inject constructor(
 //        connectedDevicesList.remove(deviceHandler)
             it.close()
             synchronized(sharedResourcesLock) {
-                connectedDevices.removeIf { gatt -> gatt.device.address == it.device.address }
-                Log.d(TAG, "removed device ${gatt.device.address} from connected devices list")
-                printConnectedDevices()
+                removeFromConnectingDevicesList(it.device.address)
+                removeFromConnectedDevicesList(it.device.address)
             }
             patientRepository.setSensorIsConnected(it.device.address, false)
         }
@@ -205,7 +214,10 @@ class BluetoothController @Inject constructor(
                         .also { char ->
                             char.getDescriptor(CLIENT_CONFIG_DESCRIPTOR_UUID).also { descriptor ->
                                 var count = 1000
-                                Log.d(TAG, "try to write to descriptor notifications to nonin oxymetry with count $count")
+                                Log.d(
+                                    TAG,
+                                    "try to write to descriptor notifications to nonin oxymetry with count $count"
+                                )
                                 descriptor.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
                                 while (count-- > 0 && !gatt.writeDescriptor(descriptor)) {
                                     Thread.sleep(10)
@@ -215,7 +227,10 @@ class BluetoothController @Inject constructor(
                                     )
                                 }
                                 if (count == 0) {
-                                    Log.e(TAG, "write to descriptor notifications to nonin oxymetry failed")
+                                    Log.e(
+                                        TAG,
+                                        "write to descriptor notifications to nonin oxymetry failed"
+                                    )
                                     // todo: disconnect and reconnect later
                                 }
                             }
@@ -230,7 +245,10 @@ class BluetoothController @Inject constructor(
                 service.getCharacteristic(UUID.fromString(NoninHandler.NoninGattAttributes.OximeteryService.Characteritics.NONIN_OXIMTERY_MEASURMENT))
                     .also { char ->
                         var count = 1000
-                        Log.d(TAG, "device ${gatt?.device?.address} try to setup notifications to nonin oximetry with count $count")
+                        Log.d(
+                            TAG,
+                            "device ${gatt?.device?.address} try to setup notifications to nonin oximetry with count $count"
+                        )
                         while (count-- > 0 && !gatt.setCharacteristicNotification(char, true)) {
                             Thread.sleep(10)
                             Log.d(
@@ -239,7 +257,10 @@ class BluetoothController @Inject constructor(
                             )
                         }
                         if (count == 0) {
-                            Log.e(TAG, "device ${gatt?.device?.address} setup notifications to nonin oximetry failed")
+                            Log.e(
+                                TAG,
+                                "device ${gatt?.device?.address} setup notifications to nonin oximetry failed"
+                            )
                             // todo: disconnect and reconnect later
                         }
                     }
@@ -257,7 +278,11 @@ class BluetoothController @Inject constructor(
                             "device ${gatt?.device?.address} try to disable notifications from nonin oximetry with count $count"
                         )
                         synchronized(sharedResourcesLock) {
-                            while (count-- > 0 && !gatt.setCharacteristicNotification(char, false)) {
+                            while (count-- > 0 && !gatt.setCharacteristicNotification(
+                                    char,
+                                    false
+                                )
+                            ) {
                                 Thread.sleep(10)
                                 Log.d(
                                     TAG,
@@ -266,7 +291,10 @@ class BluetoothController @Inject constructor(
                             }
                         }
                         if (count == 0) {
-                            Log.e(TAG, "device ${gatt?.device?.address} disable notifications to nonin oxymetry failed")
+                            Log.e(
+                                TAG,
+                                "device ${gatt?.device?.address} disable notifications to nonin oxymetry failed"
+                            )
                             // todo: disconnect and reconnect later
                         }
                     }
@@ -291,7 +319,10 @@ class BluetoothController @Inject constructor(
                             )
                         }
                         if (count == 0) {
-                            Log.e(TAG, "device ${gatt?.device?.address} setup notifications to nonin respiration failed")
+                            Log.e(
+                                TAG,
+                                "device ${gatt?.device?.address} setup notifications to nonin respiration failed"
+                            )
                             // todo: disconnect and reconnect later
                         }
                     }
@@ -336,7 +367,10 @@ class BluetoothController @Inject constructor(
             val heartRate = ((bytes[8].toInt() and 0xff) shl 8) or ((bytes[9].toInt()) and 0xff)
             Log.i(
                 NoninHandler.TAG,
-                "device ${gatt?.device?.address} - nonin oximetry message, saturation: ${if (isSaturationValueMissing(saturation)) "missing" else saturation}, hr: ${if (isHeartRateValueMissing(
+                "device ${gatt?.device?.address} - nonin oximetry message, saturation: ${if (isSaturationValueMissing(
+                        saturation
+                    )
+                ) "missing" else saturation}, hr: ${if (isHeartRateValueMissing(
                         heartRate
                     )
                 ) "missing" else heartRate}"
