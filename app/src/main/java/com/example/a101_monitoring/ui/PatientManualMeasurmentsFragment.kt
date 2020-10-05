@@ -93,14 +93,22 @@ class PatientManualMeasurmentsFragment : Fragment() {
 
     private fun isPatientTemperatureInputValid(): Boolean {
         val input = patient_manual_temperature.text.toString().trim()
-        return input.toFloatOrNull() != null
+        return input.toFloatOrNull()?.let {
+            it in 33.0..43.0
+        } ?: false
     }
 
     private fun isPatientBloodPressureInputValid(): Boolean {
         val diastolicText = patient_manual_diastolic.text.toString().trim()
         val systolicText = patient_manual_systolic.text.toString().trim()
 
-        return diastolicText != "" && systolicText != "" && diastolicText.toIntOrNull() != null && systolicText.toIntOrNull() != null
+        val diastolicValue = diastolicText.toIntOrNull()
+        val systolicValue = systolicText.toIntOrNull()
+        if (diastolicText != "" && systolicText != "" && diastolicValue != null && systolicValue != null) {
+            return diastolicValue >= 20 && diastolicValue <= systolicValue
+        } else {
+            return false
+        }
     }
 
     private fun observeStates() {
