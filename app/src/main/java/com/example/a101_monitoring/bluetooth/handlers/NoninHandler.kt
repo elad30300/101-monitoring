@@ -1,5 +1,6 @@
 package com.example.a101_monitoring.bluetooth.handlers
 
+import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.util.Log
 import com.example.a101_monitoring.MyApplication
@@ -143,7 +144,7 @@ class NoninHandler(
     private fun isRespiratoryRateValueMissing(value: Int) = isMeasurmentMissing(value, NoninGattAttributes.OximeteryService.Characteritics.RESPIRATORY_RATE_MISSING_VALUE)
     private fun isMeasurmentMissing(value: Int, missingValue: Int) = value == missingValue
 
-    private object NoninGattAttributes {
+    object NoninGattAttributes {
 
         object OximeteryService {
             const val NONIN_OXIMTERY_SERVICE = "46A970E0-0D5F-11E2-8B5E-0002A5D5C51B"

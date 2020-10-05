@@ -1,10 +1,13 @@
 package com.example.a101_monitoring.bluetooth.handlers
 
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothGattCallback
 import com.polidea.rxandroidble2.RxBleConnection
 import com.polidea.rxandroidble2.RxBleDevice
 import io.reactivex.disposables.Disposable
 
 abstract class BleDeviceHandler(
+//    val gattCallback: BluetoothGattCallback
     private val device: RxBleDevice
 ) {
 
