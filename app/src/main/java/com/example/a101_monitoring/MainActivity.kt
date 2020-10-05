@@ -152,7 +152,9 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
     }
 
     override fun onFragmentSetTitleRequest(title: String) {
-        toolbar.title = title
+        toolbar?.also {
+            it.title = title
+        }
     }
 
     private fun initializeAppBar() {
