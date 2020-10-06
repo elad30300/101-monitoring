@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "420304385712",
+    "firebase_url": "https://atalef-nitur.firebaseio.com",
+    "project_id": "atalef-nitur",
+    "storage_bucket": "atalef-nitur.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:420304385712:android:3d43697941cb2765572d75",
+        "android_client_info": {
+          "package_name": "com.example.a101_monitoring"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "420304385712-e40eik1q78jvd41bjjcr20sk38bj5fo4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAzKfuVBVItkhPtEzNnhgLVK_gTNbxzsNk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "420304385712-e40eik1q78jvd41bjjcr20sk38bj5fo4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

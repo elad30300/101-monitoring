@@ -3,6 +3,8 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: "androidx.navigation.safeargs.kotlin"
+apply plugin: 'com.google.gms.google-services'  // Google Services plugin
+apply plugin: 'com.google.firebase.crashlytics'
 
 android {
     compileSdkVersion 28
@@ -108,4 +110,8 @@ dependencies {
 
     // azure logs
     implementation 'com.microsoft.azure.android:azure-storage-android:0.8.0@aar'
+
+    // firebase services
+    implementation 'com.google.firebase:firebase-crashlytics:17.2.2'
+//    implementation 'com.google.firebase:firebase-crashlytics-ktx:17.2.2'
 }

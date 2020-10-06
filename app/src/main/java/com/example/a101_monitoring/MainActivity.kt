@@ -46,6 +46,7 @@ import com.example.a101_monitoring.viewmodel.MainViewModel
 import com.example.a101_monitoring.viewmodel.SensorViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.activity_main.*
+import java.lang.RuntimeException
 import java.nio.charset.Charset
 import javax.inject.Inject
 
