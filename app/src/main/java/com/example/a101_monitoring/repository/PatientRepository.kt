@@ -7,6 +7,7 @@ import com.example.a101_monitoring.data.dao.DepartmentDao
 import com.example.a101_monitoring.data.dao.PatientDao
 import com.example.a101_monitoring.data.dao.RoomDao
 import com.example.a101_monitoring.data.model.*
+import com.example.a101_monitoring.log.logger.Logger
 import com.example.a101_monitoring.remote.adapter.AtalefRemoteAdapter
 import com.example.a101_monitoring.remote.adapter.OnErrorCallback
 import com.example.a101_monitoring.remote.adapter.OnResponseCallback
@@ -31,7 +32,8 @@ class PatientRepository @Inject constructor(
     private val departmentDao: DepartmentDao,
     private val roomDao: RoomDao,
     private val atalefRemoteAdapter: AtalefRemoteAdapter,
-    private val executor: Executor
+    private val executor: Executor,
+    private val logger: Logger
 ) {
 
     private val checkPatientExistState = MutableLiveData<CheckPatientExistState>()
@@ -82,9 +84,9 @@ class PatientRepository @Inject constructor(
             atalefRemoteAdapter.getAvailableBeds(room.name, room.departmentId, {
                 onGotAvailableBeds(it)
             }, {
-                DefaultCallbacksHelper.onErrorDefault(TAG, "failed to fetch available beds for room ${room.name}, department ${room.departmentId} from remote", it)
+                DefaultCallbacksHelper.onErrorDefault(TAG, "failed to fetch available beds for room ${room.name}, department ${room.departmentId} from remote", it, logger)
             }, {
-                DefaultCallbacksHelper.onErrorDefault(TAG, "error in fetch available beds for room ${room.name}, department ${room.departmentId} from remote", it)
+                DefaultCallbacksHelper.onErrorDefault(TAG, "error in fetch available beds for room ${room.name}, department ${room.departmentId} from remote", it, logger)
             })
         }
     }
@@ -99,9 +101,9 @@ class PatientRepository @Inject constructor(
                 {
                     onGetDepartmentsFromRemote(it)
                 }, {
-                    DefaultCallbacksHelper.onErrorDefault(TAG, "failed to fetch departments from remote", it)
+                    DefaultCallbacksHelper.onErrorDefault(TAG, "failed to fetch departments from remote", it, logger)
                 }, {
-                    DefaultCallbacksHelper.onErrorDefault(TAG, "error in fetch departments from remote", it)
+                    DefaultCallbacksHelper.onErrorDefault(TAG, "error in fetch departments from remote", it, logger)
                 }
             )
         }
@@ -123,7 +125,7 @@ class PatientRepository @Inject constructor(
                 // TODO change that to more efficient refresh - delete non-existing departments and update only updated departments
                 departmentDao.deleteAll()
             } catch (exception: Exception) {
-                DefaultCallbacksHelper.onErrorDefault(TAG, "problem in deleting all departments", exception)
+                DefaultCallbacksHelper.onErrorDefault(TAG, "problem in deleting all departments", exception, logger)
             }
         }
     }
@@ -133,7 +135,7 @@ class PatientRepository @Inject constructor(
             try {
                 departmentDao.insert(department)
             } catch (exception: Exception) {
-                DefaultCallbacksHelper.onErrorDefault(TAG, "problem in inserting departments (list)", exception)
+                DefaultCallbacksHelper.onErrorDefault(TAG, "problem in inserting departments (list)", exception, logger)
             }
         }
     }
@@ -143,7 +145,7 @@ class PatientRepository @Inject constructor(
             try {
                 departmentDao.insert(departments)
             } catch (exception: Exception) {
-                DefaultCallbacksHelper.onErrorDefault(TAG, "problem in inserting departments (list)", exception)
+                DefaultCallbacksHelper.onErrorDefault(TAG, "problem in inserting departments (list)", exception, logger)
             }
         }
     }
@@ -153,7 +155,7 @@ class PatientRepository @Inject constructor(
             try {
                 roomDao.insert(rooms)
             } catch (exception: Exception) {
-                DefaultCallbacksHelper.onErrorDefault(TAG, "problem in inserting rooms (list)", exception)
+                DefaultCallbacksHelper.onErrorDefault(TAG, "problem in inserting rooms (list)", exception, logger)
             }
         }
     }
@@ -174,15 +176,15 @@ class PatientRepository @Inject constructor(
                         {
                             onPatientRegisteredSuccessfullyToRemote(it, sensorAddress)
                         }, {
-                            DefaultCallbacksHelper.onErrorDefault(TAG, "Failure: register patient ${identityNumber} to remote failed", it)
+                            DefaultCallbacksHelper.onErrorDefault(TAG, "Failure: register patient ${identityNumber} to remote failed", it, logger)
                             registerPatientState.postValue(RegisterPatientFailedState())
                         }, {
-                            DefaultCallbacksHelper.onErrorDefault(TAG, "Error: register patient ${identityNumber} to remote failed", it)
+                            DefaultCallbacksHelper.onErrorDefault(TAG, "Error: register patient ${identityNumber} to remote failed", it, logger)
                             registerPatientState.postValue(RegisterPatientFailedState())
                         }
                     )
                 }, {
-                    DefaultCallbacksHelper.onErrorDefault(TAG, "Error: sign in request for patient ${identityNumber} to remote failed", it)
+                    DefaultCallbacksHelper.onErrorDefault(TAG, "Error: sign in request for patient ${identityNumber} to remote failed", it, logger)
                     checkPatientExistState.postValue(CheckPatientExistFailedState())
                 }
             )
@@ -200,10 +202,10 @@ class PatientRepository @Inject constructor(
             sensor = Sensor(sensorAddress)
         }
         insertPatient(patient, {
-            DefaultCallbacksHelper.onSuccessDefault(TAG, "insert patient with id ${patient.id} in dao successfully")
+            DefaultCallbacksHelper.onSuccessDefault(TAG, "insert patient with id ${patient.id} in dao successfully", logger)
             registerPatientState.postValue(RegisterPatientDoneState())
         }, {
-            DefaultCallbacksHelper.onErrorDefault(TAG, "insert patient with id ${patient.id} in dao failed", it)
+            DefaultCallbacksHelper.onErrorDefault(TAG, "insert patient with id ${patient.id} in dao failed", it, logger)
             registerPatientState.postValue(RegisterPatientFailedState())
         })
     }
@@ -215,10 +217,10 @@ class PatientRepository @Inject constructor(
                 {
                     onSignInResponse(it)
                 }, {
-                    DefaultCallbacksHelper.onErrorDefault(TAG, "Failure: sign in request for patient ${patientId} to remote failed - patient not exist", it)
+                    DefaultCallbacksHelper.onErrorDefault(TAG, "Failure: sign in request for patient ${patientId} to remote failed - patient not exist", it, logger)
                     signInPatientState.postValue(SignInPatientFailedState())
                 }, {
-                    DefaultCallbacksHelper.onErrorDefault(TAG, "Error: sign in request for patient ${patientId} to remote failed", it)
+                    DefaultCallbacksHelper.onErrorDefault(TAG, "Error: sign in request for patient ${patientId} to remote failed", it, logger)
                     signInPatientState.postValue(SignInPatientFailedState())
                 }
             )
@@ -228,10 +230,10 @@ class PatientRepository @Inject constructor(
     private fun onSignInResponse(patientBody: PatientBody) {
         val patientFromRemote = DataRemoteHelper.fromPatientBodyToPatient(patientBody)
         insertPatient(patientFromRemote, {
-            DefaultCallbacksHelper.onSuccessDefault(TAG, "sign in patient with id ${it.id} in dao successfully")
+            DefaultCallbacksHelper.onSuccessDefault(TAG, "sign in patient with id ${it.id} in dao successfully", logger)
             signInPatientState.postValue(SignInPatientDoneState())
         }, {
-            DefaultCallbacksHelper.onErrorDefault(TAG, "sign in patient with id ${patientBody.id} in dao failed", it)
+            DefaultCallbacksHelper.onErrorDefault(TAG, "sign in patient with id ${patientBody.id} in dao failed", it, logger)
             signInPatientState.postValue(SignInPatientFailedState())
         })
     }
@@ -252,10 +254,10 @@ class PatientRepository @Inject constructor(
         executor.execute {
             try {
                 patientDao.updateSensorToPatient(patientId, sensorAddress)
-                Log.d(TAG, "Set sensor with address $sensorAddress to patient with id $patientId in dao successfully")
+                logger.d(TAG, "Set sensor with address $sensorAddress to patient with id $patientId in dao successfully")
                 submitSensorToPatientState.postValue(SubmitSensorToPatientDoneState())
             } catch (ex: Exception) {
-                Log.e(TAG, "Set sensor with address $sensorAddress to patient with id $patientId in dao failed, stacktrace:")
+                logger.e(TAG, "Set sensor with address $sensorAddress to patient with id $patientId in dao failed, stacktrace:")
                 ex.printStackTrace()
                 submitSensorToPatientState.postValue(SubmitSensorToPatientFailedState())
             }
@@ -267,9 +269,9 @@ class PatientRepository @Inject constructor(
             try {
                 sendSensorConnectionStatusToRemote(patientDao.getPatientBySensorAddress(sensorAddress), isConnected)
                 patientDao.setSensorIsConnected(sensorAddress, isConnected)
-                Log.d(TAG, "Set sensor is connected to ${isConnected} with address $sensorAddress in dao successfully")
+                logger.d(TAG, "Set sensor is connected to ${isConnected} with address $sensorAddress in dao successfully")
             } catch (ex: Exception) {
-                Log.e(TAG, "Set sensor is connected to ${isConnected} with address $sensorAddress in dao failed, stacktrace:")
+                logger.e(TAG, "Set sensor is connected to ${isConnected} with address $sensorAddress in dao failed, stacktrace:")
                 ex.printStackTrace()
 //                registerPatientState.postValue(false)
             }
@@ -281,10 +283,10 @@ class PatientRepository @Inject constructor(
             try {
                 patientDao.setAllSensorsIsConnected(isConnected)
                 patientDao.getAll().value?.forEach {
-                    Log.i(TAG, "about to send sensor connection for ${it.getIdentityField()}")
+                    logger.i(TAG, "about to send sensor connection for ${it.getIdentityField()}")
                     sendSensorConnectionStatusToRemote(patientDao.getPatientBySensorAddress(it.sensor.address), isConnected)
                 }
-                Log.d(TAG, "Set all sensors is connected to ${isConnected} in dao successfully")
+                logger.d(TAG, "Set all sensors is connected to ${isConnected} in dao successfully")
             } catch (ex: Exception) {
                 Log.e(TAG, "Set all sensors is connected to ${isConnected} in dao failed, stacktrace:")
                 ex.printStackTrace()
@@ -298,12 +300,12 @@ class PatientRepository @Inject constructor(
             atalefRemoteAdapter.releasePatient(
                 ReleasePatientRequestBody(patient.id, patient.deptId, releaseReason.id),
                 {
-                    Log.i(TAG, "patient $patientId was successfully released from remote")
+                    logger.i(TAG, "patient $patientId was successfully released from remote")
                     onPatientReleased(patient)
                 }, {
-                    DefaultCallbacksHelper.onErrorDefault(TAG, "failure in release patient $patientId from remote", it)
+                    DefaultCallbacksHelper.onErrorDefault(TAG, "failure in release patient $patientId from remote", it, logger)
                 }, {
-                    DefaultCallbacksHelper.onErrorDefault(TAG, "error in release patient $patientId from remote", it)
+                    DefaultCallbacksHelper.onErrorDefault(TAG, "error in release patient $patientId from remote", it, logger)
                 }
             )
         }
@@ -326,10 +328,10 @@ class PatientRepository @Inject constructor(
                 {
                     onBloodPressureSentResponse(patientId, it)
                 }, {
-                    DefaultCallbacksHelper.onErrorDefault(TAG, "failure: send blood pressure pressure for $patientId")
+                    DefaultCallbacksHelper.onErrorDefault(TAG, "failure: send blood pressure pressure for $patientId", logger = logger)
                     bloodPressureState.postValue(BloodPressureFailedState())
                 }, {
-                    DefaultCallbacksHelper.onErrorDefault(TAG, "error: send blood pressure pressure for $patientId")
+                    DefaultCallbacksHelper.onErrorDefault(TAG, "error: send blood pressure pressure for $patientId", logger = logger)
                     bloodPressureState.postValue(BloodPressureFailedState())
                 })
         }
@@ -337,10 +339,10 @@ class PatientRepository @Inject constructor(
 
     private fun onBloodPressureSentResponse(patientId: PatientIdentityFieldType, response: BooleanResponse) {
         if (!response.result) {
-            DefaultCallbacksHelper.onSuccessDefault(TAG, "blood pressure was sent successfully for $patientId")
+            DefaultCallbacksHelper.onSuccessDefault(TAG, "blood pressure was sent successfully for $patientId", logger = logger)
             bloodPressureState.postValue(BloodPressureDoneState())
         } else {
-            DefaultCallbacksHelper.onSuccessDefault(TAG, "failed send blood pressure pressure for $patientId")
+            DefaultCallbacksHelper.onSuccessDefault(TAG, "failed send blood pressure pressure for $patientId", logger = logger)
             bloodPressureState.postValue(BloodPressureFailedState())
         }
     }
@@ -354,10 +356,10 @@ class PatientRepository @Inject constructor(
                 {
                     onBodyTemperatureSentResponse(patientId, it)
                 }, {
-                    DefaultCallbacksHelper.onErrorDefault(TAG, "failure: send body temperature pressure for $patientId")
+                    DefaultCallbacksHelper.onErrorDefault(TAG, "failure: send body temperature pressure for $patientId", logger = logger)
                     bodyTemperatureState.postValue(BodyTemepratureFailedState())
                 }, {
-                    DefaultCallbacksHelper.onErrorDefault(TAG, "error: send body temperature pressure for $patientId")
+                    DefaultCallbacksHelper.onErrorDefault(TAG, "error: send body temperature pressure for $patientId", logger = logger)
                     bodyTemperatureState.postValue(BodyTemepratureFailedState())
                 })
         }
@@ -365,10 +367,10 @@ class PatientRepository @Inject constructor(
 
     private fun onBodyTemperatureSentResponse(patientId: PatientIdentityFieldType, response: BooleanResponse) {
         if (!response.result) {
-            DefaultCallbacksHelper.onSuccessDefault(TAG, "body temperature was sent successfully for $patientId")
+            DefaultCallbacksHelper.onSuccessDefault(TAG, "body temperature was sent successfully for $patientId", logger = logger)
             bodyTemperatureState.postValue(BodyTemperatureDoneState())
         } else {
-            DefaultCallbacksHelper.onSuccessDefault(TAG, "failed send body temperature pressure for $patientId")
+            DefaultCallbacksHelper.onSuccessDefault(TAG, "failed send body temperature pressure for $patientId", logger = logger)
             bodyTemperatureState.postValue(BodyTemepratureFailedState())
         }
     }
@@ -386,16 +388,16 @@ class PatientRepository @Inject constructor(
                 {
                     onSensorConnectionStatusSuccess(patient, isConnected)
                 }, {
-                    DefaultCallbacksHelper.onErrorDefault(TAG, "failure: send connection status (connected = $isConnected) for patient ${patient.getIdentityField()}")
+                    DefaultCallbacksHelper.onErrorDefault(TAG, "failure: send connection status (connected = $isConnected) for patient ${patient.getIdentityField()}", logger = logger)
                 }, {
-                    DefaultCallbacksHelper.onErrorDefault(TAG, "error: send connection status (connected = $isConnected) for patient ${patient.getIdentityField()}")
+                    DefaultCallbacksHelper.onErrorDefault(TAG, "error: send connection status (connected = $isConnected) for patient ${patient.getIdentityField()}", logger = logger)
                 }
             )
         }
     }
 
     private fun onSensorConnectionStatusSuccess(patient: Patient, isConnected: Boolean) {
-        DefaultCallbacksHelper.onSuccessDefault(TAG, "sent connection status (connected = $isConnected) for patient ${patient.getIdentityField()} successfully")
+        DefaultCallbacksHelper.onSuccessDefault(TAG, "sent connection status (connected = $isConnected) for patient ${patient.getIdentityField()} successfully", logger = logger)
     }
 
     companion object {

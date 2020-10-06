@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.a101_monitoring.data.dao.ReleaseReasonsDao
 import com.example.a101_monitoring.data.model.ReleaseReason
+import com.example.a101_monitoring.log.logger.Logger
 import com.example.a101_monitoring.remote.adapter.AtalefRemoteAdapter
 import com.example.a101_monitoring.remote.model.ReleaseReasonBody
 import com.example.a101_monitoring.utils.DataRemoteHelper
@@ -19,7 +20,8 @@ import javax.inject.Singleton
 class ReleaseReasonsRepository @Inject constructor(
     private val releaseReasonsDao: ReleaseReasonsDao,
     private val atalefRemoteAdapter: AtalefRemoteAdapter,
-    private val executor: Executor
+    private val executor: Executor,
+    private val logger: Logger
 ) {
 
     private val password = "2" // TODO: should be hashed so decompiler won't have access to password
@@ -44,16 +46,16 @@ class ReleaseReasonsRepository @Inject constructor(
                 {
                     onGetReleaseReasonsFromRemote(it)
                 }, {
-                    DefaultCallbacksHelper.onErrorDefault(TAG, "failure in fetch release reasons from remote", it)
+                    DefaultCallbacksHelper.onErrorDefault(TAG, "failure in fetch release reasons from remote", it, logger = logger)
                 }, {
-                    DefaultCallbacksHelper.onErrorDefault(TAG, "error in fetch release reasons from remote", it)
+                    DefaultCallbacksHelper.onErrorDefault(TAG, "error in fetch release reasons from remote", it, logger = logger)
                 }
             )
         }
     }
 
     private fun onGetReleaseReasonsFromRemote(releaseReasons: List<ReleaseReasonBody>) {
-        Log.d(TAG, "got ${releaseReasons.size} from remote")
+        logger.d(TAG, "got ${releaseReasons.size} from remote")
         insertReleaseReasons(DataRemoteHelper.fromRemoteToDataReleaseReasonList(releaseReasons))
     }
 

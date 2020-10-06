@@ -45,7 +45,7 @@ class AzureLoggingTool(environment: Environments) {
             logBlob.createOrReplace()
         }
 
-        logBlob.appendText(message)
+        logBlob.appendText("$message\n")
     }
 
     companion object {

@@ -7,6 +7,7 @@ import com.example.a101_monitoring.data.model.HeartRate
 import com.example.a101_monitoring.data.model.PatientIdentityFieldType
 import com.example.a101_monitoring.data.model.RespiratoryRate
 import com.example.a101_monitoring.data.model.Saturation
+import com.example.a101_monitoring.log.logger.Logger
 import com.example.a101_monitoring.remote.adapter.AtalefRemoteAdapter
 import com.example.a101_monitoring.remote.model.MeasurementBody
 import com.example.a101_monitoring.utils.DataRemoteHelper
@@ -23,7 +24,8 @@ class MeasurementsRepository @Inject constructor(
     private val measurementsDao: MeasurementsDao,
     private val patientDao: PatientDao,
     private val atalefRemoteAdapter: AtalefRemoteAdapter,
-    private val executor: Executor
+    private val executor: Executor,
+    private val logger: Logger
 ) {
 
     fun getAllHeartRates() = measurementsDao.getAllHeartRates()
@@ -59,7 +61,7 @@ class MeasurementsRepository @Inject constructor(
 
     private fun sendMeasurements(heartRate: HeartRate?, saturation: Saturation?, respiratoryRate: RespiratoryRate?) {
         if (heartRate == null && saturation == null && respiratoryRate == null) {
-            Log.e(TAG, "try to send to remote all missing measurements")
+            logger.e(TAG, "try to send to remote all missing measurements")
             return
         }
         val patientId = heartRate?.patientId ?: saturation?.patientId ?: respiratoryRate?.patientId
@@ -74,25 +76,25 @@ class MeasurementsRepository @Inject constructor(
                 {
                     onMeasurementSentToRemote(measurements)
                 }, {
-                    DefaultCallbacksHelper.onErrorDefault(TAG, "failure: send measurements to remote $measurements")
+                    DefaultCallbacksHelper.onErrorDefault(TAG, "failure: send measurements to remote $measurements", logger = logger)
                 }, {
-                    DefaultCallbacksHelper.onErrorDefault(TAG, "error: send measurements to remote $measurements")
+                    DefaultCallbacksHelper.onErrorDefault(TAG, "error: send measurements to remote $measurements", logger = logger)
                 }
             )
         }
     }
 
     private fun onMeasurementSentToRemote(sentMeasurements: MeasurementBody) {
-        DefaultCallbacksHelper.onSuccessDefault(TAG, "sent measurements $sentMeasurements successfully to remote")
+        DefaultCallbacksHelper.onSuccessDefault(TAG, "sent measurements $sentMeasurements successfully to remote", logger = logger)
     }
 
     fun insertHeartRates(heartRate: HeartRate) {
         executor.execute {
-            Log.d(TAG, "insert $heartRate")
+            logger.d(TAG, "insert $heartRate")
             try {
                 measurementsDao.insertHeartRates(heartRate)
             } catch (exception: Exception) {
-                DefaultCallbacksHelper.onErrorDefault(TAG, "insert heart rate failed", exception)
+                DefaultCallbacksHelper.onErrorDefault(TAG, "insert heart rate failed", exception, logger = logger)
             }
         }
     }
@@ -102,7 +104,7 @@ class MeasurementsRepository @Inject constructor(
             try {
                 measurementsDao.updateHeartRates(heartRate)
             } catch (exception: Exception) {
-                DefaultCallbacksHelper.onErrorDefault(TAG, "update heart rate failed", exception)
+                DefaultCallbacksHelper.onErrorDefault(TAG, "update heart rate failed", exception, logger = logger)
             }
         }
     }
@@ -112,7 +114,7 @@ class MeasurementsRepository @Inject constructor(
             try {
                 measurementsDao.deleteHeartRates(heartRate)
             } catch (exception: Exception) {
-                DefaultCallbacksHelper.onErrorDefault(TAG, "delete heart rate failed", exception)
+                DefaultCallbacksHelper.onErrorDefault(TAG, "delete heart rate failed", exception, logger = logger)
             }
         }
     }
@@ -123,7 +125,7 @@ class MeasurementsRepository @Inject constructor(
             try {
                 measurementsDao.insertSaturations(saturation)
             } catch (exception: Exception) {
-                DefaultCallbacksHelper.onErrorDefault(TAG, "insert saturation failed", exception)
+                DefaultCallbacksHelper.onErrorDefault(TAG, "insert saturation failed", exception, logger = logger)
             }
         }
     }
@@ -133,7 +135,7 @@ class MeasurementsRepository @Inject constructor(
             try {
                 measurementsDao.updateSaturations(saturation)
             } catch (exception: Exception) {
-                DefaultCallbacksHelper.onErrorDefault(TAG, "update saturation failed", exception)
+                DefaultCallbacksHelper.onErrorDefault(TAG, "update saturation failed", exception, logger = logger)
             }
         }
     }
@@ -143,7 +145,7 @@ class MeasurementsRepository @Inject constructor(
             try {
                 measurementsDao.deleteSaturations(saturation)
             } catch (exception: Exception) {
-                DefaultCallbacksHelper.onErrorDefault(TAG, "delete saturation failed", exception)
+                DefaultCallbacksHelper.onErrorDefault(TAG, "delete saturation failed", exception, logger = logger)
             }
         }
     }
@@ -154,7 +156,7 @@ class MeasurementsRepository @Inject constructor(
             try {
                 measurementsDao.insertRespiratoryRates(respiratoryRate)
             } catch (exception: Exception) {
-                DefaultCallbacksHelper.onErrorDefault(TAG, "insert respiratory rate failed", exception)
+                DefaultCallbacksHelper.onErrorDefault(TAG, "insert respiratory rate failed", exception, logger = logger)
             }
         }
     }
@@ -164,7 +166,7 @@ class MeasurementsRepository @Inject constructor(
             try {
                 measurementsDao.updateRespiratoryRates(respiratoryRate)
             } catch (exception: Exception) {
-                DefaultCallbacksHelper.onErrorDefault(TAG, "update respiratory rate failed", exception)
+                DefaultCallbacksHelper.onErrorDefault(TAG, "update respiratory rate failed", exception, logger = logger)
             }
         }
     }
@@ -174,7 +176,7 @@ class MeasurementsRepository @Inject constructor(
             try {
                 measurementsDao.deleteRespiratoryRates(respiratoryRate)
             } catch (exception: Exception) {
-                DefaultCallbacksHelper.onErrorDefault(TAG, "delete respiratory rate failed", exception)
+                DefaultCallbacksHelper.onErrorDefault(TAG, "delete respiratory rate failed", exception, logger = logger)
             }
         }
     }
