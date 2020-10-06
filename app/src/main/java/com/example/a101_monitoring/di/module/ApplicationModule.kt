@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.room.Room
 import com.example.a101_monitoring.data.database.ApplicationDatabase
+import com.example.a101_monitoring.log.logger.Logger
 import dagger.Module
 import dagger.Provides
 import java.util.concurrent.Executor
@@ -16,6 +17,9 @@ class ApplicationModule(val context: Application) {
     @Singleton
     @Provides
     fun provideApplicationContext() = context
+
+    @Singleton
+    @Provides fun provideLogger() = Logger()
 
     @Singleton
     @Provides

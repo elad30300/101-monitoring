@@ -105,4 +105,7 @@ dependencies {
     // True time
     implementation 'com.github.instacart.truetime-android:library-extension-rx:3.3'
     //
+
+    // azure logs
+    implementation 'com.microsoft.azure.android:azure-storage-android:0.8.0@aar'
 }

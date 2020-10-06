@@ -15,6 +15,7 @@ import com.example.a101_monitoring.data.model.HeartRate
 import com.example.a101_monitoring.data.model.RespiratoryRate
 import com.example.a101_monitoring.data.model.Saturation
 import com.example.a101_monitoring.data.model.Sensor
+import com.example.a101_monitoring.log.logger.Logger
 import com.example.a101_monitoring.repository.MeasurementsRepository
 import com.example.a101_monitoring.repository.PatientRepository
 import com.example.a101_monitoring.utils.DefaultCallbacksHelper
@@ -34,7 +35,8 @@ class BluetoothController @Inject constructor(
     private val context: Application,
 //    private val rxBleClient: RxBleClient,
     private val patientRepository: PatientRepository,
-    private val measurementsRepository: MeasurementsRepository
+    private val measurementsRepository: MeasurementsRepository,
+    private val logger: Logger
 ) : Closeable, GattCallback.Delegate {
 
     @field:[Inject Named("BleExecutor")]
