@@ -53,6 +53,9 @@ class GattCallback() : BluetoothGattCallback() {
                 onDisconnected(gatt)
             }
         } else {
+            if (status == 133 || status == 128) {
+                Thread.sleep(100)
+            }
             onDisconnected(gatt)
         }
     }

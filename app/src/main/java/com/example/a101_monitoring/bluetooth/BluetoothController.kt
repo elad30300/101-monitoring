@@ -678,7 +678,7 @@ class BluetoothController @Inject constructor(
                 printConnectingDevices()
             }
             val gattCallback = GattCallback().apply { delegate = this@BluetoothController }
-            device.connectGatt(context, false, gattCallback)
+            device.connectGatt(context, false, gattCallback, BluetoothDevice.TRANSPORT_LE)
         }
     }
 
