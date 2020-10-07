@@ -20,6 +20,10 @@ class ReleasePatientDialogViewModel @Inject constructor(
         patientRepository.releasePatient(patientId, releaseReason)
     }
 
+    fun removePatientLocally(patientId: PatientIdentityFieldType) {
+        patientRepository.removePatientLocally(patientId)
+    }
+
     fun checkReleaseAccessPassword(password: String) = releaseReasonsRepository.checkReleaseAccessPassword(password)
 
 }

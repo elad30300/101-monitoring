@@ -10,10 +10,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
-import android.widget.EditText
-import android.widget.Toast
+import android.widget.*
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.navArgs
@@ -33,6 +30,7 @@ class ReleasePatientDialogFragment(
 
     private lateinit var mReleaseReasonsSpinner: AutoCompleteTextView
     private lateinit var mPasswordEditText: EditText
+    private lateinit var mRemoveLocallyChackBox: CheckBox
     private var mActivity: Activity? = null
 
     @Inject lateinit var viewModel: ReleasePatientDialogViewModel
@@ -78,6 +76,7 @@ class ReleasePatientDialogFragment(
     private fun initializeChildViews(view: View) {
         mReleaseReasonsSpinner = view.release_reason_spinner
         mPasswordEditText = view.release_password_text
+        mRemoveLocallyChackBox = view.remove_locally_checkbox
 
         viewModel.releaseReasons.observe(activity!!, Observer {
             val releaseReasonsDescriptions = it.map { it.description }
@@ -89,9 +88,18 @@ class ReleasePatientDialogFragment(
                 mReleaseReasonsSpinner.setText(mReleaseReasonsSpinner.adapter.getItem(0) as String, false)
             }
         })
+
+        mRemoveLocallyChackBox.setOnCheckedChangeListener { buttonView, isChecked ->
+            mReleaseReasonsSpinner.isEnabled = !isChecked
+            mPasswordEditText.isEnabled = !isChecked
+        }
     }
 
     private fun onReleaseButtonClicked() {
+        if (mRemoveLocallyChackBox.isChecked) {
+            viewModel.removePatientLocally(patientId)
+            return
+        }
         if (isInputValid()) {
             viewModel.releaseReasons.value?.also {
                 val releaseReason = it.filter { it.description == mReleaseReasonsSpinner.text.toString() }.firstOrNull()

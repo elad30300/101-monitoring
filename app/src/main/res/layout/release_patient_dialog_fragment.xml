@@ -36,7 +36,7 @@
         app:layout_constraintTop_toBottomOf="@id/release_reasons_container"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/remove_locally_checkbox"
         android:layout_margin="16dp"
         >
 
@@ -48,5 +48,17 @@
             tools:layout_editor_absoluteY="142dp" />
 
     </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/remove_locally_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="מחיקה מקומית"
+        app:layout_constraintTop_toBottomOf="@id/release_password_container"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:checked="true"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
