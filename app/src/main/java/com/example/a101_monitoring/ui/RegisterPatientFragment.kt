@@ -188,8 +188,8 @@ class RegisterPatientFragment : Fragment() {
                 bed_spinner.text.toString().trim(),
                 patient_haiti.text.toString().trim(),
                 doctor.text.toString().trim(),
-                is_civilian_switch.isSelected,
-                if (is_breathed_switch.isSelected) 1 else 0,
+                is_civilian_switch.isChecked,
+                if (is_breathed_switch.isChecked) 1 else 0,
                 true
             )
         } else {

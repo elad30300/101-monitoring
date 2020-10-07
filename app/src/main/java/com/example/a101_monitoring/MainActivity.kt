@@ -34,6 +34,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.example.a101_monitoring.bluetooth.BluetoothController
 import com.example.a101_monitoring.data.model.Patient
 import com.example.a101_monitoring.download.DownloadController
+import com.example.a101_monitoring.log.logger.Logger
 import com.example.a101_monitoring.nfc.NfcController
 import com.example.a101_monitoring.states.*
 import com.example.a101_monitoring.ui.AppBarContainer
@@ -61,6 +62,7 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
     @Inject lateinit var mainViewModel: MainViewModel
     @Inject lateinit var bluetoothController: BluetoothController
     @Inject lateinit var nfcController: NfcController
+    @Inject lateinit var logger: Logger
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -216,7 +218,11 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
                 override fun onAvailable(network: Network?) {
                     super.onAvailable(network)
                     Log.i(TAG, "Network is available")
-                    networkConnectionDialog?.dismiss()
+                    try {
+                        networkConnectionDialog?.dismiss()
+                    } catch (ex: java.lang.Exception) {
+                        DefaultCallbacksHelper.onErrorDefault(TAG, "can't dismiss dialog due to $ex\n${ex.stackTrace}", ex, logger)
+                    }
                     TimeHelper.instance.initializeTimer()
                     runOnUiThread {
                         validateVersion()
@@ -235,21 +241,35 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
 
     private fun forceNetworkConnection() {
         if (!hasNetworkConnection()) {
-            networkConnectionDialog = AlertDialog.Builder(this)
-                .setTitle("Network error")
-                .setMessage("אין לך אינטרנט, בבקשה להתחבר לוויפי או להפעיל נתונים סלולרים")
-                .setPositiveButton("הגדרות") { _, _ ->
-                    startActivityForResult(Intent(android.provider.Settings.ACTION_SETTINGS), REQUEST_ENABLE_NETWORK)
-                }.setNegativeButton("ביטול", null).setCancelable(false)
-                .show()?.apply {
-                    getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener {
-                        if (hasNetworkConnection()) {
-                            dismiss()
-                        } else {
-                            Toast.makeText(context, "נא להתחבר לאינטרנט!", Toast.LENGTH_LONG).show()
+            try {
+                this?.also {
+                    Log.d(TAG, "about to show dialog for network")
+                    networkConnectionDialog = AlertDialog.Builder(this)
+                        .setTitle("Network error")
+                        .setMessage("אין לך אינטרנט, בבקשה להתחבר לוויפי או להפעיל נתונים סלולרים")
+                        .setPositiveButton("הגדרות") { _, _ ->
+                            startActivityForResult(
+                                Intent(android.provider.Settings.ACTION_SETTINGS),
+                                REQUEST_ENABLE_NETWORK
+                            )
+                        }.setNegativeButton("ביטול", null).setCancelable(false)
+                        .show()?.apply {
+                            getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener {
+                                if (hasNetworkConnection()) {
+                                    dismiss()
+                                } else {
+                                    Toast.makeText(
+                                        context,
+                                        "נא להתחבר לאינטרנט!",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            }
                         }
-                    }
                 }
+            } catch (ex: java.lang.Exception) {
+                DefaultCallbacksHelper.onErrorDefault(TAG, "can't display dialog due to $ex\n${ex.stackTrace}", ex, logger)
+            }
         }
     }
 
