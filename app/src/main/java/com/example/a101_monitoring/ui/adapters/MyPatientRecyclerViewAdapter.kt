@@ -65,6 +65,8 @@ class MyPatientRecyclerViewAdapter(
             initializePatientItemViewModel(item.getIdentityField())
 
             mIdView.text = item.identityId
+            mPatientBed.text = item.bed
+            mPatientRoom.text = item.room
 
             setObserverConnectionToSensor()
             setObserverToHeartRate()
@@ -95,6 +97,8 @@ class MyPatientRecyclerViewAdapter(
 
     inner class ViewHolder(val mView: View) : RecyclerView.ViewHolder(mView) {
         val mIdView: TextView = mView.patient_id
+        val mPatientBed: TextView = mView.patient_bed
+        val mPatientRoom: TextView = mView.patient_room
         val mSensorIndicator: ImageView = mView.sensor_connection_indicator
         val mSaturation: TextView = mView.saturation
         val mHeartRate: TextView = mView.heart_rate

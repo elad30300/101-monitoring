@@ -313,11 +313,15 @@ class BluetoothController @Inject constructor(
                 writeToNoninOximteryDescriptor(it)
             }
             thread {
-                Thread.sleep(200)
+                Thread.sleep(100)
+                writeToNoninRespirationDescriptor(it)
+            }
+            thread {
+                Thread.sleep(250)
                 setupNoninOximetryNotifications(it)
             }
             thread {
-                Thread.sleep(100)
+                Thread.sleep(200)
                 setupNoninRespirationNotifications(it)
             }
         }
@@ -348,6 +352,41 @@ class BluetoothController @Inject constructor(
                                         logger.e(
                                             TAG,
                                             "write to descriptor notifications to nonin oxymetry failed"
+                                        )
+                                        // todo: disconnect and reconnect later
+                                    }
+                                }
+                            }
+                    }
+            }
+        }
+    }
+
+    fun writeToNoninRespirationDescriptor(gatt: BluetoothGatt?) {
+        synchronized(characteristicsLock) {
+            gatt?.also {
+                it.getService(UUID.fromString(NoninHandler.NoninGattAttributes.OximeteryService.NONIN_OXIMTERY_SERVICE))
+                    .also { service ->
+                        service.getCharacteristic(UUID.fromString(NoninHandler.NoninGattAttributes.OximeteryService.Characteritics.NONIN_RESPIRATION_RATE_MEASURMENT))
+                            .also { char ->
+                                char.getDescriptor(CLIENT_CONFIG_DESCRIPTOR_UUID).also { descriptor ->
+                                    var count = 1000
+                                    logger.d(
+                                        TAG,
+                                        "try to write to descriptor notifications to nonin respiration with count $count"
+                                    )
+                                    descriptor.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+                                    while (count-- > 0 && !gatt.writeDescriptor(descriptor)) {
+                                        Thread.sleep(10)
+                                        logger.d(
+                                            TAG,
+                                            "try to write to descriptor notifications to nonin respiration with count $count"
+                                        )
+                                    }
+                                    if (count == 0) {
+                                        logger.e(
+                                            TAG,
+                                            "write to descriptor notifications to nonin respiration failed"
                                         )
                                         // todo: disconnect and reconnect later
                                     }
