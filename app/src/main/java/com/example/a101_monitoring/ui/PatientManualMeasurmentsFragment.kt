@@ -105,7 +105,7 @@ class PatientManualMeasurmentsFragment : Fragment() {
         val diastolicValue = diastolicText.toIntOrNull()
         val systolicValue = systolicText.toIntOrNull()
         if (diastolicText != "" && systolicText != "" && diastolicValue != null && systolicValue != null) {
-            return diastolicValue >= 20 && diastolicValue <= systolicValue
+            return diastolicValue >= 20 && diastolicValue < systolicValue
         } else {
             return false
         }
