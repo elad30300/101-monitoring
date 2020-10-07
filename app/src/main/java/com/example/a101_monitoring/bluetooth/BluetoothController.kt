@@ -233,6 +233,10 @@ class BluetoothController @Inject constructor(
         }
     }
 
+    private fun addToConnectedDevices(gatt: BluetoothGatt) {
+        connectedDevices.add(gatt)
+    }
+
     override fun onConnected(gatt: BluetoothGatt?) {
         thread {
             synchronized(this) {
@@ -245,7 +249,7 @@ class BluetoothController @Inject constructor(
                         )
 //                synchronized(sharedResourcesLock) {
                         removeFromConnectingDevicesList(it.device.address)
-                        removeFromConnectedDevicesList(it.device.address)
+                        addToConnectedDevices(it)
 //                }
                         patientRepository.setSensorIsConnected(gatt.device.address, true)
                         discoverServices(it)
@@ -291,7 +295,11 @@ class BluetoothController @Inject constructor(
                     removeFromConnectingDevicesList(it.device.address)
                     removeFromConnectedDevicesList(it.device.address)
 //            }
-                    patientRepository.setSensorIsConnected(it.device.address, false)
+                    if (isDeviceInSensors(it.device.address)) {
+                        patientRepository.setSensorIsConnected(it.device.address, false)
+                    } else {
+                        Log.d(TAG, "disconnected from device that is not in sensors")
+                    }
                 }
             }
         }
@@ -584,6 +592,10 @@ class BluetoothController @Inject constructor(
     private fun initializeSensors() {
         sensors = patientRepository.getSensors().apply {
             observeForever {
+                connectedDevices.filter { gatt -> !isDeviceInSensors(gatt.device.address) }.forEach {gatt ->
+                    logger.i(TAG, "found connected device ${gatt.device.address} not in sensors, about to disconnect it")
+                    disconnect(gatt)
+                }
                 if (!alreadyScheduledScans) {
                     maintainScans()
                 }
@@ -849,6 +861,11 @@ class BluetoothController @Inject constructor(
                 Log.d(TAG, "try to connect to connected device ${device.address}, doesnt continue")
             }
 //        }
+    }
+
+    private fun disconnect(gatt: BluetoothGatt) {
+        Log.d(TAG, "disconnect from device ${gatt.device.address}")
+        gatt.disconnect()
     }
 
 

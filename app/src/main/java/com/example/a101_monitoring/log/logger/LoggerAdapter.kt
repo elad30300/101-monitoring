@@ -7,37 +7,37 @@ abstract class LoggerAdapter {
     private val executor = Executors.newSingleThreadExecutor()
 
     fun d(tag: String, msg: String) {
+        Log.d(tag, msg)
         executor.execute {
             logD(tag, msg)
-            Log.d(tag, msg)
         }
     }
 
     fun e(tag: String, msg: String) {
+        Log.e(tag, msg)
         executor.execute {
             logE(tag, msg)
-            Log.e(tag, msg)
         }
     }
 
     fun i(tag: String, msg: String) {
+        Log.i(tag, msg)
         executor.execute {
             logI(tag, msg)
-            Log.i(tag, msg)
         }
     }
 
     fun v(tag: String, msg: String) {
+        Log.v(tag, msg)
         executor.execute {
             logV(tag, msg)
-            Log.v(tag, msg)
         }
     }
 
     fun w(tag: String, msg: String) {
+        Log.w(tag, msg)
         executor.execute {
             logW(tag, msg)
-            Log.w(tag, msg)
         }
     }
 
