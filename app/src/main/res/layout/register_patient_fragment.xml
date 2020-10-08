@@ -210,4 +210,42 @@
         app:layout_constraintEnd_toStartOf="@id/register_button"
         />
 
+    <ProgressBar
+        layout="@layout/default_circled_progress_bar"
+        android:id="@+id/fetch_beds_working_progress_bar"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:visibility="invisible"
+        tools:visibility="visible"
+        android:layout_margin="16dp"
+        android:indeterminateTint="@color/colorPrimary"
+        app:layout_constraintTop_toTopOf="@id/bed_container"
+        app:layout_constraintBottom_toBottomOf="@id/bed_container"
+        app:layout_constraintStart_toEndOf="@id/bed_container"
+        />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/fetch_beds_working_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/get_beds_working_message"
+        app:layout_constraintStart_toEndOf="@id/fetch_beds_working_progress_bar"
+        app:layout_constraintTop_toTopOf="@id/fetch_beds_working_progress_bar"
+        android:visibility="invisible"
+        tools:visibility="visible"
+        />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/fetch_beds_failure_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/errorMessage"
+        android:text="@string/get_beds_failure_message"
+        app:layout_constraintStart_toEndOf="@id/bed_container"
+        app:layout_constraintTop_toTopOf="@id/bed_container"
+        app:layout_constraintBottom_toBottomOf="@id/bed_container"
+        android:visibility="invisible"
+        tools:visibility="visible"
+        />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

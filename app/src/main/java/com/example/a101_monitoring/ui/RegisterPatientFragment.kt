@@ -17,12 +17,11 @@ import com.example.a101_monitoring.R
 import com.example.a101_monitoring.data.model.Department
 import com.example.a101_monitoring.data.model.DepartmentWithRooms
 import com.example.a101_monitoring.di.component.RegisterPatientComponent
-import com.example.a101_monitoring.states.RegisterPatientDoneState
-import com.example.a101_monitoring.states.RegisterPatientFailedState
-import com.example.a101_monitoring.states.RegisterPatientWorkingState
+import com.example.a101_monitoring.states.*
 import com.example.a101_monitoring.viewmodel.RegisterPatientViewModel
 import kotlinx.android.synthetic.main.fragment_patient.*
 import kotlinx.android.synthetic.main.register_patient_fragment.*
+import kotlinx.android.synthetic.main.register_patient_fragment.view.*
 import javax.inject.Inject
 
 
@@ -31,6 +30,10 @@ class RegisterPatientFragment : Fragment() {
     companion object {
         fun newInstance() = RegisterPatientFragment()
     }
+
+    private var mFetchBedsProgressBar: ProgressBar? = null
+    private var mFetchBedsWorkingLabel: TextView? = null
+    private var mFetchBedsFailureLabel: TextView? = null
 
     private lateinit var registerPatientComponent: RegisterPatientComponent
     @Inject lateinit var registerPatientViewModel: RegisterPatientViewModel
@@ -48,6 +51,10 @@ class RegisterPatientFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        mFetchBedsProgressBar = view.fetch_beds_working_progress_bar
+        mFetchBedsWorkingLabel = view.fetch_beds_working_label
+        mFetchBedsFailureLabel = view.fetch_beds_failure_label
 
         register_button.setOnClickListener {
             onRegisterClicked(it)
@@ -86,6 +93,25 @@ class RegisterPatientFragment : Fragment() {
 
     private fun onPatientRegisterFailed() {
         register_patient_progress_bar.visibility = View.INVISIBLE
+    }
+
+    private fun onFetchedBedsSuccessfully() {
+        mFetchBedsFailureLabel?.visibility = View.INVISIBLE
+        mFetchBedsProgressBar?.visibility = View.INVISIBLE
+        mFetchBedsWorkingLabel?.visibility = View.INVISIBLE
+//        view?.findNavController()?.popBackStack()
+    }
+
+    private fun oFetchBedsWorking() {
+        mFetchBedsFailureLabel?.visibility = View.INVISIBLE
+        mFetchBedsProgressBar?.visibility = View.VISIBLE
+        mFetchBedsWorkingLabel?.visibility = View.VISIBLE
+    }
+
+    private fun onFetchBedsFailed() {
+        mFetchBedsFailureLabel?.visibility = View.VISIBLE
+        mFetchBedsProgressBar?.visibility = View.INVISIBLE
+        mFetchBedsWorkingLabel?.visibility = View.INVISIBLE
     }
 
     private fun navigateToSignInScreen() {
@@ -133,6 +159,13 @@ class RegisterPatientFragment : Fragment() {
         registerPatientViewModel.getAvailableBeds().observe(viewLifecycleOwner, Observer {
             onRoomsUpdate(it)
         })
+        registerPatientViewModel.getGetAvailableBedsState().observeForever {
+            when(it.javaClass) {
+                GetAvailableBedsDoneState::class.java -> onFetchedBedsSuccessfully()
+                GetAvailableBedsWorkingState::class.java -> oFetchBedsWorking()
+                GetAvailableBedsFailedState::class.java -> onFetchBedsFailed()
+            }
+        }
         room_spinner.doAfterTextChanged {
             val roomText = it.toString()
             registerPatientViewModel.departments.value?.also {

@@ -42,9 +42,11 @@ class PatientRepository @Inject constructor(
     private val submitSensorToPatientState = MutableLiveData<SubmitSensorToPatientState>()
     private val bodyTemperatureState = MutableLiveData<BodyTemperatureState>()
     private val bloodPressureState = MutableLiveData<BloodPressureState>()
+    private val getAvailableBedsState = MutableLiveData<GetAvailableBedsState>()
 
     private val departments = departmentDao.getAll()
     private val availableBeds = MutableLiveData<List<String>>()
+    private var numberOfActiveBedsAsk = 0
 
     fun getCheckPatientExistState(): LiveData<CheckPatientExistState> = checkPatientExistState
     fun getRegisterPatientState(): LiveData<RegisterPatientState> = registerPatientState
@@ -52,6 +54,7 @@ class PatientRepository @Inject constructor(
     fun getSubmitSensorToPatientState(): LiveData<SubmitSensorToPatientState> = submitSensorToPatientState
     fun getBodyTemperatureState(): LiveData<BodyTemperatureState> = bodyTemperatureState
     fun getBloodPressureState(): LiveData<BloodPressureState> = bloodPressureState
+    fun getGetAvailableBedsState(): LiveData<GetAvailableBedsState> = getAvailableBedsState
 
     init {
         setAllSensorsIsConnected(false)
@@ -81,11 +84,41 @@ class PatientRepository @Inject constructor(
 
     private fun getAvailableBedsFromRemote(room: Room) {
         executor.execute {
+            getAvailableBedsState.postValue(GetAvailableBedsWorkingState())
+            synchronized(numberOfActiveBedsAsk) {
+                ++numberOfActiveBedsAsk
+            }
             atalefRemoteAdapter.getAvailableBeds(room.name, room.departmentId, {
                 onGotAvailableBeds(it)
             }, {
+                var shouldNotifyState = false
+                synchronized(numberOfActiveBedsAsk) {
+                    --numberOfActiveBedsAsk
+                    if (numberOfActiveBedsAsk < 0) {
+                        numberOfActiveBedsAsk = 0
+                    }
+                    if (numberOfActiveBedsAsk == 0) {
+                        shouldNotifyState = true
+                    }
+                }
+                if (shouldNotifyState) {
+                    getAvailableBedsState.postValue(GetAvailableBedsFailedState())
+                }
                 DefaultCallbacksHelper.onErrorDefault(TAG, "failed to fetch available beds for room ${room.name}, department ${room.departmentId} from remote", it, logger)
             }, {
+                var shouldNotifyState = false
+                synchronized(numberOfActiveBedsAsk) {
+                    --numberOfActiveBedsAsk
+                    if (numberOfActiveBedsAsk < 0) {
+                        numberOfActiveBedsAsk = 0
+                    }
+                    if (numberOfActiveBedsAsk == 0) {
+                        shouldNotifyState = true
+                    }
+                }
+                if (shouldNotifyState) {
+                    getAvailableBedsState.postValue(GetAvailableBedsFailedState())
+                }
                 DefaultCallbacksHelper.onErrorDefault(TAG, "error in fetch available beds for room ${room.name}, department ${room.departmentId} from remote", it, logger)
             })
         }
@@ -93,6 +126,19 @@ class PatientRepository @Inject constructor(
 
     private fun onGotAvailableBeds(beds: List<String>) {
         availableBeds.postValue(beds)
+        var shouldNotifyState = false
+        synchronized(numberOfActiveBedsAsk) {
+            --numberOfActiveBedsAsk
+            if (numberOfActiveBedsAsk < 0) {
+                numberOfActiveBedsAsk = 0
+            }
+            if (numberOfActiveBedsAsk == 0) {
+                shouldNotifyState = true
+            }
+        }
+        if (shouldNotifyState) {
+            getAvailableBedsState.postValue(GetAvailableBedsDoneState())
+        }
     }
 
     private fun getDepartmentsFromRemote() {
