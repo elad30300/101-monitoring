@@ -51,5 +51,7 @@
     <string name="manual_measurements_success_message">מדדים ידניים הוזנו בהצלחה</string>
     <string name="register_invalid_input_message">חלק מהשדות שהוזנו אינם תקינים</string>
     <string name="sign_in_invalid_input_message">תעודת הזהות שהוזנה אינה תקינה</string>
+    <string name="get_beds_working_message">מסנכרן מיטות\n אנא חכה סבלנות</string>
+    <string name="get_beds_failure_message">סנכרון מיטות נכשל\n צא מהחלון ולאחר מכן נסה שוב</string>
     <string name="sensor_address_invalid_input_message">הכתובת שהוזנה אינה תקינה, אנא שים לב לפורמט FF:FF:FF:FF:FF:FF</string>
 </resources>
