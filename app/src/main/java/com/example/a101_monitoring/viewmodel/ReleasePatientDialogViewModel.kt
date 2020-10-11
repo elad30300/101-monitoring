@@ -26,4 +26,6 @@ class ReleasePatientDialogViewModel @Inject constructor(
 
     fun checkReleaseAccessPassword(password: String) = releaseReasonsRepository.checkReleaseAccessPassword(password)
 
+    fun getReleasePatientState() = patientRepository.getReleasePatientState()
+
 }

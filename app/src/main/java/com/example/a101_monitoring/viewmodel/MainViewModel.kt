@@ -27,6 +27,8 @@ class MainViewModel @Inject constructor(
 
     fun getBodyTemperatureState() = patientRepository.getBodyTemperatureState()
 
+    fun getReleasePatientState() = patientRepository.getReleasePatientState()
+
     fun getLatestVersion(phoneId: String, phoneNumber: String, version: String) =
         versioningRepository.getLatestVersion(phoneId, phoneNumber, version)
 }

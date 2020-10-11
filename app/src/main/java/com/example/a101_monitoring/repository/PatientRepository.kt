@@ -43,6 +43,7 @@ class PatientRepository @Inject constructor(
     private val bodyTemperatureState = MutableLiveData<BodyTemperatureState>()
     private val bloodPressureState = MutableLiveData<BloodPressureState>()
     private val getAvailableBedsState = MutableLiveData<GetAvailableBedsState>()
+    private val releasePatientState = MutableLiveData<ReleasePatientState>()
 
     private val departments = departmentDao.getAll()
     private val availableBeds = MutableLiveData<List<String>>()
@@ -55,6 +56,7 @@ class PatientRepository @Inject constructor(
     fun getBodyTemperatureState(): LiveData<BodyTemperatureState> = bodyTemperatureState
     fun getBloodPressureState(): LiveData<BloodPressureState> = bloodPressureState
     fun getGetAvailableBedsState(): LiveData<GetAvailableBedsState> = getAvailableBedsState
+    fun getReleasePatientState(): LiveData<ReleasePatientState> = releasePatientState
 
     init {
         setAllSensorsIsConnected(false)
@@ -343,6 +345,7 @@ class PatientRepository @Inject constructor(
     fun releasePatient(patientId: PatientIdentityFieldType, releaseReason: ReleaseReason) {
         executor.execute {
             val patient = patientDao.getPatient(patientId)
+            releasePatientState.postValue(ReleasePatientWorkingState())
             atalefRemoteAdapter.releasePatient(
                 ReleasePatientRequestBody(patient.id, patient.deptId, releaseReason.id),
                 {
@@ -350,8 +353,10 @@ class PatientRepository @Inject constructor(
                     onPatientReleased(patient)
                 }, {
                     DefaultCallbacksHelper.onErrorDefault(TAG, "failure in release patient $patientId from remote", it, logger)
+                    releasePatientState.postValue(ReleasePatientFailedState())
                 }, {
                     DefaultCallbacksHelper.onErrorDefault(TAG, "error in release patient $patientId from remote", it, logger)
+                    releasePatientState.postValue(ReleasePatientFailedState())
                 }
             )
         }
@@ -370,6 +375,7 @@ class PatientRepository @Inject constructor(
         executor.execute {
             ExceptionsHelper.tryBlock(TAG, "delete patient ${patient.getIdentityField()} from database") {
                 patientDao.deletePatients(patient)
+                releasePatientState.postValue(ReleasePatientDoneState())
             }
         }
     }

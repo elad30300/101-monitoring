@@ -13,9 +13,6 @@ import android.net.Network
 import android.net.NetworkRequest
 import android.nfc.NdefMessage
 import android.nfc.NfcAdapter
-import android.nfc.Tag
-import android.nfc.tech.MifareUltralight
-import android.nfc.tech.NfcA
 import android.nfc.tech.NfcF
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
@@ -40,15 +37,10 @@ import com.example.a101_monitoring.states.*
 import com.example.a101_monitoring.ui.AppBarContainer
 import com.example.a101_monitoring.ui.PatientsListFragment
 import com.example.a101_monitoring.ui.PatientsListFragmentDirections
-import com.example.a101_monitoring.ui.SensorChooseFragment
 import com.example.a101_monitoring.utils.DefaultCallbacksHelper
 import com.example.a101_monitoring.utils.TimeHelper
 import com.example.a101_monitoring.viewmodel.MainViewModel
-import com.example.a101_monitoring.viewmodel.SensorViewModel
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.activity_main.*
-import java.lang.RuntimeException
-import java.nio.charset.Charset
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInteractionListener,
@@ -282,6 +274,7 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
         observeSubmitSensorToPatientState()
         observeBloodPressureState()
         observeBodyTemperatureState()
+        observeReleasePatientState()
     }
 
     private fun observerCheckPatientExistState() {
@@ -377,6 +370,19 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
             }
         })
     }
+
+    private fun onReleasePatientFailed() {
+        Toast.makeText(this, R.string.release_patient_fail_message, Toast.LENGTH_LONG).show()
+    }
+
+    private fun observeReleasePatientState() {
+        mainViewModel.getReleasePatientState().observe(this, Observer {
+            when(it.javaClass) {
+                ReleasePatientFailedState::class.java -> onReleasePatientFailed()
+            }
+        })
+    }
+
 
     private fun onSubmitBodyTemperatureSuccessfully() {
         Toast.makeText(this, R.string.manual_measurements_success_message, Toast.LENGTH_LONG).show()

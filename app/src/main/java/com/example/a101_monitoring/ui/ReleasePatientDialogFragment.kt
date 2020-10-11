@@ -18,6 +18,7 @@ import com.example.a101_monitoring.MyApplication
 
 import com.example.a101_monitoring.R
 import com.example.a101_monitoring.data.model.PatientIdentityFieldType
+import com.example.a101_monitoring.states.*
 import com.example.a101_monitoring.viewmodel.ReleasePatientDialogViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.release_patient_dialog_fragment.*
@@ -31,6 +32,7 @@ class ReleasePatientDialogFragment(
     private lateinit var mReleaseReasonsSpinner: AutoCompleteTextView
     private lateinit var mPasswordEditText: EditText
     private lateinit var mRemoveLocallyChackBox: CheckBox
+    private lateinit var mReleasePatientProgressBar: ProgressBar
     private var mActivity: Activity? = null
 
     @Inject lateinit var viewModel: ReleasePatientDialogViewModel
@@ -77,6 +79,7 @@ class ReleasePatientDialogFragment(
         mReleaseReasonsSpinner = view.release_reason_spinner
         mPasswordEditText = view.release_password_text
         mRemoveLocallyChackBox = view.remove_locally_checkbox
+        mReleasePatientProgressBar = view.release_patient_progress_bar
 
         viewModel.releaseReasons.observe(activity!!, Observer {
             val releaseReasonsDescriptions = it.map { it.description }
@@ -93,6 +96,10 @@ class ReleasePatientDialogFragment(
             mReleaseReasonsSpinner.isEnabled = !isChecked
             mPasswordEditText.isEnabled = !isChecked
         }
+
+        viewModel.getReleasePatientState().observe(this, Observer {
+            onReleasePatientStateChanged(it)
+        })
     }
 
     private fun onReleaseButtonClicked() {
@@ -113,6 +120,31 @@ class ReleasePatientDialogFragment(
     }
 
     private fun isInputValid() = viewModel.checkReleaseAccessPassword(mPasswordEditText.text.toString())
+
+    private fun onReleasePatientStateChanged(state: ReleasePatientState) {
+        when(state.javaClass) {
+            ReleasePatientDoneState::class.java -> onPatientReleasedSuccessfully()
+            ReleasePatientWorkingState::class.java -> onReleasePatientWorking()
+            ReleasePatientNotWorkingState::class.java -> onReleasePatientNotWorking()
+            ReleasePatientFailedState::class.java -> onReleasePatientFailed()
+        }
+    }
+
+    private fun onPatientReleasedSuccessfully() {
+        mReleasePatientProgressBar.visibility = View.INVISIBLE
+    }
+
+    private fun onReleasePatientNotWorking() {
+        mReleasePatientProgressBar.visibility = View.INVISIBLE
+    }
+
+    private fun onReleasePatientFailed() {
+        mReleasePatientProgressBar.visibility = View.INVISIBLE
+    }
+
+    private fun onReleasePatientWorking() {
+        mReleasePatientProgressBar.visibility = View.VISIBLE
+    }
 }
 
 
