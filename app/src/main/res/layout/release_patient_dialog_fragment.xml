@@ -55,10 +55,25 @@
         android:layout_height="wrap_content"
         android:text="מחיקה מקומית"
         app:layout_constraintTop_toBottomOf="@id/release_password_container"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/release_patient_progress_bar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         tools:checked="true"
+        />
+
+    <ProgressBar
+        layout="@layout/default_circled_progress_bar"
+        android:id="@+id/release_patient_progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminateTint="@color/colorPrimary"
+        android:visibility="invisible"
+        tools:visibility="visible"
+        android:layout_margin="16dp"
+        app:layout_constraintTop_toBottomOf="@id/remove_locally_checkbox"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -48,6 +48,7 @@
     <string name="body_temperature_illegal_input_message">החום שהוזן אינו תקין</string>
     <string name="blood_pressure_illegal_input_message">לחץ הדם שהוזן אינו תקין</string>
     <string name="manual_measurements_fail_message">הזנת מדדים ידניים נכשלה, אנא נסה שוב</string>
+    <string name="release_patient_fail_message">שחרור מטופל נכשל, אנא צור קשר עם החמל ונסה שוב</string>
     <string name="manual_measurements_success_message">מדדים ידניים הוזנו בהצלחה</string>
     <string name="register_invalid_input_message">חלק מהשדות שהוזנו אינם תקינים</string>
     <string name="sign_in_invalid_input_message">תעודת הזהות שהוזנה אינה תקינה</string>
