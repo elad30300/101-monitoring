@@ -58,6 +58,10 @@ class PatientRepository @Inject constructor(
     fun getGetAvailableBedsState(): LiveData<GetAvailableBedsState> = getAvailableBedsState
     fun getReleasePatientState(): LiveData<ReleasePatientState> = releasePatientState
 
+    fun resetPatientState() {
+        releasePatientState.postValue(ReleasePatientNotWorkingState())
+    }
+
     init {
         setAllSensorsIsConnected(false)
         getDepartmentsFromRemote()

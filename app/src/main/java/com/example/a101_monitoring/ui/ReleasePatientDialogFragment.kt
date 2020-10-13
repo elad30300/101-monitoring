@@ -138,6 +138,7 @@ class ReleasePatientDialogFragment(
     private fun onPatientReleasedSuccessfully() {
         mReleasePatientProgressBar.visibility = View.INVISIBLE
         dialog?.dismiss()
+        viewModel.resetReleasePatientState()
     }
 
     private fun onReleasePatientNotWorking() {

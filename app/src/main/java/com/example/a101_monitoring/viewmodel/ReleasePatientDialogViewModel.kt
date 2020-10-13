@@ -28,4 +28,6 @@ class ReleasePatientDialogViewModel @Inject constructor(
 
     fun getReleasePatientState() = patientRepository.getReleasePatientState()
 
+    fun resetReleasePatientState() = patientRepository.resetPatientState()
+
 }
