@@ -69,7 +69,6 @@ class RegisterPatientFragment : Fragment() {
         initializeBeds()
 
         observerRegisterPatientState()
-        observerCheckPatientExistState()
     }
 
     private fun observerRegisterPatientState() {
@@ -78,6 +77,7 @@ class RegisterPatientFragment : Fragment() {
                 RegisterPatientDoneState::class.java -> onPatientRegisteredSuccessfully()
                 RegisterPatientWorkingState::class.java -> onPatientRegisterWorking()
                 RegisterPatientFailedState::class.java -> onPatientRegisterFailed()
+                RegisterPatientNotWorkingState::class.java -> onPatientRegisterNotWorking()
             }
         })
     }
@@ -96,31 +96,8 @@ class RegisterPatientFragment : Fragment() {
         register_patient_progress_bar.visibility = View.INVISIBLE
     }
 
-    private fun observerCheckPatientExistState() {
-        registerPatientViewModel.getCheckPatientExistState().observe(this, Observer {
-            when(it.javaClass) {
-                CheckPatientExistDoneState::class.java -> onPatientExists()
-                CheckPatientExistWorkingState::class.java -> onPatientExistsWorking()
-                CheckPatientExistFailedState::class.java -> onPatientExistsFailed()
-                CheckPatientExistNotWorkingState::class.java -> onPatientExistsNotWorking()
-            }
-        })
-    }
-
-    private fun onPatientExists() {
-        check_patient_exists_progress_bar.visibility = View.INVISIBLE
-    }
-
-    private fun onPatientExistsWorking() {
-        check_patient_exists_progress_bar.visibility = View.VISIBLE
-    }
-
-    private fun onPatientExistsFailed() {
-        check_patient_exists_progress_bar.visibility = View.INVISIBLE
-    }
-
-    private fun onPatientExistsNotWorking() {
-        check_patient_exists_progress_bar.visibility = View.INVISIBLE
+    private fun onPatientRegisterNotWorking() {
+        register_patient_progress_bar.visibility = View.INVISIBLE
     }
 
     private fun onFetchedBedsSuccessfully() {

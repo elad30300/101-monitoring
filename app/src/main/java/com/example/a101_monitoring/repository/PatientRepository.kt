@@ -216,14 +216,15 @@ class PatientRepository @Inject constructor(
                         isCitizen: Boolean, isOxygen: Int, isActive: Boolean, sensorAddress: String = "") {
         val patientBody = PatientBody(0, identityNumber, deptId, room, bed, haitiId, registeredDoctor, isCitizen, isOxygen, isActive)
         executor.execute {
+            registerPatientState.postValue(RegisterPatientWorkingState())
             checkPatientExistState.postValue(CheckPatientExistWorkingState())
             atalefRemoteAdapter.signIn(PatientSignInBody(identityNumber),
                 {
                     Log.d(TAG, "try to register to an existing patient")
                     checkPatientExistState.postValue(CheckPatientExistDoneState())
+                    registerPatientState.postValue(RegisterPatientNotWorkingState())
                 }, {
                     checkPatientExistState.postValue(CheckPatientExistNotWorkingState())
-                    registerPatientState.postValue(RegisterPatientWorkingState())
                     registerPatientToRemote(patientBody,
                         {
                             onPatientRegisteredSuccessfullyToRemote(it, sensorAddress)
@@ -238,6 +239,7 @@ class PatientRepository @Inject constructor(
                 }, {
                     DefaultCallbacksHelper.onErrorDefault(TAG, "Error: sign in request for patient ${identityNumber} to remote failed", it, logger)
                     checkPatientExistState.postValue(CheckPatientExistFailedState())
+                    registerPatientState.postValue(RegisterPatientNotWorkingState())
                 }
             )
         }
