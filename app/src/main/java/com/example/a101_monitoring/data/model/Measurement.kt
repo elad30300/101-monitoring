@@ -14,6 +14,10 @@ open class Measurement(
     override fun toString(): String {
         return "[${this.javaClass::class.java.name} - value: $value,  time: $time, patientId: $patientId]"
     }
+
+    companion object {
+        const val MISSING_VALUE = -10
+    }
 }
 
 @Entity(tableName = "heart_rates")

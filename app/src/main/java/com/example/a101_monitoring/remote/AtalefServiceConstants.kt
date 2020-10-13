@@ -2,7 +2,7 @@ package com.example.a101_monitoring.remote
 
 object AtalefServiceConstants {
 
-    private val environment = Environment.DEVELOP
+    private val environment = Environment.LOCAL
 
     private val baseUrlMap = mapOf(
         Environment.LOCAL to "http://192.168.43.230:8000/api/",

@@ -162,6 +162,7 @@ class NoninHandler(
     companion object {
         const val TAG = "NoninHandler"
         const val SAMPLE_RATE_SEC = 60
+        const val SAMPLE_RATE_SEC_ALL_MISSING = 5
     }
 
 }

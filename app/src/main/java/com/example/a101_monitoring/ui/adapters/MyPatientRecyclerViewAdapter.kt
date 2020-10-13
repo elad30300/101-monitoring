@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
 import androidx.navigation.findNavController
 import com.example.a101_monitoring.R
+import com.example.a101_monitoring.data.model.Measurement
 import com.example.a101_monitoring.data.model.Patient
 import com.example.a101_monitoring.data.model.PatientIdentityFieldType
 
@@ -134,19 +135,20 @@ class MyPatientRecyclerViewAdapter(
 
         fun setObserverToHeartRate() {
             patientItemViewModel.heartRate.observe(mFragment.viewLifecycleOwner, Observer {
-                mHeartRate.text = if (it == null) "--" else it.value.toString()
+                mHeartRate.text = if (it == null || it.value == Measurement.MISSING_VALUE) "--" else it.value.toString()
             })
         }
 
         fun setObserverToSaturation() {
             patientItemViewModel.saturation.observe(mFragment.viewLifecycleOwner, Observer {
-                mSaturation.text = if (it == null) "--" else it.value.toString()
+                mSaturation.text = if (it == null || it.value == Measurement.MISSING_VALUE) "--" else it.value.toString()
             })
         }
 
         fun setObserverToRespiratoryRate() {
             patientItemViewModel.respiratoryRate.observe(mFragment.viewLifecycleOwner, Observer {
-                mRespiratoryRate.text = it.firstOrNull()?.value?.toString() ?: "--"
+                val respiratoryRate = it.firstOrNull()
+                mRespiratoryRate.text = if (respiratoryRate == null || respiratoryRate.value == Measurement.MISSING_VALUE) "--" else respiratoryRate.value.toString()
             })
         }
 
