@@ -202,6 +202,37 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
             1234)
     }
 
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 1234) {
+            val approvedResults = grantResults.filter { it == PackageManager.PERMISSION_GRANTED }
+            if (approvedResults.size == 5) {
+                // save phone number in application settings
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)
+                    == PackageManager.PERMISSION_GRANTED) {
+                    Log.i(TAG, "Storing phone number")
+                    val telephonyManager = (getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager)
+                    val phoneId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        telephonyManager.imei
+                            ?: Settings.Secure.getString(applicationContext.contentResolver, Settings.Secure.ANDROID_ID)
+                    } else {
+                        telephonyManager.deviceId
+                            ?: Settings.Secure.getString(applicationContext.contentResolver, Settings.Secure.ANDROID_ID)
+                    }
+                    phoneId?.also {
+                        ApplicationSettings.sharedInstance.phoneId = it
+                    } ?: logger.e(TAG, "could not read phone id")
+                } else {
+                    Log.i("Permission", "no Permissions")
+                }
+            }
+        }
+    }
+
     private fun registerNetworkConnectionCallback() {
         val connectivityManager = getSystemService(Application.CONNECTIVITY_SERVICE) as ConnectivityManager
         connectivityManager.registerNetworkCallback(

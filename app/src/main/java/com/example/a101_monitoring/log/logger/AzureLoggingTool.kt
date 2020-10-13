@@ -1,5 +1,6 @@
 package com.example.a101_monitoring.log.logger
 
+import com.example.a101_monitoring.ApplicationSettings
 import com.example.a101_monitoring.log.Environments
 import com.microsoft.azure.storage.CloudStorageAccount
 import com.microsoft.azure.storage.blob.CloudBlobContainer
@@ -31,7 +32,7 @@ class AzureLoggingTool(environment: Environments) {
     private fun getBlobName(): String {
         val pattern = "yyyy-MM-dd"
         val simpleDateFormat = SimpleDateFormat(pattern)
-        return simpleDateFormat.format(Date())
+        return "${simpleDateFormat.format(Date())}-${ApplicationSettings.sharedInstance.phoneId}"
     }
 
     @Throws(java.lang.Exception::class)
