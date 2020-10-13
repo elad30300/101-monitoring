@@ -650,15 +650,23 @@ class BluetoothController @Inject constructor(
                     synchronized(nextMissingValuesInsertInMillis) {
                         nextMissingValuesInsertInMillis[it.device.address] = nextTimeDate.time
                     }
+                    if (allMissingValues) {
+                        logger.i(
+                            NoninHandler.TAG,
+                            "all measurements missing for device ${it.device.address}"
+                        )
+                    } else {
+                        pauseMeasurements(gatt, NoninHandler.SAMPLE_RATE_SEC.toLong())
+                    }
                 }
-                if (allMissingValues) {
-                    logger.i(
-                        NoninHandler.TAG,
-                        "all measurements missing for device ${it.device.address}"
-                    )
-                } else {
-                    pauseMeasurements(gatt, NoninHandler.SAMPLE_RATE_SEC.toLong())
-                }
+//                if (allMissingValues) {
+//                    logger.i(
+//                        NoninHandler.TAG,
+//                        "all measurements missing for device ${it.device.address}"
+//                    )
+//                } else {
+//                    pauseMeasurements(gatt, NoninHandler.SAMPLE_RATE_SEC.toLong())
+//                }
             } catch (exception: Exception) {
                 DefaultCallbacksHelper.onErrorDefault(
                     NoninHandler.TAG,
