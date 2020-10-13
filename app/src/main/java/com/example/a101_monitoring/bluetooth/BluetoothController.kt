@@ -68,6 +68,7 @@ class BluetoothController @Inject constructor(
     private val connectedDevices = mutableListOf<BluetoothGatt>()
 
     private val lastRespiratoryRates = mutableMapOf<String, Int>()
+    private val nextMissingValuesInsertInMillis = mutableMapOf<String, Long>()
 //    private var lastRespiratoryRate =
 //        NoninHandler.NoninGattAttributes.OximeteryService.Characteritics.RESPIRATORY_RATE_MISSING_VALUE // todo: move to handler as soon as possible
 
@@ -262,6 +263,9 @@ class BluetoothController @Inject constructor(
                             lastRespiratoryRates[it.device.address] =
                                 NoninHandler.NoninGattAttributes.OximeteryService.Characteritics.RESPIRATORY_RATE_MISSING_VALUE
                         }
+                        synchronized(nextMissingValuesInsertInMillis) {
+                            nextMissingValuesInsertInMillis[it.device.address] = Calendar.getInstance().timeInMillis
+                        }
                         removeFromConnectingDevicesList(it.device.address)
                         addToConnectedDevices(it)
 //                }
@@ -318,6 +322,16 @@ class BluetoothController @Inject constructor(
                     synchronized(lastRespiratoryRates) {
                         try {
                             lastRespiratoryRates.remove(it.device.address)
+                        } catch (ex: Exception) {
+                            DefaultCallbacksHelper.onErrorDefault(
+                                TAG,
+                                "failure in remove resp from last backup for ${it.device.address}"
+                            )
+                        }
+                    }
+                    synchronized(nextMissingValuesInsertInMillis) {
+                        try {
+                            nextMissingValuesInsertInMillis.remove(it.device.address)
                         } catch (ex: Exception) {
                             DefaultCallbacksHelper.onErrorDefault(
                                 TAG,
@@ -582,6 +596,8 @@ class BluetoothController @Inject constructor(
 
     private fun getDeviceLastRespiratory(address: String): Int? = lastRespiratoryRates[address]
 
+    private fun getDeviceNextMissingValuesInsertInMillis(address: String): Long? = nextMissingValuesInsertInMillis[address]
+
     private fun onOximeteryMeasurements(
         gatt: BluetoothGatt?,
         heartRateValue: Int,
@@ -601,29 +617,45 @@ class BluetoothController @Inject constructor(
                     isHeartRateValueMissing(heartRateValue) && isSaturationValueMissing(
                         saturationValue
                     ) && isRespiratoryRateValueMissing(lastRespiratoryRate)
-                measurementsRepository.insertMeasurements(
-                    HeartRate(
-                        if (isHeartRateValueMissing(heartRateValue)) Measurement.MISSING_VALUE else heartRateValue,
-                        time,
-                        patientId
-                    ),
-                    Saturation(
-                        if (isSaturationValueMissing(saturationValue)) Measurement.MISSING_VALUE else saturationValue,
-                        time,
-                        patientId
-                    ),
-                    RespiratoryRate(
-                        if (isRespiratoryRateValueMissing(lastRespiratoryRate)) Measurement.MISSING_VALUE else lastRespiratoryRate,
-                        time,
-                        patientId
+                var shouldInsert = !allMissingValues
+                val insertTime: Long
+                synchronized(nextMissingValuesInsertInMillis) {
+                    insertTime = getDeviceNextMissingValuesInsertInMillis(it.device.address) ?: Calendar.getInstance().timeInMillis
+                }
+                if (Calendar.getInstance().timeInMillis >= insertTime) {
+                    shouldInsert = true
+                }
+                if (shouldInsert) {
+                    Log.d(TAG, "about to insert measurements for ${it.device.address}")
+                    measurementsRepository.insertMeasurements(
+                        HeartRate(
+                            if (isHeartRateValueMissing(heartRateValue)) Measurement.MISSING_VALUE else heartRateValue,
+                            time,
+                            patientId
+                        ),
+                        Saturation(
+                            if (isSaturationValueMissing(saturationValue)) Measurement.MISSING_VALUE else saturationValue,
+                            time,
+                            patientId
+                        ),
+                        RespiratoryRate(
+                            if (isRespiratoryRateValueMissing(lastRespiratoryRate)) Measurement.MISSING_VALUE else lastRespiratoryRate,
+                            time,
+                            patientId
+                        )
                     )
-                )
+                    val nextTimeDate = Calendar.getInstance().time.apply {
+                        ++minutes
+                    }
+                    synchronized(nextMissingValuesInsertInMillis) {
+                        nextMissingValuesInsertInMillis[it.device.address] = nextTimeDate.time
+                    }
+                }
                 if (allMissingValues) {
                     logger.i(
                         NoninHandler.TAG,
-                        "all measurements missing, wait 5 seconds to recover"
+                        "all measurements missing for device ${it.device.address}"
                     )
-                    pauseMeasurements(gatt, NoninHandler.SAMPLE_RATE_SEC_ALL_MISSING.toLong())
                 } else {
                     pauseMeasurements(gatt, NoninHandler.SAMPLE_RATE_SEC.toLong())
                 }
