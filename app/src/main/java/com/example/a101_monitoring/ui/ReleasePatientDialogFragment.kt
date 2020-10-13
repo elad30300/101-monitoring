@@ -63,7 +63,11 @@ class ReleasePatientDialogFragment(
             // Create the AlertDialog object and return it
             val dialog = builder.create()
 
-
+            dialog.setOnShowListener {
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                    onReleaseButtonClicked()
+                }
+            }
 
             dialog
         } ?: throw IllegalStateException("Activity cannot be null")
@@ -105,6 +109,7 @@ class ReleasePatientDialogFragment(
     private fun onReleaseButtonClicked() {
         if (mRemoveLocallyChackBox.isChecked) {
             viewModel.removePatientLocally(patientId)
+            dialog?.dismiss()
             return
         }
         if (isInputValid()) {
@@ -132,6 +137,7 @@ class ReleasePatientDialogFragment(
 
     private fun onPatientReleasedSuccessfully() {
         mReleasePatientProgressBar.visibility = View.INVISIBLE
+        dialog?.dismiss()
     }
 
     private fun onReleasePatientNotWorking() {
