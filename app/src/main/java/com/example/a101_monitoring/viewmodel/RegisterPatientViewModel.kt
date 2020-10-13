@@ -37,5 +37,7 @@ class RegisterPatientViewModel @Inject constructor(
 
     fun getRegisterPatientState() = patientRepository.getRegisterPatientState()
 
+    fun getCheckPatientExistState() = patientRepository.getCheckPatientExistState()
+
     fun getGetAvailableBedsState() = patientRepository.getGetAvailableBedsState()
 }
