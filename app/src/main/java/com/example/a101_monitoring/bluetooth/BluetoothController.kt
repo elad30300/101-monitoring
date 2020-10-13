@@ -12,10 +12,7 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import com.example.a101_monitoring.bluetooth.handlers.NoninHandler
-import com.example.a101_monitoring.data.model.HeartRate
-import com.example.a101_monitoring.data.model.RespiratoryRate
-import com.example.a101_monitoring.data.model.Saturation
-import com.example.a101_monitoring.data.model.Sensor
+import com.example.a101_monitoring.data.model.*
 import com.example.a101_monitoring.log.logger.Logger
 import com.example.a101_monitoring.repository.MeasurementsRepository
 import com.example.a101_monitoring.repository.PatientRepository
@@ -70,8 +67,10 @@ class BluetoothController @Inject constructor(
     private val connectingDevices = mutableListOf<String>()
     private val connectedDevices = mutableListOf<BluetoothGatt>()
 
-    private var lastRespiratoryRate =
-        NoninHandler.NoninGattAttributes.OximeteryService.Characteritics.RESPIRATORY_RATE_MISSING_VALUE // todo: move to handler as soon as possible
+    private val lastRespiratoryRates = mutableMapOf<String, Int>()
+    private val nextMissingValuesInsertInMillis = mutableMapOf<String, Long>()
+//    private var lastRespiratoryRate =
+//        NoninHandler.NoninGattAttributes.OximeteryService.Characteritics.RESPIRATORY_RATE_MISSING_VALUE // todo: move to handler as soon as possible
 
     private val scanSettings = android.bluetooth.le.ScanSettings.Builder()
         .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
@@ -130,7 +129,10 @@ class BluetoothController @Inject constructor(
                         Log.e(TAG, "scan results on main thread!!!")
                     }
                     if (this != currentScanCallback) {
-                        Log.d(TAG, "onScanResult - called by $this not current scan callback ${currentScanCallback}, doesn't continue")
+                        Log.d(
+                            TAG,
+                            "onScanResult - called by $this not current scan callback ${currentScanCallback}, doesn't continue"
+                        )
                         return@synchronized
                     }
                     setIsScanning(false)
@@ -138,13 +140,22 @@ class BluetoothController @Inject constructor(
                         if (isDeviceInSensors(device.address)) {
                             if (!isDeviceConnected(device.address)) {
                                 if (!isDeviceConnecting(device.address)) {
-                                    logger.i(TAG, "found device $${device.address} that should be connected!")
+                                    logger.i(
+                                        TAG,
+                                        "found device $${device.address} that should be connected!"
+                                    )
                                     connect(device)
                                 } else {
-                                    logger.d(TAG, "found connecting device ${device.address}, doesnt continue")
+                                    logger.d(
+                                        TAG,
+                                        "found connecting device ${device.address}, doesnt continue"
+                                    )
                                 }
                             } else {
-                                logger.d(TAG, "found connected device ${device.address}, doesnt continue")
+                                logger.d(
+                                    TAG,
+                                    "found connected device ${device.address}, doesnt continue"
+                                )
                             }
                         } else {
                             logger.d(
@@ -152,8 +163,8 @@ class BluetoothController @Inject constructor(
                                 "found device that is not in sensors ${device.address}, doesnt continue"
                             )
                         }
+                    }
                 }
-            }
 //                //
 //                if (isDeviceInConnectingList(device.address) || isDeviceInConnectedList(device.address) || getCurrentScanAddress() != device.address) {
 //                    Log.d(
@@ -248,13 +259,23 @@ class BluetoothController @Inject constructor(
                             logger = logger
                         )
 //                synchronized(sharedResourcesLock) {
+                        synchronized(lastRespiratoryRates) {
+                            lastRespiratoryRates[it.device.address] =
+                                NoninHandler.NoninGattAttributes.OximeteryService.Characteritics.RESPIRATORY_RATE_MISSING_VALUE
+                        }
+                        synchronized(nextMissingValuesInsertInMillis) {
+                            nextMissingValuesInsertInMillis[it.device.address] = Calendar.getInstance().timeInMillis
+                        }
                         removeFromConnectingDevicesList(it.device.address)
                         addToConnectedDevices(it)
 //                }
                         patientRepository.setSensorIsConnected(gatt.device.address, true)
                         discoverServices(it)
                     } else {
-                        logger.d(TAG, "onConnected for already connected device ${it.device.address}, doesnt continue")
+                        logger.d(
+                            TAG,
+                            "onConnected for already connected device ${it.device.address}, doesnt continue"
+                        )
                     }
                     //
 //            bleDeviceHandler.onConnected(connection)
@@ -268,9 +289,15 @@ class BluetoothController @Inject constructor(
 //        executor.execute {
         thread {
             var count = 1000
-            logger.d(TAG, "about to discover services with count $count for device ${gatt.device.address}")
+            logger.d(
+                TAG,
+                "about to discover services with count $count for device ${gatt.device.address}"
+            )
             while (count-- > 0 && !gatt.discoverServices()) {
-                logger.d(TAG, "about to discover services with count $count for device ${gatt.device.address}")
+                logger.d(
+                    TAG,
+                    "about to discover services with count $count for device ${gatt.device.address}"
+                )
             }
         }
 //        }
@@ -292,6 +319,26 @@ class BluetoothController @Inject constructor(
 //        connectedDevicesList.remove(deviceHandler)
                     it.close()
 //            synchronized(sharedResourcesLock) {
+                    synchronized(lastRespiratoryRates) {
+                        try {
+                            lastRespiratoryRates.remove(it.device.address)
+                        } catch (ex: Exception) {
+                            DefaultCallbacksHelper.onErrorDefault(
+                                TAG,
+                                "failure in remove resp from last backup for ${it.device.address}"
+                            )
+                        }
+                    }
+                    synchronized(nextMissingValuesInsertInMillis) {
+                        try {
+                            nextMissingValuesInsertInMillis.remove(it.device.address)
+                        } catch (ex: Exception) {
+                            DefaultCallbacksHelper.onErrorDefault(
+                                TAG,
+                                "failure in remove resp from last backup for ${it.device.address}"
+                            )
+                        }
+                    }
                     removeFromConnectingDevicesList(it.device.address)
                     removeFromConnectedDevicesList(it.device.address)
 //            }
@@ -334,28 +381,30 @@ class BluetoothController @Inject constructor(
                     .also { service ->
                         service.getCharacteristic(UUID.fromString(NoninHandler.NoninGattAttributes.OximeteryService.Characteritics.NONIN_OXIMTERY_MEASURMENT))
                             .also { char ->
-                                char.getDescriptor(CLIENT_CONFIG_DESCRIPTOR_UUID).also { descriptor ->
-                                    var count = 1000
-                                    logger.d(
-                                        TAG,
-                                        "try to write to descriptor notifications to nonin oxymetry with count $count"
-                                    )
-                                    descriptor.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
-                                    while (count-- > 0 && !gatt.writeDescriptor(descriptor)) {
-                                        Thread.sleep(10)
+                                char.getDescriptor(CLIENT_CONFIG_DESCRIPTOR_UUID)
+                                    .also { descriptor ->
+                                        var count = 1000
                                         logger.d(
                                             TAG,
                                             "try to write to descriptor notifications to nonin oxymetry with count $count"
                                         )
+                                        descriptor.value =
+                                            BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+                                        while (count-- > 0 && !gatt.writeDescriptor(descriptor)) {
+                                            Thread.sleep(10)
+                                            logger.d(
+                                                TAG,
+                                                "try to write to descriptor notifications to nonin oxymetry with count $count"
+                                            )
+                                        }
+                                        if (count == 0) {
+                                            logger.e(
+                                                TAG,
+                                                "write to descriptor notifications to nonin oxymetry failed"
+                                            )
+                                            // todo: disconnect and reconnect later
+                                        }
                                     }
-                                    if (count == 0) {
-                                        logger.e(
-                                            TAG,
-                                            "write to descriptor notifications to nonin oxymetry failed"
-                                        )
-                                        // todo: disconnect and reconnect later
-                                    }
-                                }
                             }
                     }
             }
@@ -369,28 +418,30 @@ class BluetoothController @Inject constructor(
                     .also { service ->
                         service.getCharacteristic(UUID.fromString(NoninHandler.NoninGattAttributes.OximeteryService.Characteritics.NONIN_RESPIRATION_RATE_MEASURMENT))
                             .also { char ->
-                                char.getDescriptor(CLIENT_CONFIG_DESCRIPTOR_UUID).also { descriptor ->
-                                    var count = 1000
-                                    logger.d(
-                                        TAG,
-                                        "try to write to descriptor notifications to nonin respiration with count $count"
-                                    )
-                                    descriptor.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
-                                    while (count-- > 0 && !gatt.writeDescriptor(descriptor)) {
-                                        Thread.sleep(10)
+                                char.getDescriptor(CLIENT_CONFIG_DESCRIPTOR_UUID)
+                                    .also { descriptor ->
+                                        var count = 1000
                                         logger.d(
                                             TAG,
                                             "try to write to descriptor notifications to nonin respiration with count $count"
                                         )
+                                        descriptor.value =
+                                            BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+                                        while (count-- > 0 && !gatt.writeDescriptor(descriptor)) {
+                                            Thread.sleep(10)
+                                            logger.d(
+                                                TAG,
+                                                "try to write to descriptor notifications to nonin respiration with count $count"
+                                            )
+                                        }
+                                        if (count == 0) {
+                                            logger.e(
+                                                TAG,
+                                                "write to descriptor notifications to nonin respiration failed"
+                                            )
+                                            // todo: disconnect and reconnect later
+                                        }
                                     }
-                                    if (count == 0) {
-                                        logger.e(
-                                            TAG,
-                                            "write to descriptor notifications to nonin respiration failed"
-                                        )
-                                        // todo: disconnect and reconnect later
-                                    }
-                                }
                             }
                     }
             }
@@ -543,6 +594,10 @@ class BluetoothController @Inject constructor(
         }
     }
 
+    private fun getDeviceLastRespiratory(address: String): Int? = lastRespiratoryRates[address]
+
+    private fun getDeviceNextMissingValuesInsertInMillis(address: String): Long? = nextMissingValuesInsertInMillis[address]
+
     private fun onOximeteryMeasurements(
         gatt: BluetoothGatt?,
         heartRateValue: Int,
@@ -552,31 +607,66 @@ class BluetoothController @Inject constructor(
             try {
                 val time = TimeHelper.instance.getTimeInMilliSeconds()
                 val patientId = patientRepository.getPatientIdBySensorAddress(it.device.address)
-                if (isHeartRateValueMissing(heartRateValue) && isSaturationValueMissing(
+                val lastRespiratoryRate: Int
+                synchronized(lastRespiratoryRates) {
+                    lastRespiratoryRate = getDeviceLastRespiratory(it.device.address)
+                        ?: NoninHandler.NoninGattAttributes.OximeteryService.Characteritics.RESPIRATORY_RATE_MISSING_VALUE
+                }
+                Log.d(TAG, "last respiration for ${it.device.address} is $lastRespiratoryRate")
+                var allMissingValues =
+                    isHeartRateValueMissing(heartRateValue) && isSaturationValueMissing(
                         saturationValue
                     ) && isRespiratoryRateValueMissing(lastRespiratoryRate)
-                ) {
-                    logger.i(NoninHandler.TAG, "all measurements missing, not send the values")
-                    return
+                var shouldInsert = !allMissingValues
+                val insertTime: Long
+                synchronized(nextMissingValuesInsertInMillis) {
+                    insertTime = getDeviceNextMissingValuesInsertInMillis(it.device.address) ?: Calendar.getInstance().timeInMillis
                 }
-                measurementsRepository.insertMeasurements(
-                    if (isHeartRateValueMissing(heartRateValue)) null else HeartRate(
-                        heartRateValue,
-                        time,
-                        patientId
-                    ),
-                    if (isSaturationValueMissing(saturationValue)) null else Saturation(
-                        saturationValue,
-                        time,
-                        patientId
-                    ),
-                    if (isRespiratoryRateValueMissing(lastRespiratoryRate)) null else RespiratoryRate(
-                        lastRespiratoryRate,
-                        time,
-                        patientId
+                if (Calendar.getInstance().timeInMillis >= insertTime) {
+                    shouldInsert = true
+                }
+                if (shouldInsert) {
+                    Log.d(TAG, "about to insert measurements for ${it.device.address}")
+                    measurementsRepository.insertMeasurements(
+                        HeartRate(
+                            if (isHeartRateValueMissing(heartRateValue)) Measurement.MISSING_VALUE else heartRateValue,
+                            time,
+                            patientId
+                        ),
+                        Saturation(
+                            if (isSaturationValueMissing(saturationValue)) Measurement.MISSING_VALUE else saturationValue,
+                            time,
+                            patientId
+                        ),
+                        RespiratoryRate(
+                            if (isRespiratoryRateValueMissing(lastRespiratoryRate)) Measurement.MISSING_VALUE else lastRespiratoryRate,
+                            time,
+                            patientId
+                        )
                     )
-                )
-                pauseMeasurements(gatt, NoninHandler.SAMPLE_RATE_SEC.toLong())
+                    val nextTimeDate = Calendar.getInstance().time.apply {
+                        ++minutes
+                    }
+                    synchronized(nextMissingValuesInsertInMillis) {
+                        nextMissingValuesInsertInMillis[it.device.address] = nextTimeDate.time
+                    }
+                    if (allMissingValues) {
+                        logger.i(
+                            NoninHandler.TAG,
+                            "all measurements missing for device ${it.device.address}"
+                        )
+                    } else {
+                        pauseMeasurements(gatt, NoninHandler.SAMPLE_RATE_SEC.toLong())
+                    }
+                }
+//                if (allMissingValues) {
+//                    logger.i(
+//                        NoninHandler.TAG,
+//                        "all measurements missing for device ${it.device.address}"
+//                    )
+//                } else {
+//                    pauseMeasurements(gatt, NoninHandler.SAMPLE_RATE_SEC.toLong())
+//                }
             } catch (exception: Exception) {
                 DefaultCallbacksHelper.onErrorDefault(
                     NoninHandler.TAG,
@@ -591,7 +681,11 @@ class BluetoothController @Inject constructor(
     private fun onRespirationNotification(gatt: BluetoothGatt?, value: ByteArray?) {
         value?.also { bytes ->
             val respiratoryRate = bytes[4].toInt() and 0xff
-            lastRespiratoryRate = respiratoryRate
+            gatt?.device?.address?.also {
+                synchronized(lastRespiratoryRates) {
+                    lastRespiratoryRates[it] = respiratoryRate
+                }
+            }
             logger.i(
                 NoninHandler.TAG,
                 "device ${gatt?.device?.address} - nonin respiratory rate message, respiratory: ${if (isRespiratoryRateValueMissing(
@@ -631,10 +725,14 @@ class BluetoothController @Inject constructor(
     private fun initializeSensors() {
         sensors = patientRepository.getSensors().apply {
             observeForever {
-                connectedDevices.filter { gatt -> !isDeviceInSensors(gatt.device.address) }.forEach {gatt ->
-                    logger.i(TAG, "found connected device ${gatt.device.address} not in sensors, about to disconnect it")
-                    disconnect(gatt)
-                }
+                connectedDevices.filter { gatt -> !isDeviceInSensors(gatt.device.address) }
+                    .forEach { gatt ->
+                        logger.i(
+                            TAG,
+                            "found connected device ${gatt.device.address} not in sensors, about to disconnect it"
+                        )
+                        disconnect(gatt)
+                    }
                 if (!alreadyScheduledScans) {
                     maintainScans()
                 }
@@ -694,7 +792,9 @@ class BluetoothController @Inject constructor(
         alreadyScheduledScans = true
         maintainScansTimer?.cancel()
         sensors.value?.also { sensors ->
-            val addressesToScan = sensors.filter { BluetoothAdapter.checkBluetoothAddress(it.address) && !it.isConnected }.map { it.address }
+            val addressesToScan =
+                sensors.filter { BluetoothAdapter.checkBluetoothAddress(it.address) && !it.isConnected }
+                    .map { it.address }
             if (addressesToScan.isNotEmpty()) {
                 scan(addressesToScan)
             }
@@ -814,9 +914,9 @@ class BluetoothController @Inject constructor(
     fun scan(addresses: List<String>) {
 //        executor.execute {
         logger.d(TAG, "in scan with address")
-            if (addresses.any { !BluetoothAdapter.checkBluetoothAddress(it) }) {
-                logger.i(TAG, "called scan with illegal address")
-            } else {
+        if (addresses.any { !BluetoothAdapter.checkBluetoothAddress(it) }) {
+            logger.i(TAG, "called scan with illegal address")
+        } else {
 //                if (isDeviceInConnectedList(address)) {
 //                    Log.d(TAG, "try to scan connected device ${address}, not proceeding")
 //                    return@execute
@@ -827,35 +927,38 @@ class BluetoothController @Inject constructor(
 //                    return@execute
 //                }
 
-                val filters = addresses.map {
-                    android.bluetooth.le.ScanFilter.Builder()
-                        .setDeviceAddress(it)
-                        .build()
-                }
+            val filters = addresses.map {
+                android.bluetooth.le.ScanFilter.Builder()
+                    .setDeviceAddress(it)
+                    .build()
+            }
 
 //                val filters = android.bluetooth.le.ScanFilter.Builder()
 //                    .setDeviceAddress(address)
 //                    .build()
 
-                if (!getIsScanning()) {
+            if (!getIsScanning()) {
 //                    Log.d(TAG, "about to scan for address $address")
-                    currentScanThread?.interrupt()
-                    currentScanThread = object : Thread() {
-                        override fun run() {
-                            super.run()
-                            logger.d(TAG, "about to scan ${getStringListOfAddresses(addresses)}")
-                            handler.postDelayed(
-                                {
-                                    stopScan()
-                                }, SCAN_PERIOD.toLong()
-                            )
-                            startScan(filters, scanSettings, generateScanCallback())
-                        }
-                    }.apply { start() }
-                } else {
-                    logger.d(TAG, "can't scan ${getStringListOfAddresses(addresses)} now because is scanning, wait to turn")
-                }
+                currentScanThread?.interrupt()
+                currentScanThread = object : Thread() {
+                    override fun run() {
+                        super.run()
+                        logger.d(TAG, "about to scan ${getStringListOfAddresses(addresses)}")
+                        handler.postDelayed(
+                            {
+                                stopScan()
+                            }, SCAN_PERIOD.toLong()
+                        )
+                        startScan(filters, scanSettings, generateScanCallback())
+                    }
+                }.apply { start() }
+            } else {
+                logger.d(
+                    TAG,
+                    "can't scan ${getStringListOfAddresses(addresses)} now because is scanning, wait to turn"
+                )
             }
+        }
 //        }
 
 //        val settings = buildScanSettings()
@@ -879,26 +982,26 @@ class BluetoothController @Inject constructor(
 
     private fun connect(device: BluetoothDevice) {
 //        executor.execute {
-            if (!isDeviceConnected(device.address)) {
-                if (!isDeviceConnecting(device.address)) {
-                    logger.d(TAG, "about to connect to ${device.address}")
+        if (!isDeviceConnected(device.address)) {
+            if (!isDeviceConnecting(device.address)) {
+                logger.d(TAG, "about to connect to ${device.address}")
 //            synchronized(sharedResourcesLock) {
-                    connectingDevices.add(device.address)
+                connectingDevices.add(device.address)
 //                Log.d(TAG, "added ${device.address} to connecting devices list")
 //                printConnectingDevices()
 //            }
-                    val gattCallback = GattCallback().apply { delegate = this@BluetoothController }
-                    device.connectGatt(context, false, gattCallback, BluetoothDevice.TRANSPORT_LE)
-                } else {
-                    logger.d(
-                        TAG,
-                        "try to connect to connected device ${device.address}, doesnt continue"
-                    )
-                }
-
+                val gattCallback = GattCallback().apply { delegate = this@BluetoothController }
+                device.connectGatt(context, false, gattCallback, BluetoothDevice.TRANSPORT_LE)
             } else {
-                Log.d(TAG, "try to connect to connected device ${device.address}, doesnt continue")
+                logger.d(
+                    TAG,
+                    "try to connect to connected device ${device.address}, doesnt continue"
+                )
             }
+
+        } else {
+            Log.d(TAG, "try to connect to connected device ${device.address}, doesnt continue")
+        }
 //        }
     }
 
