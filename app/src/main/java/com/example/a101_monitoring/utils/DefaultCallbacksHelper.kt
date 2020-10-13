@@ -15,7 +15,7 @@ class DefaultCallbacksHelper {
         }
 
         fun onSuccessDefault(tag: String, message: String, logger: Logger? = null) {
-            logger?.e(tag, message) ?: Log.i(tag, message)
+            logger?.i(tag, message) ?: Log.i(tag, message)
         }
 
     }
