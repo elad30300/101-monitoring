@@ -224,7 +224,7 @@ class RegisterPatientFragment : Fragment() {
                 getSelectedDepartment()!!.id,
                 room_spinner.text.toString().trim(),
                 bed_spinner.text.toString().trim(),
-                patient_haiti.text.toString().trim(),
+                "ISR001P-${patient_haiti.text.toString().trim()}",
                 doctor.text.toString().trim(),
                 is_civilian_switch.isChecked,
                 if (is_breathed_switch.isChecked) 1 else 0,
