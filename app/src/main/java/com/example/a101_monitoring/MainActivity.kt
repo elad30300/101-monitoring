@@ -441,7 +441,7 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
             mainViewModel.getLatestVersion(phoneId, tm.voiceMailNumber, BuildConfig.VERSION_CODE.toString()).observe(this, Observer {
                 it?.let { uri ->
                     Log.i(TAG, "Received apk uri, calling download")
-                    showProgress(DownloadController(this, uri.toString()).enqueueDownload())
+                    showProgress(DownloadController(this, uri.toString(), logger).enqueueDownload())
                 }
             })
         } else {

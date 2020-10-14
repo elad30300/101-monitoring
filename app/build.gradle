@@ -14,8 +14,8 @@ android {
         applicationId "com.example.a101_monitoring"
         minSdkVersion 24 // originally was 19
         targetSdkVersion 28
-        versionCode 2
-        versionName "1.0.1-develop"
+        versionCode 1
+        versionName "1.0.0.1-develop"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
