@@ -2,25 +2,27 @@ package com.example.a101_monitoring.download
 
 import android.app.Activity
 import android.app.DownloadManager
-import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.PackageInstaller
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.core.content.FileProvider
 import com.example.a101_monitoring.BuildConfig
 import com.example.a101_monitoring.MainActivity
 import com.example.a101_monitoring.log.logger.Logger
 import java.io.File
-import java.io.InputStream
-import java.io.InputStreamReader
-import java.lang.Exception
 
-class DownloadController(private val context: Context, private val url: String, private val logger: Logger) {
+
+class DownloadController(
+    private val context: Context,
+    private val activity: Activity?,
+    private val url: String,
+    private val logger: Logger
+) {
     companion object {
         private const val TAG = "DownloadCtrl"
         private const val FILE_NAME = "atalefnitur.apk"
@@ -28,7 +30,9 @@ class DownloadController(private val context: Context, private val url: String, 
         private const val MIME_TYPE = "application/vnd.android.package-archive"
         private const val PROVIDER_PATH = ".fileprovider"
         private const val APP_INSTALL_PATH = "\"application/vnd.android.package-archive\""
-        const val PACKAGE_INSTALLED_ACTION = "com.example.a101_monitoring.SESSION_API_PACKAGE_INSTALLED"
+        const val REQUEST_INSTALL = 1456
+        const val PACKAGE_INSTALLED_ACTION =
+            "com.example.a101_monitoring.SESSION_API_PACKAGE_INSTALLED"
     }
 
     fun enqueueDownload(): Long {
@@ -68,16 +72,18 @@ class DownloadController(private val context: Context, private val url: String, 
                         File(destination)
                     )
 
-                    val packageInstaller = context.packageManager.packageInstaller
-                    val params = PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL)
-                    val sessionId = packageInstaller.createSession(params)
-                    val session = packageInstaller.openSession(sessionId)
-                    addApkToInstallSession(contentUri, session)
-                    val intent = Intent(context, MainActivity::class.java)
-                    intent.action = PACKAGE_INSTALLED_ACTION
-                    val pendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
-                    val statusReceiver = pendingIntent.intentSender
-                    session.commit(statusReceiver)
+                    val intent = Intent(Intent.ACTION_INSTALL_PACKAGE)
+                    intent.data = contentUri
+                    intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    intent.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true)
+                    intent.putExtra(Intent.EXTRA_RETURN_RESULT, true)
+                    intent.putExtra(
+                        Intent.EXTRA_INSTALLER_PACKAGE_NAME,
+                        context.applicationInfo.packageName
+                    )
+                    activity?.startActivityForResult(intent, REQUEST_INSTALL)
+
+
 
 //                    val install = Intent(Intent.ACTION_VIEW)
 //                    install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
@@ -99,22 +105,42 @@ class DownloadController(private val context: Context, private val url: String, 
                     // finish()
                 }
             }
-
-            private fun addApkToInstallSession(uri: Uri, session: PackageInstaller.Session) {
-                try {
-                    val packageInSession = session.openWrite(context.packageName, 0, -1)
-                    val inputStream = context.contentResolver.openInputStream(uri)
-                    val buffer = ByteArray(16384)
-                    var n = inputStream.read(buffer)
-                    while (n >= 0) {
-                        packageInSession.write(buffer, 0, n)
-                        n = inputStream.read(buffer)
-                    }
-                } catch (ex: Exception) {
-                    logger.e(TAG, "addApkToInstallSession exception $ex\n${ex.stackTrace}")
-                }
-            }
         }
         context.registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
     }
+//
+//    class InstallService(private val context: Context) :
+//        IntentService(InstallService::class.simpleName) {
+//        override fun onHandleIntent(intent: Intent?) {
+//            val packageInstaller = context.packageManager.packageInstaller
+//            val params =
+//                PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL)
+//            val sessionId = packageInstaller.createSession(params)
+//            val session = packageInstaller.openSession(sessionId)
+//            addApkToInstallSession(contentUri, session)
+//            val intent = Intent(context, MainActivity::class.java)
+//            intent.action = PACKAGE_INSTALLED_ACTION
+//            val pendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
+//            val statusReceiver = pendingIntent.intentSender
+//            session.commit(statusReceiver)
+//        }
+//
+//
+//    }
+//
+//    private fun addApkToInstallSession(uri: Uri, session: PackageInstaller.Session) {
+//        try {
+//            val packageInSession = session.openWrite(context.packageName, 0, -1)
+//            val inputStream = context.contentResolver.openInputStream(uri)
+//            val buffer = ByteArray(16384)
+//            var n = inputStream.read(buffer)
+//            while (n >= 0) {
+//                packageInSession.write(buffer, 0, n)
+//                n = inputStream.read(buffer)
+//            }
+//        } catch (ex: Exception) {
+//            logger.e(TAG, "addApkToInstallSession exception $ex\n${ex.stackTrace}")
+//        }
+//    }
+
 }
