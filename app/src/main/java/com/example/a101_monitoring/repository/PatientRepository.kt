@@ -371,6 +371,7 @@ class PatientRepository @Inject constructor(
     fun removePatientLocally(patientId: PatientIdentityFieldType) {
         executor.execute {
             val patient = patientDao.getPatient(patientId)
+            sendSensorConnectionStatusToRemote(patient, false)
             ExceptionsHelper.tryBlock(TAG, "delete patient ${patient.getIdentityField()} from database") {
                 patientDao.deletePatients(patient)
             }
