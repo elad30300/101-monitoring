@@ -2,16 +2,19 @@ package com.example.a101_monitoring.download
 
 import android.app.Activity
 import android.app.DownloadManager
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageInstaller
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.util.Log
 import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.core.content.FileProvider
+import androidx.documentfile.provider.DocumentFile
 import com.example.a101_monitoring.BuildConfig
 import com.example.a101_monitoring.MainActivity
 import com.example.a101_monitoring.log.logger.Logger
@@ -84,14 +87,44 @@ class DownloadController(
 //                    )
 //                    activity?.startActivityForResult(intent, REQUEST_INSTALL) ?: Log.e(TAG, "activity is null")
 
-                    val install = Intent(Intent.ACTION_VIEW, contentUri)
-                    install.setType(MIME_TYPE)
-//                    install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                    install.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
-                    install.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                    install.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true)
-//                    install.data = contentUri
-                    activity?.startActivity(install) ?: Log.e(TAG, "activity is null")
+//                    val install = Intent(Intent.ACTION_VIEW)
+////                    install.setData(contentUri)
+////                    install.setType(MIME_TYPE)
+////                    install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+//////                    install.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
+////                    install.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+////                    install.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true)
+//////                    install.data = contentUri
+////                    activity?.startActivity(install) ?: Log.e(TAG, "activity is null")
+
+                    context.apply {
+                        contentResolver.openInputStream(contentUri)?.use { apkStream ->
+                            val installer = context.applicationContext.packageManager.packageInstaller
+                            val length =
+                                DocumentFile.fromSingleUri(context.applicationContext, contentUri)?.length() ?: -1
+                            val params =
+                                PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL)
+                            val sessionId = installer.createSession(params)
+                            val session = installer.openSession(sessionId)
+
+                            session.openWrite("package", 0, length).use { sessionStream ->
+                                apkStream.copyTo(sessionStream)
+                                session.fsync(sessionStream)
+                            }
+
+                            val intent = Intent(context.applicationContext, MainActivity::class.java)
+                            val pi = PendingIntent.getBroadcast(
+                                context.applicationContext,
+                                REQUEST_INSTALL,
+                                intent,
+                                PendingIntent.FLAG_UPDATE_CURRENT
+                            )
+
+                            session.commit(pi.intentSender)
+                            session.close()
+                        }
+                    }
+
                     context.unregisterReceiver(this)
                     // finish()
                 } else {
