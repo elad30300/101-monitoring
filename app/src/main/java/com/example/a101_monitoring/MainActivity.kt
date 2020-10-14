@@ -195,7 +195,8 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.READ_PHONE_STATE
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.REQUEST_INSTALL_PACKAGES
         )
         requestPermissions(
             PERMISSIONS_STORAGE,

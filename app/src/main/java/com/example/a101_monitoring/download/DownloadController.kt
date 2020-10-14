@@ -9,6 +9,7 @@ import android.content.IntentFilter
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.util.Log
 import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.core.content.FileProvider
 import com.example.a101_monitoring.BuildConfig
@@ -71,26 +72,26 @@ class DownloadController(
                         BuildConfig.APPLICATION_ID + PROVIDER_PATH,
                         File(destination)
                     )
+//
+//                    val intent = Intent(Intent.ACTION_INSTALL_PACKAGE, contentUri)
+//                    intent.setType(MIME_TYPE)
+//                    intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+//                    intent.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true)
+//                    intent.putExtra(Intent.EXTRA_RETURN_RESULT, true)
+//                    intent.putExtra(
+//                        Intent.EXTRA_INSTALLER_PACKAGE_NAME,
+//                        context.applicationInfo.packageName
+//                    )
+//                    activity?.startActivityForResult(intent, REQUEST_INSTALL) ?: Log.e(TAG, "activity is null")
 
-                    val intent = Intent(Intent.ACTION_INSTALL_PACKAGE)
-                    intent.data = contentUri
-                    intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    intent.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true)
-                    intent.putExtra(Intent.EXTRA_RETURN_RESULT, true)
-                    intent.putExtra(
-                        Intent.EXTRA_INSTALLER_PACKAGE_NAME,
-                        context.applicationInfo.packageName
-                    )
-                    activity?.startActivityForResult(intent, REQUEST_INSTALL)
-
-
-
-//                    val install = Intent(Intent.ACTION_VIEW)
+                    val install = Intent(Intent.ACTION_VIEW, contentUri)
+                    install.setType(MIME_TYPE)
 //                    install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-//                    install.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-//                    install.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true)
+                    install.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
+                    install.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    install.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true)
 //                    install.data = contentUri
-//                    context.startActivity(install)
+                    activity?.startActivity(install) ?: Log.e(TAG, "activity is null")
                     context.unregisterReceiver(this)
                     // finish()
                 } else {
