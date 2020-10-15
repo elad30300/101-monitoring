@@ -195,7 +195,8 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.READ_PHONE_STATE
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.REQUEST_INSTALL_PACKAGES
         )
         requestPermissions(
             PERMISSIONS_STORAGE,
@@ -441,7 +442,7 @@ class MainActivity : AppCompatActivity(), PatientsListFragment.OnListFragmentInt
             mainViewModel.getLatestVersion(phoneId, tm.voiceMailNumber, BuildConfig.VERSION_CODE.toString()).observe(this, Observer {
                 it?.let { uri ->
                     Log.i(TAG, "Received apk uri, calling download")
-                    showProgress(DownloadController(this, uri.toString()).enqueueDownload())
+                    showProgress(DownloadController(this, this, uri.toString(), logger).enqueueDownload())
                 }
             })
         } else {
