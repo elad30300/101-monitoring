@@ -17,6 +17,7 @@ import androidx.core.content.FileProvider
 import androidx.documentfile.provider.DocumentFile
 import com.example.a101_monitoring.BuildConfig
 import com.example.a101_monitoring.MainActivity
+import com.example.a101_monitoring.UpdateVersionActivity
 import com.example.a101_monitoring.log.logger.Logger
 import java.io.File
 
@@ -69,23 +70,13 @@ class DownloadController(
                 context: Context,
                 intent: Intent
             ) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    val contentUri = FileProvider.getUriForFile(
-                        context,
-                        BuildConfig.APPLICATION_ID + PROVIDER_PATH,
-                        File(destination)
-                    )
-//
-//                    val intent = Intent(Intent.ACTION_INSTALL_PACKAGE, contentUri)
-//                    intent.setType(MIME_TYPE)
-//                    intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
-//                    intent.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true)
-//                    intent.putExtra(Intent.EXTRA_RETURN_RESULT, true)
-//                    intent.putExtra(
-//                        Intent.EXTRA_INSTALLER_PACKAGE_NAME,
-//                        context.applicationInfo.packageName
-//                    )
-//                    activity?.startActivityForResult(intent, REQUEST_INSTALL) ?: Log.e(TAG, "activity is null")
+                try {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        val contentUri = FileProvider.getUriForFile(
+                            context,
+                            BuildConfig.APPLICATION_ID + PROVIDER_PATH,
+                            File(destination)
+                        )
 
 //                    val install = Intent(Intent.ACTION_VIEW)
 ////                    install.setData(contentUri)
@@ -97,46 +88,113 @@ class DownloadController(
 //////                    install.data = contentUri
 ////                    activity?.startActivity(install) ?: Log.e(TAG, "activity is null")
 
-                    context.apply {
-                        contentResolver.openInputStream(contentUri)?.use { apkStream ->
-                            val installer = context.applicationContext.packageManager.packageInstaller
-                            val length =
-                                DocumentFile.fromSingleUri(context.applicationContext, contentUri)?.length() ?: -1
-                            val params =
-                                PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL)
-                            val sessionId = installer.createSession(params)
-                            val session = installer.openSession(sessionId)
+                        context.apply {
+                            contentResolver.openInputStream(contentUri)?.use { apkStream ->
+                                val installer =
+                                    context.applicationContext.packageManager.packageInstaller.apply {
+                                        registerSessionCallback(object :
+                                            PackageInstaller.SessionCallback() {
+                                            override fun onCreated(sessionId: Int) {
+                                                Log.d(TAG, "new session $sessionId was created")
+                                            }
 
-                            session.openWrite("package", 0, length).use { sessionStream ->
-                                apkStream.copyTo(sessionStream)
-                                session.fsync(sessionStream)
+                                            override fun onActiveChanged(
+                                                sessionId: Int,
+                                                active: Boolean
+                                            ) {
+                                                Log.d(
+                                                    TAG,
+                                                    "session $sessionId active changed to $active"
+                                                )
+                                            }
+
+                                            override fun onBadgingChanged(sessionId: Int) {
+                                                Log.d(TAG, "session $sessionId badging changed")
+                                            }
+
+                                            override fun onFinished(
+                                                sessionId: Int,
+                                                success: Boolean
+                                            ) {
+                                                if (success) {
+                                                    Log.i(
+                                                        TAG,
+                                                        "session $sessionId finished with sucessfully"
+                                                    )
+                                                } else {
+                                                    Log.e(
+                                                        TAG,
+                                                        "session $sessionId finished with failure"
+                                                    )
+                                                }
+                                            }
+
+                                            override fun onProgressChanged(
+                                                sessionId: Int,
+                                                progress: Float
+                                            ) {
+                                                Log.d(
+                                                    TAG,
+                                                    "session $sessionId progress changed to $progress"
+                                                )
+                                            }
+                                        })
+                                    }
+                                val length =
+                                    DocumentFile.fromSingleUri(
+                                        context.applicationContext,
+                                        contentUri
+                                    )
+                                        ?.length() ?: -1
+                                val params =
+                                    PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL)
+                                val sessionId = installer.createSession(params)
+                                val session = installer.openSession(sessionId)
+
+                                try {
+                                    session.openWrite("package", 0, length).use { sessionStream ->
+                                        apkStream.copyTo(sessionStream)
+                                        session.fsync(sessionStream)
+                                    }
+
+
+                                    activity?.also {
+                                        val intent = Intent(
+                                            context,
+                                            UpdateVersionActivity::class.java
+                                        ).apply {
+                                            action = PACKAGE_INSTALLED_ACTION
+                                        }
+                                        val pendingIntent =
+                                            PendingIntent.getActivity(context, 0, intent, 0)
+
+                                        val intentSender = pendingIntent.intentSender
+                                        logger.i(TAG, "about to start version update")
+                                        session.commit(intentSender)
+//                                session.close()
+                                    }
+                                } catch (ex: Exception) {
+                                    logger.e(TAG, "failed to use session, ex $ex\n${ex.stackTrace}")
+                                    session?.apply { abandon() }
+                                }
                             }
-
-                            val intent = Intent(context.applicationContext, MainActivity::class.java)
-                            val pi = PendingIntent.getBroadcast(
-                                context.applicationContext,
-                                REQUEST_INSTALL,
-                                intent,
-                                PendingIntent.FLAG_UPDATE_CURRENT
-                            )
-
-                            session.commit(pi.intentSender)
-                            session.close()
                         }
-                    }
 
-                    context.unregisterReceiver(this)
-                    // finish()
-                } else {
-                    val install = Intent(Intent.ACTION_VIEW)
-                    install.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-                    install.setDataAndType(
-                        uri,
-                        APP_INSTALL_PATH
-                    )
-                    context.startActivity(install)
-                    context.unregisterReceiver(this)
-                    // finish()
+                        context.unregisterReceiver(this)
+                        // finish()
+                    } else {
+                        val install = Intent(Intent.ACTION_VIEW)
+                        install.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        install.setDataAndType(
+                            uri,
+                            APP_INSTALL_PATH
+                        )
+                        context.startActivity(install)
+                        context.unregisterReceiver(this)
+                        // finish()
+                    }
+                } catch (ex: java.lang.Exception) {
+                    logger.e(TAG, "failed in onComplete download, ex $ex\n${ex.stackTrace}")
                 }
             }
         }

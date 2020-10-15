@@ -33,7 +33,7 @@
     <string name="wrong_release_password_message">סיסמה שגויה</string>
     <string name="sign_in_fragment_title">התחברות</string>
     <string name="sign_in_button_text">התחבר</string>
-    <string name="check_patient_exist_success_message">המטופל כבר קיים</string>check_patient_exist_fail_message
+    <string name="check_patient_exist_success_message">המטופל כבר קיים</string>
     <string name="check_patient_exist_fail_message">וידוא קיום מטופל זהה במערכת נכשל</string>
     <string name="register_patient_fail_message">רישום מטופל נכשל</string>
     <string name="register_patient_success_message">מטופל נרשם בהצלחה</string>
